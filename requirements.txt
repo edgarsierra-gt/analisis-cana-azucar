@@ -1,0 +1,11 @@
+pandas==3.0.5
+numpy
+scipy
+scikit-learn==1.9.1
+statsmodels==0.15.0
+xgboost==3.4.1
+matplotlib==3.11.2
+jupyter
+nbconvert
+pytest
+psycopg[binary]   # opcional: solo para tests/test_esquema_postgres.py

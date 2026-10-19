@@ -1,0 +1,19 @@
+data/raw/*
+!data/raw/.gitkeep
+__pycache__/
+.ipynb_checkpoints/
+.env
+.pytest_cache/
+# documentos de la prueba y archivos externos: nunca se versionan
+*.pdf
+*.docx
+*.xlsx
+# entornos y artefactos locales
+.venv/
+venv/
+node_modules/
+.next/
+.vercel/
+*.zip
+# instrucciones locales de trabajo con el asistente
+CLAUDE.md
