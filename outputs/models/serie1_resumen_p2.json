@@ -1,0 +1,465 @@
+{
+ "metricas_e1": {
+  "Ingenuo": {
+   "MAE": 1598.2782,
+   "RMSE": 2017.3812,
+   "MAPE_%": 23.9593,
+   "R2": 0.1418,
+   "orden_spearman": NaN,
+   "filas": 3404.0,
+   "R2_ventaja": NaN
+  },
+  "Agrónomo": {
+   "MAE": 1724.3639,
+   "RMSE": 2177.022,
+   "MAPE_%": 25.4322,
+   "R2": 0.0006,
+   "orden_spearman": 0.3833,
+   "filas": 3404.0,
+   "R2_ventaja": NaN
+  },
+  "Regla P1": {
+   "MAE": 1496.8134,
+   "RMSE": 1860.4334,
+   "MAPE_%": 22.3897,
+   "R2": 0.2702,
+   "orden_spearman": 0.4081,
+   "filas": 3404.0,
+   "R2_ventaja": 0.2952
+  },
+  "Ridge": {
+   "MAE": 1488.1146,
+   "RMSE": 1844.5548,
+   "MAPE_%": 21.7901,
+   "R2": 0.2826,
+   "orden_spearman": 0.4382,
+   "filas": 3404.0,
+   "R2_ventaja": 0.3566
+  },
+  "Random Forest": {
+   "MAE": 1484.3452,
+   "RMSE": 1840.4966,
+   "MAPE_%": 21.5705,
+   "R2": 0.2857,
+   "orden_spearman": 0.4168,
+   "filas": 3404.0,
+   "R2_ventaja": 0.3346
+  },
+  "XGBoost": {
+   "MAE": 1498.3485,
+   "RMSE": 1859.1711,
+   "MAPE_%": 21.6175,
+   "R2": 0.2712,
+   "orden_spearman": 0.4018,
+   "filas": 3404.0,
+   "R2_ventaja": 0.3035
+  }
+ },
+ "metricas_e2": {
+  "Ingenuo": {
+   "MAE": 1617.2317,
+   "RMSE": 2043.5881,
+   "MAPE_%": 24.2937,
+   "R2": 0.1214,
+   "orden_spearman": NaN,
+   "filas": 3423.0,
+   "R2_ventaja": NaN
+  },
+  "Regla P1": {
+   "MAE": 1578.1193,
+   "RMSE": 1992.4146,
+   "MAPE_%": 24.0089,
+   "R2": 0.1649,
+   "orden_spearman": 0.3925,
+   "filas": 3423.0,
+   "R2_ventaja": 0.2739
+  },
+  "Ridge": {
+   "MAE": 1577.4781,
+   "RMSE": 1988.7344,
+   "MAPE_%": 23.6834,
+   "R2": 0.168,
+   "orden_spearman": 0.3925,
+   "filas": 3423.0,
+   "R2_ventaja": 0.2406
+  },
+  "Random Forest": {
+   "MAE": 1588.1364,
+   "RMSE": 1999.1592,
+   "MAPE_%": 23.2885,
+   "R2": 0.1592,
+   "orden_spearman": 0.3422,
+   "filas": 3423.0,
+   "R2_ventaja": 0.167
+  },
+  "XGBoost": {
+   "MAE": 1594.4151,
+   "RMSE": 2006.807,
+   "MAPE_%": 23.3177,
+   "R2": 0.1528,
+   "orden_spearman": 0.3158,
+   "filas": 3423.0,
+   "R2_ventaja": 0.1325
+  }
+ },
+ "parte_error_nivel": 0.7651693029503445,
+ "parte_error_finca": 0.4742427129348378,
+ "error_por_zafra_pct": {
+  "2013": 5.479,
+  "2014": 0.964,
+  "2015": -1.956,
+  "2016": -3.174,
+  "2017": 12.067,
+  "2018": 9.723,
+  "2019": -16.855,
+  "2020": 8.237,
+  "2021": -10.61
+ },
+ "coef_e1": {
+  "constante": {
+   "Ridge": 0.0026,
+   "MCO": 0.0022,
+   "IC95 bajo": -0.0067,
+   "IC95 alto": 0.0111
+  },
+  "var_rel": {
+   "Ridge": 0.6192,
+   "MCO": 0.6351,
+   "IC95 bajo": 0.5395,
+   "IC95 alto": 0.7307
+  },
+  "lote_ant_rel": {
+   "Ridge": 0.4906,
+   "MCO": 0.4923,
+   "IC95 bajo": 0.4337,
+   "IC95 alto": 0.5509
+  },
+  "tiene_lote_ant": {
+   "Ridge": -0.0149,
+   "MCO": -0.0146,
+   "IC95 bajo": -0.0248,
+   "IC95 alto": -0.0043
+  }
+ },
+ "cobertura": {
+  "Escenario 1": {
+   "cobertura banda 80 %": 0.7365,
+   "ancho (% del predicho)": 0.5694,
+   "cobertura plantía": 0.7739,
+   "cobertura socas": 0.7226,
+   "banda 2022": "-29% / +32%"
+  },
+  "Escenario 2": {
+   "cobertura banda 80 %": 0.7136,
+   "ancho (% del predicho)": 0.5742,
+   "cobertura plantía": 0.7719,
+   "cobertura socas": 0.6915,
+   "banda 2022": "-32% / +33%"
+  }
+ },
+ "costo_finca_nueva_lb": 83.43975771703148,
+ "costo_finca_ic90": [
+  12.008194010225806,
+  154.16773693647193
+ ],
+ "plantia_2022": {
+  "RHEBERT": {
+   "HOCP14-885": 11098.0,
+   "HOL15-508": 10554.0,
+   "L15-306": 10507.0,
+   "testigo promedio": 10062.0
+  },
+  "GLENWOOD": {
+   "HOCP14-885": 10454.0,
+   "HOL15-508": 9942.0,
+   "L15-306": 9898.0,
+   "testigo promedio": 9479.0
+  },
+  "LANDRY": {
+   "HOCP14-885": 10337.0,
+   "HOL15-508": 9831.0,
+   "L15-306": 9787.0,
+   "testigo promedio": 9373.0
+  },
+  "STJOHN": {
+   "HOCP14-885": 10045.0,
+   "HOL15-508": 9553.0,
+   "L15-306": 9510.0,
+   "testigo promedio": 9108.0
+  },
+  "LANAUX": {
+   "HOCP14-885": 9840.0,
+   "HOL15-508": 9359.0,
+   "L15-306": 9317.0,
+   "testigo promedio": 8922.0
+  },
+  "BONSECOUR": {
+   "HOCP14-885": 9745.0,
+   "HOL15-508": 9268.0,
+   "L15-306": 9227.0,
+   "testigo promedio": 8836.0
+  },
+  "HARPER": {
+   "HOCP14-885": 9528.0,
+   "HOL15-508": 9062.0,
+   "L15-306": 9021.0,
+   "testigo promedio": 8639.0
+  },
+  "DOMINGUE": {
+   "HOCP14-885": 9231.0,
+   "HOL15-508": 8779.0,
+   "L15-306": 8740.0,
+   "testigo promedio": 8370.0
+  },
+  "ALLAINS": {
+   "HOCP14-885": 9185.0,
+   "HOL15-508": 8735.0,
+   "L15-306": 8696.0,
+   "testigo promedio": 8328.0
+  },
+  "ALMA": {
+   "HOCP14-885": 9091.0,
+   "HOL15-508": 8646.0,
+   "L15-306": 8607.0,
+   "testigo promedio": 8243.0
+  },
+  "MARY": {
+   "HOCP14-885": 8933.0,
+   "HOL15-508": 8495.0,
+   "L15-306": 8457.0,
+   "testigo promedio": 8099.0
+  },
+  "FMARTIN": {
+   "HOCP14-885": 8902.0,
+   "HOL15-508": 8466.0,
+   "L15-306": 8428.0,
+   "testigo promedio": 8071.0
+  },
+  "BRUNSWICK": {
+   "HOCP14-885": 8886.0,
+   "HOL15-508": 8451.0,
+   "L15-306": 8413.0,
+   "testigo promedio": 8057.0
+  },
+  "MAGNOLIA": {
+   "HOCP14-885": 7457.0,
+   "HOL15-508": 7092.0,
+   "L15-306": 7060.0,
+   "testigo promedio": 6762.0
+  }
+ },
+ "por_corte": {
+  "plantía|Ingenuo": {
+   "MAE": 1513.281,
+   "R2": -0.0348,
+   "orden_spearman": NaN,
+   "R2_ventaja": NaN
+  },
+  "plantía|Agrónomo": {
+   "MAE": 1485.3544,
+   "R2": 0.0215,
+   "orden_spearman": 0.2537,
+   "R2_ventaja": NaN
+  },
+  "plantía|Regla P1": {
+   "MAE": 1485.3544,
+   "R2": 0.0215,
+   "orden_spearman": 0.2537,
+   "R2_ventaja": 0.0786
+  },
+  "plantía|Ridge": {
+   "MAE": 1504.6741,
+   "R2": 0.0028,
+   "orden_spearman": 0.2537,
+   "R2_ventaja": 0.0431
+  },
+  "plantía|Random Forest": {
+   "MAE": 1508.1822,
+   "R2": -0.001,
+   "orden_spearman": 0.1994,
+   "R2_ventaja": 0.0214
+  },
+  "plantía|XGBoost": {
+   "MAE": 1506.7061,
+   "R2": -0.0035,
+   "orden_spearman": 0.1581,
+   "R2_ventaja": -0.029
+  },
+  "socas|Ingenuo": {
+   "MAE": 1629.9465,
+   "R2": 0.0574,
+   "orden_spearman": NaN,
+   "R2_ventaja": NaN
+  },
+  "socas|Agrónomo": {
+   "MAE": 1813.4142,
+   "R2": -0.161,
+   "orden_spearman": 0.4337,
+   "R2_ventaja": NaN
+  },
+  "socas|Regla P1": {
+   "MAE": 1501.0828,
+   "R2": 0.2258,
+   "orden_spearman": 0.4682,
+   "R2_ventaja": 0.325
+  },
+  "socas|Ridge": {
+   "MAE": 1481.9449,
+   "R2": 0.2489,
+   "orden_spearman": 0.51,
+   "R2_ventaja": 0.402
+  },
+  "socas|Random Forest": {
+   "MAE": 1475.4639,
+   "R2": 0.2544,
+   "orden_spearman": 0.5013,
+   "R2_ventaja": 0.3797
+  },
+  "socas|XGBoost": {
+   "MAE": 1495.2346,
+   "R2": 0.2342,
+   "orden_spearman": 0.4965,
+   "R2_ventaja": 0.3515
+  }
+ },
+ "diagnostico_directo": {
+  "mae_regla": 1496.8133850116615,
+  "mae_directo": 1565.719410071931,
+  "por_anio": {
+   "2011": {
+    "suerte_del_anio": 0.1021,
+    "peso_real_dentro_del_lote": 0.5283,
+    "constante_aprendida": NaN,
+    "peso_aprendido_var_rel": NaN
+   },
+   "2012": {
+    "suerte_del_anio": 0.1395,
+    "peso_real_dentro_del_lote": 0.1464,
+    "constante_aprendida": NaN,
+    "peso_aprendido_var_rel": NaN
+   },
+   "2013": {
+    "suerte_del_anio": -0.0056,
+    "peso_real_dentro_del_lote": 0.4667,
+    "constante_aprendida": 0.1282,
+    "peso_aprendido_var_rel": 0.2801
+   },
+   "2014": {
+    "suerte_del_anio": -0.0322,
+    "peso_real_dentro_del_lote": 0.8065,
+    "constante_aprendida": 0.0861,
+    "peso_aprendido_var_rel": 0.3339
+   },
+   "2015": {
+    "suerte_del_anio": -0.0482,
+    "peso_real_dentro_del_lote": 0.8473,
+    "constante_aprendida": 0.0559,
+    "peso_aprendido_var_rel": 0.3885
+   },
+   "2016": {
+    "suerte_del_anio": -0.1051,
+    "peso_real_dentro_del_lote": 0.6944,
+    "constante_aprendida": 0.0349,
+    "peso_aprendido_var_rel": 0.4688
+   },
+   "2017": {
+    "suerte_del_anio": 0.0923,
+    "peso_real_dentro_del_lote": 1.0654,
+    "constante_aprendida": 0.0129,
+    "peso_aprendido_var_rel": 0.5193
+   },
+   "2018": {
+    "suerte_del_anio": 0.1085,
+    "peso_real_dentro_del_lote": 1.0157,
+    "constante_aprendida": 0.0232,
+    "peso_aprendido_var_rel": 0.6212
+   },
+   "2019": {
+    "suerte_del_anio": -0.184,
+    "peso_real_dentro_del_lote": 0.9054,
+    "constante_aprendida": 0.0304,
+    "peso_aprendido_var_rel": 0.6961
+   },
+   "2020": {
+    "suerte_del_anio": 0.0866,
+    "peso_real_dentro_del_lote": 0.8107,
+    "constante_aprendida": 0.0029,
+    "peso_aprendido_var_rel": 0.6518
+   },
+   "2021": {
+    "suerte_del_anio": -0.1161,
+    "peso_real_dentro_del_lote": 1.0708,
+    "constante_aprendida": 0.009,
+    "peso_aprendido_var_rel": 0.7018
+   }
+  }
+ },
+ "comparaciones": {
+  "Ridge − Regla P1": {
+   "Δ MAE lb/acre": -8.699,
+   "IC90 bajo": -27.166,
+   "IC90 alto": 10.339,
+   "Δ error ventaja (pp)": -0.331,
+   "IC90 bajo (pp)": -0.513,
+   "IC90 alto (pp)": -0.151
+  },
+  "Ridge − Random Forest": {
+   "Δ MAE lb/acre": 3.769,
+   "IC90 bajo": -7.732,
+   "IC90 alto": 15.895,
+   "Δ error ventaja (pp)": -0.221,
+   "IC90 bajo (pp)": -0.328,
+   "IC90 alto (pp)": -0.112
+  },
+  "Ridge − XGBoost": {
+   "Δ MAE lb/acre": -10.234,
+   "IC90 bajo": -27.3,
+   "IC90 alto": 6.239,
+   "Δ error ventaja (pp)": -0.519,
+   "IC90 bajo (pp)": -0.707,
+   "IC90 alto (pp)": -0.341
+  },
+  "Regla P1 − Ingenuo": {
+   "Δ MAE lb/acre": -101.465,
+   "IC90 bajo": -174.914,
+   "IC90 alto": -28.553,
+   "Δ error ventaja (pp)": NaN,
+   "IC90 bajo (pp)": NaN,
+   "IC90 alto (pp)": NaN
+  },
+  "Agrónomo − Regla P1": {
+   "Δ MAE lb/acre": 227.55,
+   "IC90 bajo": 142.059,
+   "IC90 alto": 314.999,
+   "Δ error ventaja (pp)": NaN,
+   "IC90 bajo (pp)": NaN,
+   "IC90 alto (pp)": NaN
+  }
+ },
+ "cobertura_por_zafra": {
+  "2014": 0.8453,
+  "2015": 0.8663,
+  "2016": 0.6658,
+  "2017": 0.75,
+  "2018": 0.6951,
+  "2019": 0.6325,
+  "2020": 0.776,
+  "2021": 0.6637
+ },
+ "lotes_ejemplo": [
+  "5|MARY|2018|2019",
+  "5|BONSECOUR|2012|2015",
+  "5|RHEBERT|2015|2017"
+ ],
+ "rho_mediano_lotes": 0.49090909090909085,
+ "importancia_rf_pp": {
+  "var_rel": 1.804,
+  "lote_ant_rel": 1.624,
+  "corte": 0.061,
+  "var_n": 0.053,
+  "lote_ant_amb": 0.027,
+  "tiene_lote_ant": 0.023,
+  "loc_rel": 0.013
+ },
+ "efecto_anio_autocorr": -0.2071271227018065
+}
