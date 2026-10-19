@@ -1,0 +1,31 @@
+{
+ "n_variedades_etapa5": 40,
+ "n_elegibles": 23,
+ "n_elegibles_testigos": 12,
+ "motivos": {
+  "cumple": 23,
+  "un solo año en etapa 5": 13,
+  "sin plantía en 2010-2021 (variedad antigua)": 3,
+  "sin soca 2 medida": 1
+ },
+ "bootstrap": {
+  "replicas": 1000,
+  "semilla": 20261019,
+  "sin_soca4": 48
+ },
+ "referencia": {
+  "ciclo": 4,
+  "margen": 526.2805475965661
+ },
+ "ambiente_pct": {
+  "C(LOC)": 28.689548079795742,
+  "C(YEAR)": 28.049049231701236,
+  "Residual": 43.26140268850302
+ },
+ "trampa": {
+  "neg_con_trampa": 0.782608695652174,
+  "neg_corregida": 0.6086956521739131,
+  "mediana_con_trampa": -0.06483791052439654,
+  "mediana_corregida": -0.019920359126424737
+ }
+}
