@@ -1,0 +1,2256 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caña, socas y datos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: cuaderno de campo — columna de lectura de ~720px; figuras que se abren hasta ~1040px; secciones separadas por aire, no por cajas */
+:root {
+  --bg: #f6f8f2;          /* papel con un tinte verde de hoja */
+  --surface: #fdfefb;
+  --ink: #18210f;
+  --ink-2: #4a5541;
+  --ink-3: #79836f;
+  --rule: #dfe5d6;
+  --cane: #3b7a2a;        /* verde caña: acento y serie principal */
+  --cane-soft: #e3eedb;
+  --violet: #7b4fc4;      /* serie de comparación (validada contra el verde para daltonismo) */
+  --neutral: #9aa092;     /* serie de referencia */
+  --sugar: #b8740c;       /* azúcar crudo: solo para resaltar, nunca como serie */
+  --sugar-soft: #f7ecd7;
+  --soil: #6b4f35;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12170f; --surface: #182016; --ink: #e9efe2; --ink-2: #b6c1ab; --ink-3: #8b9681; --rule: #2c3726;
+    --cane: #55a043; --cane-soft: #22301c; --violet: #9a7ae6; --neutral: #7d8576; --sugar: #e2a447; --sugar-soft: #33291a; --soil: #b58f6a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12170f; --surface: #182016; --ink: #e9efe2; --ink-2: #b6c1ab; --ink-3: #8b9681; --rule: #2c3726;
+  --cane: #55a043; --cane-soft: #22301c; --violet: #9a7ae6; --neutral: #7d8576; --sugar: #e2a447; --sugar-soft: #33291a; --soil: #b58f6a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--f-body); font-size: 17px; line-height: 1.62;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+.wrap { max-width: 1040px; margin: 0 auto; }
+.read { max-width: 720px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; color: var(--ink); margin: 0; }
+h1 { font-size: clamp(2.4rem, 6vw, 4.1rem); line-height: 1.02; font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.7rem, 3.6vw, 2.35rem); line-height: 1.1; font-weight: 800; letter-spacing: -0.01em; }
+h3 { font-size: 1.28rem; line-height: 1.25; font-weight: 700; }
+p { margin: 0; }
+.stack { display: flex; flex-direction: column; gap: 18px; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cane); font-weight: 500; }
+.lede { font-size: 1.2rem; color: var(--ink-2); max-width: 640px; }
+.muted { color: var(--ink-2); }
+.small { font-size: 0.88rem; }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+code { background: var(--cane-soft); padding: 1px 6px; border-radius: 4px; color: var(--ink); }
+strong { font-weight: 600; }
+a { color: var(--cane); }
+:focus-visible { outline: 2px solid var(--cane); outline-offset: 3px; }
+
+/* ---------- hero ---------- */
+header.hero { padding-block: 56px 28px; }
+.hero .stack { gap: 20px; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.toc a { font-size: 0.9rem; text-decoration: none; color: var(--ink-2); border: 1px solid var(--rule); background: var(--surface); padding: 5px 12px; border-radius: 999px; }
+.toc a:hover { border-color: var(--cane); color: var(--ink); }
+
+/* ciclo de la caña */
+.cycle { margin-top: 30px; background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 22px 22px 16px; }
+.cycle-head { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: baseline; }
+.cycle-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; align-items: end; margin-top: 18px; height: 230px; }
+.cyc { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 6px; min-width: 0; }
+.cyc .pct { font-family: var(--f-display); font-weight: 700; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.cyc .bar { width: min(44px, 70%); background: var(--cane); border-radius: 5px 5px 0 0; transition: height .6s ease; }
+.cyc .stalks { width: min(44px, 70%); display: flex; justify-content: space-between; align-items: flex-end; }
+.cyc.renew .bar { background: repeating-linear-gradient(135deg, var(--sugar) 0 6px, transparent 6px 10px); border: 1.5px solid var(--sugar); }
+.cyc-labels { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; border-top: 2px solid var(--soil); padding-top: 8px; }
+.cyc-labels div { text-align: center; font-size: 0.85rem; color: var(--ink-2); line-height: 1.25; min-width: 0; }
+.cyc-labels b { display: block; color: var(--ink); font-weight: 600; }
+
+/* ---------- secciones ---------- */
+section { padding-block: 64px 8px; }
+section > .read > .stack > h2 { margin-bottom: 2px; }
+.figure { margin-block: 26px 6px; }
+.figure-wide { max-width: 1040px; margin-inline: auto; }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 18px 20px; }
+.callout { background: var(--sugar-soft); border-radius: 12px; padding: 16px 20px; }
+.callout h3 { font-size: 1.05rem; margin-bottom: 6px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+/* ilustración de la planta */
+.plants { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 640px) { .plants { grid-template-columns: 1fr; } }
+.plant { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.plant svg { width: 100%; height: auto; max-width: 100%; display: block; }
+.plant .tag { font-family: var(--f-mono); font-size: 0.75rem; color: var(--cane); letter-spacing: .06em; text-transform: uppercase; }
+.plant h3 { font-size: 1.1rem; }
+.plant p { font-size: 0.95rem; color: var(--ink-2); line-height: 1.5; }
+
+/* calculadora */
+.calc { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 20px; display: grid; grid-template-columns: minmax(0, 280px) minmax(0, 1fr); gap: 24px; }
+@media (max-width: 760px) { .calc { grid-template-columns: 1fr; } }
+.calc label { font-size: 0.92rem; color: var(--ink-2); display: block; }
+.calc input[type=range] { width: 100%; accent-color: var(--cane); }
+.calc .big { font-family: var(--f-display); font-size: 2.2rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+.calc .check { display: flex; gap: 8px; align-items: flex-start; font-size: 0.92rem; color: var(--ink-2); }
+.calc .check input { margin-top: 5px; accent-color: var(--cane); }
+.verdict { border-top: 1px solid var(--rule); padding-top: 12px; }
+
+/* embudo */
+.funnel { display: flex; flex-direction: column; gap: 12px; }
+.frow { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 14px; align-items: center; }
+.frow .st { font-family: var(--f-display); font-weight: 800; font-size: 1.05rem; line-height: 1.1; }
+.frow .st span { display: block; font-family: var(--f-body); font-weight: 400; font-size: 0.78rem; color: var(--ink-3); }
+.fbar { height: 34px; background: var(--cane); border-radius: 0 6px 6px 0; display: flex; align-items: center; padding-left: 10px; color: #fff; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 46px; }
+.fmeta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.chip { font-size: 0.78rem; color: var(--ink-2); background: var(--surface); border: 1px solid var(--rule); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.chip.cane { background: var(--cane-soft); border-color: transparent; color: var(--ink); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* cronograma de ensayos */
+.timeline-wrap { overflow-x: auto; }
+table.tl { border-collapse: separate; border-spacing: 4px; font-variant-numeric: tabular-nums; min-width: 520px; }
+table.tl th { font-size: 0.8rem; color: var(--ink-3); font-weight: 500; text-align: center; padding: 2px 4px; }
+table.tl th.row { text-align: right; white-space: nowrap; padding-right: 8px; }
+table.tl td { width: 64px; height: 38px; text-align: center; border-radius: 6px; font-size: 0.82rem; font-weight: 600; }
+td.c0 { background: var(--cane); color: #fff; }
+td.c1 { background: color-mix(in srgb, var(--cane) 72%, var(--surface)); color: #fff; }
+td.c2 { background: color-mix(in srgb, var(--cane) 48%, var(--surface)); color: var(--ink); }
+td.c3 { background: color-mix(in srgb, var(--cane) 28%, var(--surface)); color: var(--ink); }
+td.empty { background: transparent; }
+table.tl tr td.hl { outline: 2px solid var(--sugar); outline-offset: -2px; }
+
+/* anatomía de la fila */
+.row-card { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+.row-raw { font-family: var(--f-mono); font-size: 0.82rem; background: var(--cane-soft); padding: 12px 18px; overflow-x: auto; white-space: nowrap; color: var(--ink); }
+.fields { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 760px) { .fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 440px) { .fields { grid-template-columns: 1fr; } }
+.field { padding: 12px 16px; border-top: 1px solid var(--rule); border-right: 1px solid var(--rule); min-width: 0; }
+.field .k { font-family: var(--f-mono); font-size: 0.78rem; color: var(--cane); font-weight: 500; }
+.field .v { font-family: var(--f-display); font-weight: 700; font-size: 1.15rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.field .d { font-size: 0.84rem; color: var(--ink-2); line-height: 1.4; }
+.field.target { background: var(--sugar-soft); }
+.eq { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 700; font-size: 1.15rem; }
+.eq .box { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 8px 12px; text-align: center; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.eq .box small { display: block; font-family: var(--f-mono); font-weight: 400; font-size: 0.72rem; color: var(--ink-3); }
+.eq .box.res { background: var(--sugar-soft); border-color: transparent; }
+.eq .op { color: var(--ink-3); }
+
+/* pipeline */
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; counter-reset: s; }
+@media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+.steps li { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.steps li::before { counter-increment: s; content: counter(s); font-family: var(--f-display); font-weight: 800; font-size: 1.6rem; color: var(--cane); line-height: 1; }
+.steps li h3 { font-size: 1rem; }
+.steps li p { font-size: 0.88rem; color: var(--ink-2); line-height: 1.45; }
+.status { align-self: flex-start; font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+.status.done { background: var(--cane-soft); color: var(--ink); }
+.status.next { background: var(--sugar-soft); color: var(--ink); }
+.status.later { border: 1px dashed var(--rule); color: var(--ink-3); }
+.princ h3 { font-size: 1.05rem; margin-bottom: 4px; }
+.princ p { font-size: 0.95rem; color: var(--ink-2); }
+
+/* hallazgos */
+.group-title { display: flex; align-items: baseline; gap: 12px; padding-top: 34px; border-bottom: 2px solid var(--ink); padding-bottom: 6px; margin-bottom: 4px; }
+.group-title h3 { font-size: 1.4rem; }
+.group-title span { font-family: var(--f-mono); font-size: 0.78rem; color: var(--ink-3); }
+.finding { padding-block: 26px; border-bottom: 1px solid var(--rule); display: flex; flex-direction: column; gap: 14px; }
+.finding h3 { font-size: 1.3rem; }
+.finding .meaning { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .finding .meaning { grid-template-columns: 1fr; } }
+.meaning div { font-size: 0.95rem; color: var(--ink-2); line-height: 1.5; padding-left: 12px; border-left: 3px solid var(--rule); }
+.meaning div.decide { border-left-color: var(--cane); }
+.meaning b { display: block; font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); font-family: var(--f-mono); font-weight: 500; margin-bottom: 2px; }
+.bigstat { display: flex; flex-wrap: wrap; gap: 14px 30px; }
+.bigstat div { display: flex; flex-direction: column; }
+.bigstat .n { font-family: var(--f-display); font-weight: 800; font-size: 2.2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.bigstat .l { font-size: 0.88rem; color: var(--ink-2); }
+.diff { font-family: var(--f-mono); font-size: 0.82rem; border-radius: 10px; overflow: hidden; border: 1px solid var(--rule); }
+.diff div { padding: 8px 14px; overflow-x: auto; white-space: nowrap; }
+.diff .bad { background: color-mix(in srgb, var(--sugar) 14%, var(--surface)); }
+.diff .good { background: var(--cane-soft); }
+.diff mark { background: color-mix(in srgb, var(--sugar) 40%, transparent); color: var(--ink); border-radius: 3px; padding: 0 2px; }
+.diff .good mark { background: color-mix(in srgb, var(--cane) 30%, transparent); }
+.diff span.tag { display: inline-block; min-width: 64px; color: var(--ink-3); }
+
+/* gráficas */
+.chart { width: 100%; overflow-x: auto; }
+.chart svg { width: 100%; min-width: 600px; height: auto; display: block; }
+.chart .axis text, .chart text.lab { fill: var(--ink-2); font-family: var(--f-body); font-size: 12px; }
+.chart text.val { fill: var(--ink); font-family: var(--f-body); font-size: 12.5px; font-weight: 600; }
+.chart .grid line { stroke: var(--rule); stroke-width: 1; }
+.chart .base { stroke: var(--ink-3); stroke-width: 1; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.85rem; color: var(--ink-2); margin-bottom: 6px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.legend i.line { height: 3px; width: 16px; border-radius: 2px; vertical-align: 3px; }
+.chart-title { font-family: var(--f-display); font-weight: 700; font-size: 1.02rem; margin-bottom: 4px; }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 0.82rem; line-height: 1.35; padding: 7px 10px; border-radius: 8px; max-width: 260px; z-index: 50; opacity: 0; transition: opacity .12s; }
+#tip b { font-weight: 600; }
+.hit { cursor: default; }
+.hit:hover, .hit:focus { opacity: .85; }
+
+/* glosario */
+.glossary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+@media (max-width: 640px) { .glossary { grid-template-columns: 1fr; } }
+.glossary dt { font-family: var(--f-display); font-weight: 700; margin-top: 14px; }
+.glossary dt code { font-size: 0.8em; }
+.glossary dd { margin: 2px 0 0; color: var(--ink-2); font-size: 0.95rem; line-height: 1.5; }
+
+.next-list { counter-reset: n; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.next-list li { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px 14px 56px; position: relative; }
+.next-list li::before { counter-increment: n; content: counter(n); position: absolute; left: 18px; top: 12px; font-family: var(--f-display); font-weight: 800; font-size: 1.5rem; color: var(--sugar); }
+footer { padding-top: 56px; color: var(--ink-3); font-size: 0.85rem; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------- pregunta 1 ---------- */
+:root { --ramp1: #9cc98a; --ramp2: #5c9a46; --ramp3: #2c6420; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ramp1: #3e6b31; --ramp2: #62a24c; --ramp3: #9fd88a; } }
+:root[data-theme="dark"] { --ramp1: #3e6b31; --ramp2: #62a24c; --ramp3: #9fd88a; }
+.podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 860px) { .podium { grid-template-columns: 1fr; } }
+.pod { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.pod.first { border: 2px solid var(--cane); }
+.pod-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.pod .rk { font-family: var(--f-display); font-weight: 800; font-size: 1rem; color: var(--ink-3); }
+.pod .nm { font-family: var(--f-mono); font-weight: 500; font-size: 1.3rem; }
+.pod .gain { font-family: var(--f-display); font-weight: 800; font-size: 2.5rem; line-height: 1; color: var(--cane); font-variant-numeric: tabular-nums; }
+.pod .sub { font-size: 0.86rem; color: var(--ink-2); margin-top: 4px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.badge.alta { background: var(--cane-soft); color: var(--ink); }
+.badge.media { background: var(--sugar-soft); color: var(--ink); }
+.badge.baja { border: 1px dashed var(--rule); color: var(--ink-3); }
+.badge i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.meter { height: 8px; background: var(--cane-soft); border-radius: 999px; overflow: hidden; }
+.meter span { display: block; height: 100%; background: var(--cane); border-radius: 999px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 0.86rem; margin: 0; }
+.kv dt { color: var(--ink-3); } .kv dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+.warn { font-size: 0.82rem; color: var(--ink); background: var(--sugar-soft); border-radius: 8px; padding: 7px 10px; line-height: 1.4; }
+.linkbtn { align-self: flex-start; font: inherit; font-size: 0.88rem; color: var(--cane); background: none; border: 0; padding: 0; cursor: pointer; font-weight: 600; }
+.linkbtn:hover { text-decoration: underline; }
+.how { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; counter-reset: h; }
+@media (max-width: 900px) { .how { grid-template-columns: 1fr; } }
+.how li { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.how li::before { counter-increment: h; content: counter(h); font-family: var(--f-display); font-weight: 800; font-size: 1.5rem; color: var(--cane); line-height: 1; }
+.how li h3 { font-size: 0.98rem; }
+.how li p { font-size: 0.86rem; color: var(--ink-2); line-height: 1.45; }
+.how li .num { font-family: var(--f-display); font-weight: 800; font-size: 1.35rem; font-variant-numeric: tabular-nums; color: var(--ink); }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); }
+table.rank { border-collapse: collapse; width: 100%; min-width: 860px; font-size: 0.84rem; font-variant-numeric: tabular-nums; }
+table.rank th { text-align: right; font-weight: 600; color: var(--ink-2); padding: 10px 7px; border-bottom: 1px solid var(--rule); cursor: pointer; white-space: nowrap; user-select: none; background: var(--surface); }
+table.rank th:hover { color: var(--ink); }
+table.rank th.l, table.rank td.l { text-align: left; }
+table.rank td { text-align: right; padding: 7px 7px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.rank tbody tr { cursor: pointer; }
+table.rank tbody tr:hover { background: var(--cane-soft); }
+table.rank tbody tr.sel { background: color-mix(in srgb, var(--cane) 18%, var(--surface)); }
+table.rank tbody tr:last-child td { border-bottom: 0; }
+.vt { font-size: 0.7rem; padding: 1px 7px; border-radius: 999px; margin-left: 6px; font-family: var(--f-body); vertical-align: 1px; }
+.vt.t { background: color-mix(in srgb, var(--violet) 16%, var(--surface)); color: var(--ink); }
+.vt.c { background: var(--cane-soft); color: var(--ink); }
+.minimeter { display: inline-block; width: 40px; height: 7px; background: var(--cane-soft); border-radius: 999px; vertical-align: middle; margin-right: 6px; overflow: hidden; }
+.minimeter span { display: block; height: 100%; background: var(--cane); }
+.calc2 { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 20px; display: grid; grid-template-columns: minmax(0, 290px) minmax(0, 1fr); gap: 26px; }
+@media (max-width: 900px) { .calc2 { grid-template-columns: 1fr; } }
+.calc2 label { font-size: 0.9rem; color: var(--ink-2); display: block; }
+.calc2 select { width: 100%; font: inherit; font-family: var(--f-mono); font-size: 0.95rem; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); margin-top: 4px; }
+.calc2 input[type=range] { width: 100%; accent-color: var(--cane); }
+.calc2 .check { display: flex; gap: 8px; align-items: flex-start; font-size: 0.9rem; color: var(--ink-2); }
+.calc2 .check input { margin-top: 5px; accent-color: var(--cane); }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; overflow: hidden; }
+.seg button { font: inherit; font-size: 0.85rem; border: 0; background: transparent; color: var(--ink-2); padding: 6px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--cane); color: #fff; }
+.kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.kpi { background: var(--bg); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.kpi .l { font-size: 0.76rem; color: var(--ink-3); line-height: 1.3; }
+.kpi .v { font-family: var(--f-display); font-weight: 800; font-size: 1.45rem; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.kpi .v.pos { color: var(--cane); }
+.kpi .s { font-size: 0.76rem; color: var(--ink-2); line-height: 1.3; }
+.charts2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px; }
+table.pgrid { border-collapse: separate; border-spacing: 3px; font-variant-numeric: tabular-nums; min-width: 660px; }
+table.pgrid th { font-size: 0.78rem; color: var(--ink-3); font-weight: 500; padding: 2px 4px; text-align: center; }
+table.pgrid th.row { text-align: right; font-family: var(--f-mono); color: var(--ink-2); white-space: nowrap; padding-right: 10px; }
+table.pgrid td { width: 48px; height: 36px; text-align: center; border-radius: 6px; font-weight: 700; font-size: 0.92rem; }
+td.k3 { background: var(--ramp1); color: var(--ink); }
+td.k4 { background: var(--ramp2); color: #fff; }
+td.k5 { background: var(--ramp3); color: #fff; }
+:root[data-theme="dark"] td.k5, :root[data-theme="dark"] td.k4 { color: var(--bg); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) td.k5, :root:not([data-theme="light"]) td.k4 { color: var(--bg); } }
+td.loss { background: repeating-linear-gradient(135deg, var(--rule) 0 4px, transparent 4px 8px) !important; color: var(--ink-3) !important; }
+td.now { outline: 2px solid var(--sugar); outline-offset: -2px; }
+.trap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 640px) { .trap { grid-template-columns: 1fr; } }
+.trap .card .n { font-family: var(--f-display); font-weight: 800; font-size: 1.8rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.trap .card.bad { border-style: dashed; }
+.gcards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .gcards { grid-template-columns: 1fr; } }
+.gcards .card h3 { font-size: 1rem; margin-bottom: 6px; }
+.gcards .card p, .gcards .card li { font-size: 0.92rem; color: var(--ink-2); line-height: 1.5; }
+.gcards .card ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.gcards .card.wide { grid-column: 1 / -1; }
+.scen { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .scen { grid-template-columns: 1fr; } }
+.sc { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.sc h3 { font-size: 1.02rem; }
+.sc .badge { align-self: flex-start; }
+.sc p { font-size: 0.9rem; color: var(--ink-2); line-height: 1.5; }
+.know { display: flex; flex-direction: column; gap: 4px; font-size: 0.86rem; }
+.know span::before { display: inline-block; width: 18px; font-weight: 700; }
+.know .y::before { content: "✓"; color: var(--cane); }
+.know .n::before { content: "✕"; color: var(--ink-3); }
+.know .n { color: var(--ink-3); }
+.done-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.done-list li { padding-left: 26px; position: relative; color: var(--ink-2); }
+.done-list li::before { content: "✓"; position: absolute; left: 4px; color: var(--cane); font-weight: 700; }
+
+/* ---------- pregunta 2 ---------- */
+.q2kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 900px) { .q2kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.q2kpis .kpi { background: var(--surface); border: 1px solid var(--rule); padding: 12px 14px; }
+.q2kpis .kpi .v { font-size: 1.75rem; }
+.ctrl { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; }
+.ctrl label { font-size: 0.88rem; color: var(--ink-2); display: flex; flex-direction: column; gap: 4px; }
+.ctrl select { font: inherit; font-family: var(--f-mono); font-size: 0.88rem; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); max-width: 260px; }
+.ctrl input[type=range] { accent-color: var(--cane); width: 220px; }
+table.vgrid { border-spacing: 3px; min-width: 640px; }
+table.vgrid td { width: 44px; height: 20px; border-radius: 4px; }
+table.vgrid th { font-size: 0.75rem; }
+table.vgrid th.row { font-family: var(--f-mono); font-size: 0.74rem; }
+table.vgrid tr.off td, table.vgrid tr.off th { opacity: .3; }
+table.vgrid tr.on th.row { color: var(--ink); font-weight: 700; }
+td.vt { background: var(--cane); }
+td.vh { background: color-mix(in srgb, var(--cane) 32%, var(--surface)); }
+td.vp { background: var(--sugar); }
+td.vf { background: transparent; box-shadow: inset 0 0 0 1px var(--rule); }
+td.vx { background: repeating-linear-gradient(135deg, var(--neutral) 0 3px, transparent 3px 7px); }
+td.vn { background: transparent; }
+.legend i.sq { border-radius: 3px; }
+.feat { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .feat { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .feat { grid-template-columns: 1fr; } }
+.cmp { display: flex; flex-direction: column; gap: 8px; }
+.cmp .row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px 16px; align-items: center; background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 10px 14px; font-size: 0.86rem; }
+@media (max-width: 640px) { .cmp .row { grid-template-columns: 1fr; } }
+.cmp .row .nm { font-weight: 600; grid-column: 1 / -1; }
+#cCut button { padding: 6px 10px; white-space: nowrap; }
+.cmp .row .ci { font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.cmp .row .ci b { color: var(--ink); font-weight: 600; }
+.breakdown { display: flex; flex-direction: column; gap: 6px; font-size: 0.86rem; }
+.breakdown .bd { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; border-bottom: 1px dashed var(--rule); padding-bottom: 4px; color: var(--ink-2); }
+.breakdown .bd span:last-child { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); }
+.breakdown .bd.tot { border-bottom: 0; font-weight: 700; color: var(--ink); }
+.calc2 select:disabled, .calc2 input:disabled { opacity: .45; }
+#chLote svg { min-width: 560px; }
+#jsErr .warn { margin-top: 12px; }
+@media (max-width: 900px) { .q2kpis .kpi:last-child { grid-column: 1 / -1; } }
+
+/* ---------- preguntas 3 y 4 ---------- */
+:root { --g1: #2a78d6; --g2: #eb6834; --g3: #1baf7a; --g4: #eda100; --g5: #9aa092; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --g1: #3987e5; --g2: #d95926; --g3: #199e70; --g4: #c98500; --g5: #7d8576; } }
+:root[data-theme="dark"] { --g1: #3987e5; --g2: #d95926; --g3: #199e70; --g4: #c98500; --g5: #7d8576; }
+#chMap svg { min-width: 640px; }
+#q3Groups .kv { font-size: .84rem; }
+</style>
+</head>
+<body>
+<div id="tip" role="tooltip"></div>
+<noscript><div class="wrap"><div class="warn" style="margin-top:12px">Este documento necesita JavaScript para dibujar las gráficas y las calculadoras. Abrilo en Chrome, Edge, Firefox o Safari.</div></div></noscript>
+<div id="jsErr" class="wrap" hidden><div class="warn">Una parte interactiva no se pudo dibujar en este visor: <span></span> Si lo abriste en una vista previa, probá descargarlo y abrirlo en el navegador.</div></div>
+
+<header class="hero wrap">
+  <div class="read stack">
+    <span class="eyebrow">Prueba técnica · Serie I · Campo</span>
+    <h1>Caña, socas y datos de campo</h1>
+    <p class="lede">Qué es una soca, cómo se evalúan variedades nuevas de caña, qué trae el dataset de Louisiana, qué encontramos al explorarlo y las cuatro respuestas de la Serie I: qué variedades ampliar y cuándo renovar, cuánto azúcar esperar, qué perfil tiene cada variedad y cómo decidir con datos propios.</p>
+    <nav class="toc" aria-label="Contenido">
+      <a href="#cana">La caña</a><a href="#decision">La decisión</a><a href="#datos">Los datos</a><a href="#fila">Una fila</a><a href="#metodo">El método</a><a href="#hallazgos">Hallazgos</a><a href="#recomendacion">Recomendación</a><a href="#modelo">Modelo</a><a href="#segmentos">Segmentos</a><a href="#datos-propios">Datos propios</a><a href="#cierre">Cierre</a><a href="#glosario">Glosario</a>
+    </nav>
+  </div>
+  <div class="cycle" aria-label="Ciclo de una plantación de caña">
+    <div class="cycle-head">
+      <h3>Una plantación se corta varias veces, y cada corte rinde menos</h3>
+      <span class="small muted">Azúcar por acre relativo a la plantía · etapa 5 de Louisiana, ajustado por lugar y año</span>
+    </div>
+    <div class="cycle-grid" id="cycleGrid"></div>
+    <div class="cyc-labels" id="cycleLabels"></div>
+  </div>
+</header>
+
+<!-- ================================================================== -->
+<section id="cana" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">1 · La caña en dos minutos</span>
+    <h2>Se siembra una vez y se cosecha varios años</h2>
+    <p>La caña no se siembra con semilla sino con <strong>trozos de tallo</strong>. Después del primer corte, la planta no muere: la <strong>cepa</strong> (la base que queda bajo tierra) vuelve a brotar y da otra cosecha al año siguiente, sin volver a sembrar. Cada una de esas cosechas tiene nombre.</p>
+  </div>
+  <div class="figure figure-wide plants">
+    <div class="plant">
+      <span class="tag">CROP = 0</span>
+      <svg viewBox="0 0 220 150" role="img" aria-label="Plantía: caña sembrada con trozos de tallo que crece alta">
+        <rect x="0" y="118" width="220" height="32" fill="var(--soil)" opacity=".25"/>
+        <line x1="0" y1="118" x2="220" y2="118" stroke="var(--soil)" stroke-width="2"/>
+        <g stroke="var(--cane)" stroke-width="5" stroke-linecap="round">
+          <line x1="70" y1="116" x2="66" y2="22"/><line x1="86" y1="116" x2="88" y2="14"/><line x1="102" y1="116" x2="106" y2="20"/>
+          <line x1="118" y1="116" x2="120" y2="12"/><line x1="134" y1="116" x2="138" y2="24"/><line x1="150" y1="116" x2="152" y2="18"/>
+        </g>
+        <g stroke="var(--cane)" stroke-width="2.5" fill="none" stroke-linecap="round">
+          <path d="M66 30 q-22 -6 -34 6"/><path d="M88 20 q20 -10 34 -4"/><path d="M106 26 q-18 -14 -30 -10"/><path d="M120 18 q22 -8 36 2"/><path d="M138 30 q16 -12 32 -6"/><path d="M152 24 q14 -2 26 10"/>
+        </g>
+        <rect x="58" y="124" width="104" height="7" rx="3.5" fill="var(--sugar)"/>
+        <text x="110" y="146" text-anchor="middle" font-size="10" fill="var(--ink-2)" font-family="var(--f-body)">trozos de tallo sembrados</text>
+      </svg>
+      <h3>Plantía</h3>
+      <p>El primer corte después de sembrar. Es el que más rinde.</p>
+    </div>
+    <div class="plant">
+      <span class="tag">El corte</span>
+      <svg viewBox="0 0 220 150" role="img" aria-label="Corte: se cosechan los tallos y queda la cepa">
+        <rect x="0" y="118" width="220" height="32" fill="var(--soil)" opacity=".25"/>
+        <line x1="0" y1="118" x2="220" y2="118" stroke="var(--soil)" stroke-width="2"/>
+        <g stroke="var(--cane)" stroke-width="5" stroke-linecap="round">
+          <line x1="70" y1="116" x2="70" y2="108"/><line x1="86" y1="116" x2="86" y2="107"/><line x1="102" y1="116" x2="102" y2="108"/>
+          <line x1="118" y1="116" x2="118" y2="106"/><line x1="134" y1="116" x2="134" y2="108"/><line x1="150" y1="116" x2="150" y2="107"/>
+        </g>
+        <g stroke="var(--ink-3)" stroke-width="4" stroke-linecap="round" opacity=".7">
+          <line x1="40" y1="70" x2="170" y2="54"/><line x1="44" y1="80" x2="176" y2="66"/><line x1="48" y1="90" x2="168" y2="78"/>
+        </g>
+        <path d="M30 50 l14 10" stroke="var(--sugar)" stroke-width="3" stroke-linecap="round"/>
+        <text x="110" y="38" text-anchor="middle" font-size="10" fill="var(--ink-2)" font-family="var(--f-body)">tallos cosechados → ingenio</text>
+        <text x="110" y="146" text-anchor="middle" font-size="10" fill="var(--ink-2)" font-family="var(--f-body)">queda la cepa bajo tierra</text>
+      </svg>
+      <h3>Zafra</h3>
+      <p>La temporada de cosecha. Se cortan los tallos, se llevan al ingenio y se extrae el azúcar.</p>
+    </div>
+    <div class="plant">
+      <span class="tag">CROP = 1, 2, 3, 4</span>
+      <svg viewBox="0 0 220 150" role="img" aria-label="Soca: la cepa rebrota con menos tallos">
+        <rect x="0" y="118" width="220" height="32" fill="var(--soil)" opacity=".25"/>
+        <line x1="0" y1="118" x2="220" y2="118" stroke="var(--soil)" stroke-width="2"/>
+        <g stroke="var(--cane)" stroke-width="5" stroke-linecap="round">
+          <line x1="78" y1="116" x2="74" y2="44"/><line x1="98" y1="116" x2="100" y2="36"/><line x1="122" y1="116" x2="124" y2="40"/><line x1="144" y1="116" x2="148" y2="52"/>
+        </g>
+        <g stroke="var(--cane)" stroke-width="2.5" fill="none" stroke-linecap="round">
+          <path d="M74 52 q-18 -6 -28 4"/><path d="M100 42 q18 -10 30 -4"/><path d="M124 46 q18 -8 30 0"/><path d="M148 58 q12 -4 22 6"/>
+        </g>
+        <g stroke="var(--ink-3)" stroke-width="5" stroke-linecap="round" opacity=".55">
+          <line x1="70" y1="116" x2="70" y2="110"/><line x1="102" y1="116" x2="102" y2="110"/><line x1="134" y1="116" x2="134" y2="110"/>
+        </g>
+        <text x="110" y="146" text-anchor="middle" font-size="10" fill="var(--ink-2)" font-family="var(--f-body)">la cepa rebrota, con menos vigor</text>
+      </svg>
+      <h3>Soca (o retoño)</h3>
+      <p>Cada rebrote de la cepa. Soca 1, soca 2… Cada una rinde menos que la anterior.</p>
+    </div>
+  </div>
+  <div class="read stack" style="margin-top:26px">
+    <p>¿Por qué cae? Con cada año la cepa envejece, el suelo se compacta por la maquinaria y se acumulan plagas y daños. Llega un punto en que conviene <strong>renovar</strong>: arar el lote y volver a sembrar. Renovar cuesta dinero (en la prueba, US$1,100 por acre), pero el lote vuelve a plantía y recupera el rendimiento.</p>
+    <div class="callout">
+      <h3>Para leerlo en unidades de Guatemala</h3>
+      <p class="small">El dataset es de Estados Unidos: acres, libras y toneladas cortas (2,000 lb). Las conversiones útiles:</p>
+      <div class="chips" style="margin-top:10px" id="unitChips"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="decision" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">2 · La decisión que nos piden</span>
+    <h2>Qué variedades ampliar y cada cuántos cortes renovar</h2>
+    <p>La Gerencia Agrícola quiere dos respuestas: las <strong>3 variedades</strong> que conviene sembrar más, y <strong>cada cuántos cortes</strong> renovar un lote. La segunda es un balance entre dos costos:</p>
+    <div class="grid-2">
+      <div class="card"><h3 style="font-size:1.02rem">Renovar pronto</h3><p class="small muted">Siempre se cosecha caña joven que rinde bien, pero se paga la renovación muy seguido.</p></div>
+      <div class="card"><h3 style="font-size:1.02rem">Renovar tarde</h3><p class="small muted">La renovación se reparte entre más años, pero se cosechan socas viejas que rinden poco.</p></div>
+    </div>
+    <p>El punto óptimo es el ciclo con el <strong>mejor margen promedio por año</strong>. Para cada corte, con los supuestos de la prueba:</p>
+    <div class="eq" style="font-size:1rem">
+      <div class="box">Azúcar × precio<small>lb/acre × US$/lb</small></div><span class="op">−</span>
+      <div class="box">US$14 × toneladas<small>corte, alce y transporte</small></div><span class="op">−</span>
+      <div class="box">US$350<small>mantenimiento anual</small></div><span class="op">−</span>
+      <div class="box">US$1,100<small>solo en plantía</small></div><span class="op">=</span>
+      <div class="box res">Margen del corte<small>US$/acre</small></div>
+    </div>
+    <p>Movés el precio y ves cómo cambia el ciclo óptimo. Aquí se usa el promedio de los 4 <strong>testigos núcleo</strong> (las variedades comerciales que estuvieron en etapa 5 los 12 años). El cálculo para cada variedad está en la <a href="#recomendacion">sección 7</a>.</p>
+  </div>
+  <div class="figure figure-wide calc" id="calc">
+    <div class="stack" style="gap:16px">
+      <div>
+        <label for="price">Precio del azúcar: <strong id="priceLbl"></strong> por libra</label>
+        <input type="range" id="price" min="0.10" max="0.30" step="0.01" value="0.20">
+        <div class="small muted" style="display:flex;justify-content:space-between"><span>US$0.10</span><span>US$0.30</span></div>
+      </div>
+      <label class="check"><input type="checkbox" id="fallow"><span>Contar un año de barbecho (lote sin caña) antes de resembrar, como es común en Louisiana</span></label>
+      <div class="verdict">
+        <div class="small muted">Ciclo óptimo</div>
+        <div class="big" id="bestN"></div>
+        <div class="small muted" id="bestTxt"></div>
+      </div>
+      <p class="small muted">Más de 5 cortes no se puede evaluar: el dataset casi no tiene datos después de la soca 4.</p>
+    </div>
+    <div class="chart" id="chartCalc"></div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="datos" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">3 · De dónde vienen los datos</span>
+    <h2>Un embudo de selección de variedades</h2>
+    <p>Los datos vienen del programa de mejoramiento de caña de Louisiana (LSU AgCenter, USDA-ARS y la American Sugar Cane League), 2010-2021. Cada año se siembran cientos de <strong>clones</strong> nuevos (candidatos a variedad). Los mejores avanzan de <strong>etapa</strong>; el resto se descarta. Solo unos pocos llegan a etapa 5, que se siembra en fincas de productores.</p>
+  </div>
+  <div class="figure read">
+    <div class="funnel" id="funnel"></div>
+  </div>
+  <div class="read stack" style="margin-top:28px">
+    <h3>Los testigos: la regla con la que se mide</h3>
+    <p>En cada ensayo se siembran también variedades comerciales conocidas, los <strong>testigos</strong>. Como comparten lugar, año y suelo con los candidatos, compararse contra ellos quita el efecto del ambiente. Identificamos 12 (son los únicos clones que se vuelven a sembrar en etapas 2-3 año tras año):</p>
+    <div class="chips" id="checkChips"></div>
+    <h3 style="margin-top:14px">Cómo se ve un ensayo en el tiempo</h3>
+    <p>Un <strong>ensayo</strong> es una etapa en una localidad, sembrada en un año. Ese mismo lote se cosecha en plantía y luego en socas los años siguientes. En una misma finca conviven ensayos sembrados en años distintos, y eso es lo que permite separar <em>el efecto del año</em> del <em>efecto de la edad de la caña</em>.</p>
+  </div>
+  <div class="figure read timeline-wrap" id="timeline"></div>
+  <p class="read small muted" style="margin-top:8px">En 2018 (columna resaltada), la misma finca tiene plantía, soca 1, soca 2 y soca 3 a la vez, todas con el mismo clima. Comparar entre ellas aísla la caída por edad.</p>
+</section>
+
+<!-- ================================================================== -->
+<section id="fila" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">4 · Qué trae cada fila</span>
+    <h2>Una fila es una parcela, en una cosecha</h2>
+    <p>El archivo tiene <strong id="nRows"></strong> filas. Cada una es una parcela de un clon, en un ensayo, en una repetición y en un corte. Esta es una fila real de etapa 5:</p>
+  </div>
+  <div class="figure read row-card" id="rowCard"></div>
+  <div class="read stack" style="margin-top:22px">
+    <p>Tres columnas se relacionan entre sí. Si las unidades son correctas, estas cuentas deben cuadrar en cada fila:</p>
+    <div class="eq" id="eqSugar"></div>
+    <div class="eq" id="eqCane"></div>
+    <p class="small muted">Esto será clave en los hallazgos: la primera identidad prueba que T_SPACRE está en libras (no en toneladas, como dice el PDF), y la segunda delata un cambio de unidades en 2020.</p>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="metodo" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">5 · Cómo lo estamos trabajando</span>
+    <h2>Primero entender los datos, después modelar</h2>
+  </div>
+  <div class="figure figure-wide">
+    <ol class="steps">
+      <li><span class="status done">Hecho</span><h3>Auditar el archivo</h3><p>Leerlo como texto y revisar qué trae realmente cada columna.</p></li>
+      <li><span class="status done">Hecho</span><h3>Limpiar</h3><p>Reglas documentadas en código: reparar, marcar faltantes, quitar imposibles.</p></li>
+      <li><span class="status done">Hecho</span><h3>Explorar (EDA)</h3><p>Buscar sesgos y patrones que cambien cómo modelar.</p></li>
+      <li><span class="status next">Siguiente</span><h3>Modelar</h3><p>Ranking de variedades, ciclo de renovación y modelo predictivo.</p></li>
+      <li><span class="status later">Después</span><h3>Recomendar</h3><p>Evaluación gerencial: qué hacer, impacto, riesgos y certeza.</p></li>
+    </ol>
+  </div>
+  <div class="read stack" style="margin-top:26px">
+    <h3>Tres reglas que salieron del análisis</h3>
+    <div class="grid-3 princ">
+      <div class="card"><h3>Comparar contra testigos</h3><p>Cada clon se mide contra las variedades testigo de su mismo ensayo y corte.</p></div>
+      <div class="card"><h3>La economía, solo con etapa 5</h3><p>Las etapas tempranas inflan el rendimiento por acre; etapa 5 se parece a un campo comercial.</p></div>
+      <div class="card"><h3>Nada de la cosecha entra al modelo</h3><p>TCA, TRS, tallos y fibra se miden al cosechar: usarlos para predecir sería hacer trampa.</p></div>
+    </div>
+    <p class="small muted">Métodos simples a propósito: comparaciones contra testigos, regresión con efectos fijos y bootstrap. Se pueden explicar en una frase y controlan lo mismo que un modelo más complejo.</p>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="hallazgos" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">6 · Lo que encontramos</span>
+    <h2>Once hallazgos en cuatro temas</h2>
+    <p>Cada hallazgo trae qué significa y qué decidimos por él. Pasá el cursor sobre las gráficas para ver los valores.</p>
+  </div>
+
+  <div class="read">
+    <div class="group-title"><h3>El archivo</h3><span>formato y unidades</span></div>
+
+    <article class="finding">
+      <h3>Un tercio de las filas venía partido por una coma decimal</h3>
+      <div class="bigstat" id="statCorrupt"></div>
+      <p>En 2010-2019, el azúcar por acre se guardó con coma decimal (<code>10841,58</code>). Como el CSV usa coma para separar columnas, el número se partió: la parte entera quedó en su columna y los decimales se pegaron al TRS.</p>
+      <div class="diff" id="diffRow"></div>
+      <div class="meaning"><div><b>Qué significa</b>Leído con <code>read_csv</code> sin revisar, esas filas pierden el TRS sin dar ningún error.</div><div class="decide"><b>Qué decidimos</b>Reparar las filas y validar la reparación con la identidad TCA × TRS. Cuadra en todas con error &lt; 0.3 %.</div></div>
+    </article>
+
+    <article class="finding">
+      <h3>El azúcar por acre está en libras, no en toneladas</h3>
+      <div class="bigstat" id="statUnits"></div>
+      <div class="meaning"><div><b>Qué significa</b>El PDF y una nota dentro del CSV dicen "toneladas", pero la cuenta TCA × TRS da libras en cada fila. Una mediana de ~9,100 lb/acre son ~4.6 t de azúcar.</div><div class="decide"><b>Qué decidimos</b>Ingreso = libras × precio por libra. Con toneladas, el ingreso saldría 2,000 veces más alto.</div></div>
+    </article>
+
+    <article class="finding">
+      <h3>El archivo une dos exportaciones distintas</h3>
+      <div class="bigstat" id="statPopn"></div>
+      <div class="meaning"><div><b>Qué significa</b>En 2020-2021 la población de tallos (POPN) viene en otra unidad, la fibra se midió casi siempre y el TRS cambia de precisión. Además encontramos 126 filas duplicadas y 75 valores imposibles (como 518 t/acre).</div><div class="decide"><b>Qué decidimos</b>POPN de 2020-2021 queda como faltante. Las reglas de limpieza viven en <code>src/campo_data.py</code> con su conteo de filas afectadas.</div></div>
+    </article>
+
+    <div class="group-title"><h3>El diseño</h3><span>etapas, lugares y años</span></div>
+
+    <article class="finding">
+      <h3>Las etapas tempranas inflan el rendimiento</h3>
+      <div class="chart" id="chartStage"></div>
+      <div class="meaning"><div><b>Qué significa</b>Las mismas variedades testigo rinden mucho más en etapa 2 que en etapa 5. Comparando el mismo clon en el mismo año, la etapa 2 da <strong id="txtInfl"></strong> más caña. Las parcelas tempranas son pequeñas y en estación experimental.</div><div class="decide"><b>Qué decidimos</b>Los valores absolutos de etapas 2-4 no sirven para calcular dinero. La economía se hace con etapa 5.</div></div>
+    </article>
+
+    <article class="finding">
+      <h3>El lugar y el año pesan cuatro veces más que la variedad</h3>
+      <div class="chart" id="chartVar"></div>
+      <div class="meaning"><div><b>Qué significa</b>Si un clon rinde más que otro en promedio, puede ser solo porque se sembró en mejores fincas o mejores años.</div><div class="decide"><b>Qué decidimos</b>Toda comparación entre clones se hace dentro del mismo ensayo, contra los testigos.</div></div>
+    </article>
+
+    <article class="finding">
+      <h3>Hay años buenos y años malos para todos</h3>
+      <div class="chart" id="chartYear"></div>
+      <div class="meaning"><div><b>Qué significa</b>Las mismas variedades testigo cambian mucho de un año a otro. Un clon evaluado en un solo año puede verse bien o mal por suerte.</div><div class="decide"><b>Qué decidimos</b>Exigir que una variedad recomendada tenga resultados en más de un año.</div></div>
+    </article>
+
+    <div class="group-title"><h3>Las socas</h3><span>cuánto cae el rendimiento</span></div>
+
+    <article class="finding">
+      <h3>Solo los mejores llegan a las socas</h3>
+      <div class="chart" id="chartSurv"></div>
+      <div class="meaning"><div><b>Qué significa</b>El programa descarta clones después de la plantía. Los que se siguen midiendo en socas ya rendían 12-13 % más. Un promedio de socas está hecho solo con los buenos.</div><div class="decide"><b>Qué decidimos</b>Medir la caída de socas comparando cada clon consigo mismo, y en etapa 5, donde no se descarta dentro del ensayo.</div></div>
+    </article>
+
+    <article class="finding">
+      <h3>Cada soca rinde menos: 93, 80, 72 y 65 % de la plantía</h3>
+      <div class="chart" id="chartDecline"></div>
+      <div class="meaning"><div><b>Qué significa</b>El promedio crudo dice que la soca 4 rinde igual que la soca 3. Es falso: a soca 4 solo llegaron 28 parcelas de los mejores ensayos. La curva ajustada compara cortes del mismo lugar y año.</div><div class="decide"><b>Qué decidimos</b>Usar la curva ajustada para la economía de renovación y no extrapolar más allá de 5 cortes.</div></div>
+    </article>
+
+    <div class="group-title"><h3>Las variedades</h3><span>longevidad y evidencia</span></div>
+
+    <article class="finding">
+      <h3>Algunas variedades aguantan muchas más socas que otras</h3>
+      <div class="chart" id="chartLong"></div>
+      <div class="meaning"><div><b>Qué significa</b>L01-299 conserva ~96 % de su rendimiento en cada corte; HO07-613 y HOCP96-540 solo ~83 %. La diferencia es estadísticamente clara (p &lt; 0.001), no es ruido.</div><div class="decide"><b>Qué decidimos</b>El ranking combina productividad y longevidad. La longevidad define cada cuántos cortes renovar cada variedad.</div></div>
+    </article>
+
+    <article class="finding">
+      <h3>Los que mejor se ven son los que menos se han probado</h3>
+      <div class="chart" id="chartEvid"></div>
+      <div class="meaning"><div><b>Qué significa</b>Los primeros del ranking crudo solo tienen plantía de un año. Además, dos repeticiones del mismo clon en el mismo ensayo apenas se parecen (correlación ~0.4): una parcela sola es muy ruidosa.</div><div class="decide"><b>Qué decidimos</b>Propuesta: recomendar solo variedades con al menos 2 años en etapa 5 y socas medidas hasta la soca 2.</div></div>
+    </article>
+
+    <article class="finding">
+      <h3>El costo de corte no cambia el ranking (corrigiendo una hipótesis nuestra)</h3>
+      <div class="chart" id="chartTon"></div>
+      <div class="meaning"><div><b>Qué significa</b>Esperábamos que cobrar US$14 por tonelada castigara a las variedades de mucho tonelaje y poco azúcar. Los datos dicen que no: el ranking por azúcar y por margen casi coinciden (Spearman <span id="txtRho"></span>). Una tonelada de caña genera mucho más azúcar de lo que cuesta cortarla.</div><div class="decide"><b>Qué decidimos</b>Rankear por azúcar por acre y longevidad. La economía se usa para el ciclo de renovación y el riesgo de precio. La fibra tampoco sirve como criterio: solo se midió en el 19 % de etapa 5.</div></div>
+    </article>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="recomendacion" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">7 · Pregunta 1 resuelta</span>
+    <h2>Qué variedades ampliar y cuándo renovarlas</h2>
+    <p class="lede" id="q1Lede"></p>
+  </div>
+  <div class="figure figure-wide podium" id="podium"></div>
+
+  <div class="read stack" style="margin-top:44px">
+    <h3>Cómo se calculó, con HOCP14-885 como ejemplo</h3>
+    <p class="muted">Cinco pasos simples. Ninguno necesita un modelo complejo: todo es comparar contra la misma regla y hacer cuentas de dinero.</p>
+  </div>
+  <div class="figure figure-wide"><ol class="how" id="howSteps"></ol></div>
+
+  <div class="read stack" style="margin-top:44px">
+    <h3>Las variedades con evidencia suficiente</h3>
+    <p class="small muted" id="tblNote"></p>
+  </div>
+  <div class="figure figure-wide tbl-wrap" id="rankTable"></div>
+
+  <div class="read stack" id="calc2-anchor" style="margin-top:44px">
+    <h3>Calculadora por variedad</h3>
+    <p>Elegí una variedad, mové el precio y probá los supuestos. Todo se recalcula aquí con las mismas fórmulas del notebook 02: curva de rendimiento, margen de cada ciclo y precio de equilibrio.</p>
+  </div>
+  <div class="figure figure-wide calc2" id="calc2">
+    <div class="stack" style="gap:16px">
+      <div><label for="selVar">Variedad</label><select id="selVar"></select></div>
+      <div>
+        <label for="price2">Precio del azúcar: <strong id="price2Lbl"></strong> por libra</label>
+        <input type="range" id="price2" min="0.10" max="0.30" step="0.01" value="0.20">
+        <div class="small muted" style="display:flex;justify-content:space-between"><span>US$0.10</span><span>US$0.30</span></div>
+      </div>
+      <label class="check"><input type="checkbox" id="fallow2"><span>Contar un año de barbecho antes de resembrar</span></label>
+      <div>
+        <div class="small muted" style="margin-bottom:6px">Socas sin datos de la variedad</div>
+        <div class="seg" role="group" aria-label="Tratamiento de socas sin datos"><button type="button" id="exCons" aria-pressed="true">Conservador</button><button type="button" id="exLin" aria-pressed="false">Lineal</button></div>
+        <p class="small muted" id="exNote" style="margin-top:6px"></p>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <p class="small muted" id="bootNote"></p>
+    </div>
+    <div class="stack" style="gap:20px;min-width:0">
+      <div class="charts2"><div class="chart" id="chCurve"></div><div class="chart" id="chCycle"></div></div>
+      <div class="chart" id="chPrice"></div>
+    </div>
+  </div>
+
+  <div class="read" style="margin-top:36px">
+    <article class="finding">
+      <h3>¿Qué tan segura es la recomendación?</h3>
+      <p id="certIntro"></p>
+      <div class="chart" id="chCert"></div>
+      <div class="meaning"><div><b>Qué significa</b><span id="certMean"></span></div><div class="decide"><b>Qué decidimos</b>Recomendar las tres primeras. L14-267 y L01-299 quedan como alternativa si L15-306 no confirma su desempeño en socas 3 y 4.</div></div>
+    </article>
+
+    <article class="finding">
+      <h3>El precio no cambia cuál variedad elegir, pero sí cuándo renovar</h3>
+      <p>Cada celda es el ciclo óptimo (número de cortes) con ese precio. Rayado = con ese precio ni el mejor ciclo cubre los costos.</p>
+      <label class="check small" style="display:flex;gap:8px;align-items:center;color:var(--ink-2)"><input type="checkbox" id="fallow3" style="accent-color:var(--cane)">Con un año de barbecho</label>
+      <div class="timeline-wrap" id="priceGrid"></div>
+      <div class="legend" style="margin-top:4px"><span><i style="background:var(--ramp1);border-radius:3px"></i>3 cortes</span><span><i style="background:var(--ramp2);border-radius:3px"></i>4 cortes</span><span><i style="background:var(--ramp3);border-radius:3px"></i>5 cortes</span><span><i style="background:repeating-linear-gradient(135deg,var(--rule) 0 3px,transparent 3px 6px);border:1px solid var(--rule);border-radius:3px"></i>pierde dinero</span><span><i style="border:2px solid var(--sugar);border-radius:3px;background:transparent"></i>precio de la prueba</span></div>
+      <div class="meaning"><div><b>Qué significa</b>Con precios altos conviene renovar antes, porque la caña joven produce más azúcar y cada libra vale más. Con precios bajos conviene estirar las socas y pagar menos veces la renovación.</div><div class="decide"><b>Qué decidimos</b>Renovar a los 4 cortes con el precio de la prueba. Revisar la regla cada zafra con el precio esperado (Serie III).</div></div>
+    </article>
+
+    <article class="finding">
+      <h3>¿En qué fincas conviene cada variedad?</h3>
+      <p>El dataset no trae coordenadas, altitud ni lluvia: solo el nombre de la finca. Además, la zona cañera de Louisiana es plana y casi al nivel del mar. Por eso el ambiente se mide con los propios datos: cuánto rinden los testigos núcleo en cada finca y año. Ese <strong>índice ambiental</strong> resume clima, suelo y manejo.</p>
+      <div class="chart" id="chLocs"></div>
+      <p class="small muted" id="locNote"></p>
+      <div class="chart" id="chAmb" style="margin-top:14px"></div>
+      <h3 style="font-size:1.05rem;margin-top:6px">Una trampa estadística que corregimos</h3>
+      <p>La primera versión comparaba la ventaja de cada variedad (variedad ÷ testigos) contra un índice calculado con esos mismos testigos. Si en una finca los testigos tienen mala suerte, el índice baja y la ventaja sube por el mismo error. Parece que las variedades "rinden mejor en fincas pobres", pero es regresión a la media.</p>
+      <div class="trap" id="trapCards"></div>
+      <div class="meaning"><div><b>Qué significa</b>HOCP14-885 es la mejor en los tres tipos de finca y aprovecha más las buenas. HOL15-508 y L15-306 ganan ~16-17 % en fincas de potencial bajo y medio, pero en las de alto potencial su ventaja baja a 7-10 %.</div><div class="decide"><b>Qué decidimos</b>HOCP14-885 sirve en cualquier finca. HOL15-508 y L15-306 conviene probarlas primero en fincas de potencial bajo o medio.</div></div>
+    </article>
+  </div>
+
+  <div class="read stack" style="margin-top:36px">
+    <h3>Evaluación gerencial</h3>
+    <div class="gcards" id="gerencial"></div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="modelo" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">8 · Pregunta 2 resuelta</span>
+    <h2>Un modelo para planificar la zafra siguiente</h2>
+    <p class="lede" id="q2Lede"></p>
+  </div>
+  <div class="figure figure-wide"><div class="q2kpis" id="q2Kpis"></div></div>
+
+  <!-- validación -->
+  <div class="read stack" style="margin-top:44px">
+    <h3>Se valida como se usaría: en diciembre, con lo que ya pasó</h3>
+    <p>Al cerrar una zafra se planifica la siguiente. Por eso el modelo nunca ve el año que predice: se entrena con los años anteriores y se prueba con el siguiente, nueve veces (2013 a 2021). Un <em>k-fold</em> al azar mezclaría años y daría un error optimista que nunca se repetiría en la práctica.</p>
+    <div class="ctrl">
+      <div class="seg" role="group" aria-label="Escenario de validación"><button type="button" id="vE1" aria-pressed="true">Finca conocida</button><button type="button" id="vE2" aria-pressed="false">Finca nueva</button></div>
+      <label>Zafra que se predice: <strong id="vYearLbl"></strong><input type="range" id="vYear" min="2013" max="2021" step="1" value="2018"></label>
+      <label id="vLocWrap" hidden>Finca que se trata como nueva<select id="vLoc"></select></label>
+    </div>
+  </div>
+  <div class="figure figure-wide timeline-wrap" id="valGrid"></div>
+  <div class="read"><div class="legend" id="valLegend"></div><p class="small muted" id="valNote"></p></div>
+
+  <!-- variables -->
+  <div class="read stack" style="margin-top:44px">
+    <h3>Qué sabe el modelo antes de la zafra</h3>
+    <p>Solo información que existe en diciembre. Todo se expresa contra los testigos núcleo, igual que en la pregunta 1.</p>
+  </div>
+  <div class="figure figure-wide"><div class="feat" id="featCards"></div></div>
+  <div class="read stack" style="margin-top:14px">
+    <p class="small muted">Quedan fuera, aunque estén en el dataset, porque se miden el mismo día que el azúcar (usarlas sería predecir el azúcar con el azúcar):</p>
+    <div class="chips" id="leakChips"></div>
+  </div>
+
+  <div class="read" style="margin-top:28px">
+    <article class="finding">
+      <h3>Primer intento: una regresión directa perdió contra una regla que no aprende nada</h3>
+      <p id="directIntro"></p>
+      <div class="chart" id="chDirect"></div>
+      <div class="meaning"><div><b>Qué significa</b><span id="directMean"></span></div><div class="decide"><b>Qué decidimos</b>Partir el modelo en dos piezas: el nivel del lote se toma de la historia, sin ajustar pesos, y solo se aprende la ventaja de la variedad dentro de cada lote, donde hay miles de comparaciones limpias.</div></div>
+    </article>
+  </div>
+
+  <div class="read stack" style="margin-top:26px">
+    <h3>El modelo en dos piezas</h3>
+    <div class="eq" id="twoPieces"></div>
+    <p class="muted" id="twoNote"></p>
+  </div>
+
+  <!-- comparación -->
+  <div class="read stack" style="margin-top:44px">
+    <h3>Seis modelos, dos escenarios</h3>
+    <p>Tres referencias que no aprenden nada y tres algoritmos, con los mismos datos y la misma validación. Los hiperparámetros se fijaron antes de validar: buscarlos sobre los mismos 9 años de prueba sería hacer trampa con la validación.</p>
+    <div class="ctrl">
+      <div class="seg" role="group" aria-label="Métrica" id="metricSeg"><button type="button" data-m="MAE" aria-pressed="true">Error</button><button type="button" data-m="R2" aria-pressed="false">R²</button><button type="button" data-m="orden" aria-pressed="false">Orden</button><button type="button" data-m="ventaja" aria-pressed="false">Ventaja</button></div>
+      <div class="seg" role="group" aria-label="Cortes" id="subsetSeg"><button type="button" data-s="todo" aria-pressed="true">Todos los cortes</button><button type="button" data-s="plantía" aria-pressed="false">Plantía</button><button type="button" data-s="socas" aria-pressed="false">Socas</button></div>
+    </div>
+  </div>
+  <div class="figure figure-wide"><div class="chart" id="chModels"></div><p class="small muted" id="modelsNote" style="margin-top:6px"></p></div>
+  <div class="read stack" style="margin-top:18px">
+    <h3 style="font-size:1.05rem">¿Las diferencias son reales?</h3>
+    <p class="small muted">Bootstrap pareado: se remuestrean fincas-año completas 2,000 veces. Si el intervalo de 90 % cruza el cero, es un empate.</p>
+    <div class="cmp" id="cmpRows"></div>
+  </div>
+
+  <!-- lotes -->
+  <div class="read" style="margin-top:36px">
+    <article class="finding">
+      <h3>El modelo ordena las variedades; el clima corre a todo el lote junto</h3>
+      <p id="loteIntro"></p>
+      <div class="ctrl">
+        <label>Zafra<select id="lYear"></select></label>
+        <label>Finca<select id="lLoc"></select></label>
+        <label>Lote<select id="lLote"></select></label>
+      </div>
+      <div class="chips" id="loteEx"></div>
+      <div class="chart" id="chLote"></div>
+      <div class="bigstat" id="loteStats"></div>
+      <div class="meaning"><div><b>Qué significa</b><span id="loteMean"></span></div><div class="decide"><b>Qué decidimos</b>Usar el modelo para comparar variedades y presupuestar con una banda, no para prometer una cifra exacta. Para mejorar el nivel hacen falta datos de clima y manejo por lote (pregunta 4).</div></div>
+    </article>
+
+    <article class="finding">
+      <h3>Cada zafra trae su clima</h3>
+      <p>Mediana de real ÷ predicho de todas las parcelas de etapa 5 en cada zafra. Pasá el cursor por cada barra para ver cuántos casos cayeron dentro de la banda ese año.</p>
+      <div class="chart" id="chZafra"></div>
+      <div class="meaning"><div><b>Qué significa</b><span id="zafraMean"></span></div><div class="decide"><b>Qué decidimos</b><span id="zafraDecide"></span></div></div>
+    </article>
+  </div>
+
+  <!-- calculadora -->
+  <div class="read stack" id="calc3-anchor" style="margin-top:44px">
+    <h3>Calculadora: azúcar esperado en la zafra 2022</h3>
+    <p>Elegí variedad, finca y corte. El cálculo usa el modelo guardado por el notebook 03 (<code>serie1_modelo_p2.json</code>), el mismo que leerá la API. Si el lote ya se cosechó, indicá cómo le fue a la variedad frente a los testigos del lote.</p>
+  </div>
+  <div class="figure figure-wide calc2" id="calc3">
+    <div class="stack" style="gap:16px">
+      <div><label for="cVar">Variedad</label><select id="cVar"></select><p class="small muted" id="cVarNote" style="margin-top:6px"></p></div>
+      <div><label for="cLoc">Finca</label><select id="cLoc"></select></div>
+      <div><div class="small muted" style="margin-bottom:6px">Corte</div><div class="seg" role="group" aria-label="Corte" id="cCut"></div></div>
+      <div>
+        <label class="check"><input type="checkbox" id="cLote"><span>Ya conozco la cosecha anterior de este lote</span></label>
+        <label for="cLoteV" style="margin-top:6px">Ventaja de la variedad vs testigos del lote el año pasado: <strong id="cLoteLbl"></strong></label>
+        <input type="range" id="cLoteV" min="-30" max="40" step="1" value="0">
+      </div>
+      <div class="kpis" id="cKpis"></div>
+      <div class="breakdown" id="cBreak"></div>
+      <p class="small muted" id="cCheck"></p>
+    </div>
+    <div class="stack" style="gap:20px;min-width:0">
+      <div class="chart" id="chCycle3"></div>
+      <div>
+        <div class="chart-title" id="lotesTitle"></div>
+        <p class="small muted" style="margin-bottom:6px">Clic en una fila para cargarla en la calculadora.</p>
+        <div class="tbl-wrap" id="lotesTbl" style="max-height:320px;overflow:auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="read stack" style="margin-top:36px">
+    <h3>Evaluación gerencial</h3>
+    <div class="gcards" id="gerencial2"></div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="segmentos" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">9 · Pregunta 3 resuelta</span>
+    <h2>Cinco perfiles de variedades</h2>
+    <p class="lede" id="q3Lede"></p>
+  </div>
+  <div class="figure figure-wide"><div class="q2kpis" id="q3Kpis"></div></div>
+
+  <div class="read stack" style="margin-top:44px">
+    <h3>Cuatro indicadores, todos contra los testigos del mismo ensayo y corte</h3>
+    <p>Igual que en las preguntas 1 y 2: así el lugar y el año no se confunden con la variedad.</p>
+  </div>
+  <div class="figure figure-wide"><div class="feat" id="q3Feats"></div></div>
+  <div class="read stack" style="margin-top:14px">
+    <p class="small muted">Se usa caña y calidad por separado, no azúcar y calidad: azúcar = caña × calidad, y con azúcar la calidad contaría dos veces. A la estabilidad se le resta el ruido de parcela, medido con las repeticiones: <span id="q3Ruido"></span></p>
+  </div>
+
+  <div class="read" style="margin-top:28px">
+    <article class="finding">
+      <h3>No existe la variedad que gane en todo</h3>
+      <p>Correlaciones entre indicadores en las 23 variedades. Pasá el cursor por cada una.</p>
+      <div class="chips" id="q3Corr"></div>
+      <div class="meaning"><div><b>Qué significa</b>Hay un compromiso entre tonelaje y calidad; la calidad viene con longevidad y la longevidad con estabilidad. Los grupos van a reflejar esos compromisos.</div><div class="decide"><b>Qué decidimos</b>Medir caña y calidad por separado y mirar la longevidad: dos variedades con el mismo azúcar en plantía pueden terminar muy distintas en la soca 3.</div></div>
+    </article>
+  </div>
+
+  <div class="read stack" style="margin-top:36px">
+    <h3>El mapa: caña contra calidad</h3>
+    <p>Cada punto es una variedad; las líneas punteadas unen variedades con el mismo azúcar en plantía. El tamaño es la longevidad. Tocá un grupo para resaltarlo.</p>
+    <div class="chips" id="q3Legend"></div>
+  </div>
+  <div class="figure figure-wide"><div class="chart" id="chMap"></div></div>
+  <div class="figure figure-wide"><div class="scen" id="q3Groups" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))"></div></div>
+
+  <div class="read" style="margin-top:36px">
+    <article class="finding">
+      <h3>Los grupos son una forma útil de partir un continuo, no tipos naturales</h3>
+      <p id="q3NatIntro"></p>
+      <div class="chart" id="chSil"></div><div class="chart" id="chAri"></div>
+      <div class="meaning"><div><b>Qué significa</b><span id="q3NatMean"></span></div><div class="decide"><b>Qué decidimos</b>Elegir el número de grupos por reproducibilidad, decirlo tal cual, y medir la certeza de cada asignación. Para una variedad del borde manda la pregunta 1, no la etiqueta.</div></div>
+    </article>
+    <article class="finding">
+      <h3>¿Qué tan firme es cada asignación?</h3>
+      <p>En qué % de las 300 réplicas (ensayos remuestreados) cada variedad cae junto con los demás miembros de su grupo.</p>
+      <div class="tbl-wrap" id="q3Cert"></div>
+      <p class="small muted" id="q3CertNote"></p>
+    </article>
+  </div>
+
+  <div class="read stack" style="margin-top:36px">
+    <h3>Evaluación gerencial</h3>
+    <div class="gcards" id="gerencial3"></div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="datos-propios" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">10 · Pregunta 4 resuelta</span>
+    <h2>Decidir con datos propios</h2>
+    <p class="lede">Qué datos empezar a capturar y cómo diseñar los ensayos para que, en pocas zafras, la recomendación de variedades y de renovación salga de los datos del ingenio y no de Louisiana.</p>
+  </div>
+  <div class="figure read"><ol class="next-list">
+    <li><strong>Lo que ya existe.</strong> Todo ingenio registra cada corte de cada lote. Con eso se audita desde la primera zafra cuándo se renovó cada lote y si fue a tiempo, y cuánto pesa la distancia al ingenio.</li>
+    <li><strong>El ambiente de cada lote.</strong> La costa sur no es Louisiana: estrato, suelo, lluvia, viento y drenaje cambian a lo largo de la franja cañera. Se agrupan los lotes en zonas de manejo.</li>
+    <li><strong>Evidencia causal.</strong> En los datos comerciales cada variedad está donde alguien decidió sembrarla. Para comparar variedades en igualdad de condiciones hacen falta ensayos propios.</li>
+  </ol></div>
+
+  <div class="read stack" style="margin-top:36px">
+    <h3>La costa sur, según fuentes públicas</h3>
+    <p>CENGICAÑA divide la zona cañera en cuatro estratos altitudinales con condiciones muy distintas.</p>
+  </div>
+  <div class="figure read tbl-wrap"><table class="rank" style="min-width:520px"><thead><tr><th class="l">Estrato</th><th>Altitud (msnm)</th><th>Lluvia (mm/año)</th><th>Viento (km/h)</th></tr></thead><tbody>
+    <tr><td class="l">Litoral</td><td>&lt; 40</td><td>1,500</td><td>8.7</td></tr>
+    <tr><td class="l">Bajo</td><td>40-100</td><td>1,900</td><td>6.2</td></tr>
+    <tr><td class="l">Medio</td><td>100-300</td><td>3,700</td><td>6.8</td></tr>
+    <tr><td class="l">Alto</td><td>&gt; 300</td><td>4,100</td><td>5.2</td></tr>
+  </tbody></table></div>
+  <div class="read stack" style="margin-top:14px">
+    <ul class="done-list">
+      <li>Suelos: mollisoles 40 % (litoral y planicie), andisoles 26 % (zonas altas, volcánicos), entisoles 16 % (aluviales, subsuelo arenoso). El segundo grupo de manejo más extenso son los entisoles con capas de arena (19.9 %).</li>
+      <li>CENGICAÑA cruza 13 grupos de suelo con el balance hídrico y obtiene 44 zonas agroecológicas (primera aproximación).</li>
+      <li>Con datos comerciales de un ingenio guatemalteco, la mejor variedad cambia según el estrato y el suelo: la interacción variedad × ambiente existe aquí también.</li>
+      <li>CP72-2086, el "caballito de batalla": la más sembrada durante años (33.4 % del área en 2015-16), superada por la guatemalteca CG02-163 en 2020-21 (25.4 % contra 23.1 %).</li>
+    </ul>
+    <p class="small muted">Fuentes: Melgar et al. (eds.), <em>El Cultivo de la Caña de Azúcar en Guatemala</em>, CENGICAÑA 2012, cap. II · Ralda (2015), Zamorano · censos varietales de CENGICAÑA publicados por Prensa Libre (2016) y ASAZGUA (2021).</p>
+    <h3 style="margin-top:14px">Hipótesis de experto, a confirmar con datos del ingenio</h3>
+  </div>
+  <div class="figure figure-wide"><div class="scen" id="q4Hyp" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))"></div></div>
+
+  <div class="read stack" style="margin-top:36px">
+    <h3>Qué capturar: un modelo de datos mínimo en PostgreSQL</h3>
+    <p>11 tablas y una vista (<code>sql/esquema_campo.sql</code>). Cada regla responde a un error real del dataset de Louisiana. Probado con PostgreSQL 16: el esquema rechaza los cuatro errores.</p>
+    <div class="chips" id="q4Rules"></div>
+  </div>
+  <div class="figure figure-wide"><div class="feat" id="q4Tables"></div></div>
+
+  <div class="read" style="margin-top:28px">
+    <article class="finding">
+      <h3>Auditoría de renovaciones con los registros que ya existen</h3>
+      <p>Se reconstruye la historia de cada lote (plantía → socas → renovación) y cada ciclo se compara con el óptimo de la pregunta 1: <b>4 cortes</b>, con tolerancia de ±1 porque el óptimo es plano. Para cada lote en pie, una regla propia: mantener la soca mientras el próximo corte deje más que el promedio anual de un ciclo nuevo en ese mismo lote.</p>
+      <div class="warn">Datos <b>simulados</b> para probar el método: no describen a ningún ingenio.</div>
+      <div class="timeline-wrap" id="q4Audit"></div>
+      <div class="bigstat" id="q4AuditStats"></div>
+      <div class="meaning"><div><b>Qué significa</b>Desde la primera zafra, con datos que ya existen, se puede saber qué lotes están vencidos, cuáles se renuevan de más y cuáles nunca se renovaron.</div><div class="decide"><b>Qué decidimos</b>Hacer obligatorio el número de corte (o la siembra a la que pertenece cada cosecha): sin él, en la simulación la auditoría no vio una de cada cuatro renovaciones (las que repiten variedad).</div></div>
+    </article>
+
+    <article class="finding">
+      <h3>La distancia al ingenio: calculadora</h3>
+      <p>La distancia encarece el corte, alce y transporte por tonelada y, muchas veces, la renovación. Mové ambos costos: el cálculo usa las curvas de la pregunta 1 en unidades métricas.</p>
+      <div class="ctrl">
+        <label>Corte, alce y transporte: <strong id="dCostLbl"></strong><input type="range" id="dCost" min="10" max="60" step="0.01" value="15.43"></label>
+        <label>Costo de renovar: <strong id="dRenLbl"></strong><input type="range" id="dRen" min="1500" max="4500" step="1" value="2718"></label>
+      </div>
+      <div class="kpis" id="dKpis" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))"></div>
+      <div class="chart" id="chDist"></div>
+      <div class="meaning"><div><b>Qué significa</b><span id="dMean"></span></div><div class="decide"><b>Qué decidimos</b>Registrar costo real y distancia por lote, y calcular el ciclo óptimo por zona de costo, no uno solo para todo el ingenio.</div></div>
+    </article>
+
+    <article class="finding">
+      <h3>¿Cuántas fincas hacen falta en los ensayos? Calculadora</h3>
+      <p>La variabilidad se midió con los ensayos de Louisiana. El factor "Guatemala" multiplica la interacción variedad × ambiente, que aquí probablemente sea mayor (cuatro estratos y de 1,500 a 4,100 mm de lluvia).</p>
+      <div class="ctrl">
+        <label>Ventaja real a detectar: <strong id="pDeltaLbl"></strong><input type="range" id="pDelta" min="5" max="20" step="0.5" value="10"></label>
+        <label>Años de cosecha: <strong id="pYLbl"></strong><input type="range" id="pY" min="2" max="8" step="1" value="4"></label>
+        <label>Repeticiones: <strong id="pRLbl"></strong><input type="range" id="pR" min="1" max="6" step="1" value="3"></label>
+        <label>Interacción en Guatemala: <strong id="pFLbl"></strong><input type="range" id="pF" min="1" max="3" step="0.25" value="1.5"></label>
+      </div>
+      <div class="kpis" id="pKpis" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))"></div>
+      <div class="chart" id="chPow"></div>
+      <div class="meaning"><div><b>Qué significa</b>Con el mismo número de parcelas extra, sumar fincas da <span id="pRatio" style="font-weight:600">2.6 veces</span> la potencia que suma una repetición (2.6 con la interacción de Louisiana; más cuanto mayor sea la de Guatemala): el error de parcela se promedia, la interacción variedad × ambiente no. Ventajas de 5 % no se separan del ruido con ningún tamaño razonable; con datos propios se decide sobre ventajas de ~10 % o más.</div><div class="decide"><b>Qué decidimos</b>20 fincas por cohorte, 5 por estrato (con 6 años de cosecha: 87 % de potencia si la interacción es 1.5 veces la de Louisiana, 78 % si es el doble); una cohorte nueva cada año, seguida hasta la soca 3-4; testigos fijos y estables (CP72-2086, CG02-163 y la comercial principal del ingenio).</div></div>
+    </article>
+  </div>
+
+  <div class="read stack" style="margin-top:28px">
+    <h3>Hoja de ruta</h3>
+    <ol class="steps" id="q4Road" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))"></ol>
+  </div>
+
+  <div class="read stack" style="margin-top:36px">
+    <h3>Evaluación gerencial</h3>
+    <div class="gcards" id="gerencial4"></div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="cierre" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">11 · Cierre de la Serie I</span>
+    <h2>Lo que la Serie I le dice a la Gerencia Agrícola</h2>
+    <p class="lede">Cuatro preguntas, una misma forma de mirar los datos: comparar cada variedad contra testigos fijos en el mismo campo y año, medir su longevidad y poner todo en dinero con su certeza.</p>
+  </div>
+  <div class="figure figure-wide"><div class="gcards" id="cierreCards"></div></div>
+  <div class="read stack" style="margin-top:26px">
+    <h3>Qué se traslada al ingenio y qué no</h3>
+    <ul class="done-list">
+      <li><b>Se traslada el método</b>: testigos fijos, ventaja dentro del mismo ensayo, longevidad, economía del ciclo con su precio de equilibrio, certeza por remuestreo, validación por años y perfiles reproducibles.</li>
+      <li><b>No se trasladan las variedades ni los números</b>: son de Louisiana, con heladas y ciclos cortos. Las cifras del ingenio saldrán de sus registros y de sus ensayos (pregunta 4).</li>
+      <li><b>Lo que queda pendiente</b>: el escenario 3 de la pregunta 2 (variedad nueva con historia de etapas 3-4), documentado en el README, y la interacción variedad × zona con datos propios.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="glosario" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">12 · Glosario</span>
+    <h2>Las palabras del campo y del dataset</h2>
+    <dl class="glossary">
+      <div><dt>Plantía</dt><dd>Primera cosecha después de sembrar. En el dataset, <code>CROP = 0</code>.</dd></div>
+      <div><dt>Soca (retoño)</dt><dd>Cada rebrote de la cepa después de un corte. <code>CROP = 1</code> a <code>4</code>.</dd></div>
+      <div><dt>Cepa</dt><dd>La base de la planta que queda bajo tierra y rebrota.</dd></div>
+      <div><dt>Zafra</dt><dd>Temporada de cosecha y molienda.</dd></div>
+      <div><dt>Renovación</dt><dd>Arar el lote y volver a sembrar. Reinicia el ciclo en plantía.</dd></div>
+      <div><dt>Barbecho</dt><dd>Tiempo en que el lote queda sin caña antes de resembrar.</dd></div>
+      <div><dt>Clon</dt><dd>Un genotipo de caña candidato a variedad (<code>CLONE</code>). Si se libera comercialmente, pasa a ser una variedad.</dd></div>
+      <div><dt>Testigo</dt><dd>Variedad comercial conocida que se siembra en cada ensayo como referencia.</dd></div>
+      <div><dt>Etapa</dt><dd>Nivel del programa de selección (<code>STAGE</code> 2 a 5). A más etapa, menos clones y más evaluación.</dd></div>
+      <div><dt>Ensayo</dt><dd>Etapa × localidad × año de siembra. Se sigue en plantía y socas.</dd></div>
+      <div><dt>Repetición</dt><dd>Copia de la misma parcela dentro del ensayo (<code>REP</code>), para medir el ruido.</dd></div>
+      <div><dt><code>TCA</code></dt><dd>Toneladas cortas de caña por acre. ×2.24 = toneladas métricas por hectárea (TCH).</dd></div>
+      <div><dt><code>TRS_TON</code></dt><dd>Libras de azúcar recuperable por tonelada de caña: la calidad de la caña. ×0.5 = kg por tonelada métrica.</dd></div>
+      <div><dt><code>T_SPACRE</code></dt><dd>Libras de azúcar por acre = TCA × TRS. Es lo que se quiere maximizar. ×0.00112 = t de azúcar por hectárea (TAH).</dd></div>
+      <div><dt><code>POPN</code> y <code>MSTWT</code></dt><dd>Tallos por acre y peso medio del tallo (lb). TCA = POPN × MSTWT / 2000.</dd></div>
+      <div><dt><code>FIBER</code></dt><dd>% de fibra en la caña. Más fibra = más bagazo para generar energía.</dd></div>
+      <div><dt>Testigo núcleo</dt><dd>Los 4 testigos presentes en etapa 5 los 12 años: la regla fija contra la que se compara todo.</dd></div>
+      <div><dt>Margen promedio anual</dt><dd>Lo que deja un ciclo completo (plantía + socas, menos renovación) dividido entre sus años.</dd></div>
+      <div><dt>Ciclo óptimo</dt><dd>Número de cortes antes de renovar que da el mejor margen promedio anual.</dd></div>
+      <div><dt>Precio de equilibrio</dt><dd>Precio del azúcar con el que el mejor ciclo de una variedad apenas cubre todos sus costos.</dd></div>
+      <div><dt>Bootstrap</dt><dd>Repetir el análisis muchas veces remuestreando ensayos completos, para ver cuánto cambian los resultados.</dd></div>
+      <div><dt>IC 90 %</dt><dd>Rango donde cayó el 90 % de los resultados del bootstrap.</dd></div>
+      <div><dt>Validación por años</dt><dd>Entrenar con las zafras anteriores y probar con la siguiente, como se usaría el modelo en la realidad.</dd></div>
+      <div><dt>Fuga de información</dt><dd>Usar en un modelo un dato que no existe al momento de predecir (p. ej. TCA del mismo año). Hace que el error parezca menor de lo que es.</dd></div>
+      <div><dt>Encogimiento</dt><dd>Acercar al promedio una estimación con poca evidencia. Una variedad con 3 parcelas buenas no es necesariamente buena.</dd></div>
+      <div><dt>Ridge</dt><dd>Regresión lineal con una penalización que estabiliza los coeficientes. Se explica con sus coeficientes.</dd></div>
+      <div><dt>Random Forest y XGBoost</dt><dd>Conjuntos de árboles de decisión. Encuentran interacciones, pero son más difíciles de explicar.</dd></div>
+      <div><dt>MAE</dt><dd>Error absoluto medio: cuánto se equivoca el modelo en promedio, en lb de azúcar por acre.</dd></div>
+      <div><dt>ρ de Spearman</dt><dd>Qué tan bien coincide el orden predicho con el real. 1 = orden perfecto, 0 = al azar.</dd></div>
+      <div><dt>Banda de error</dt><dd>Rango donde se espera el valor real. Se calcula con los errores de zafras anteriores; en validación cubrió ~3 de cada 4 casos.</dd></div>
+      <div><dt>Silueta</dt><dd>Qué tan separados quedan los grupos. Se compara contra datos barajados para saber si hay grupos de verdad.</dd></div>
+      <div><dt>Reproducibilidad (ARI)</dt><dd>Cuánto se parece la agrupación al repetirla con ensayos remuestreados. 1 = idéntica, 0 = al azar.</dd></div>
+      <div><dt>Jaccard de Hennig</dt><dd>Qué tan firme es un grupo al remuestrear: ≥ 0.75 firme, 0.6-0.75 con bordes difusos.</dd></div>
+      <div><dt>Estrato altitudinal</dt><dd>Clasificación de CENGICAÑA de la zona cañera: litoral (&lt; 40 msnm), bajo, medio y alto (&gt; 300 msnm).</dd></div>
+      <div><dt>Distancia de Gower</dt><dd>Forma de medir qué tan parecidos son dos lotes cuando se mezclan números (altitud, lluvia) y categorías (suelo, drenaje).</dd></div>
+      <div><dt>Potencia</dt><dd>Probabilidad de que un ensayo detecte una ventaja que sí existe. Se busca al menos 80 %.</dd></div>
+      <div><dt>Componentes de varianza</dt><dd>Cuánto de la diferencia entre variedades cambia por finca, por año o por lote-año, y cuánto es error de parcela.</dd></div>
+      <div><dt>Índice ambiental</dt><dd>Rendimiento de los testigos en una finca y año: mide qué tan bueno fue ese ambiente.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<footer class="wrap"><div class="read">Todas las cifras de este documento salen de <code>notebooks/01_campo_eda.ipynb</code>, <code>notebooks/02_campo_recomendacion.ipynb</code> a <code>notebooks/05_campo_datos_propios.ipynb</code> y <code>src/</code>. Las calculadoras se recalculan con las mismas fórmulas de <code>src/campo_economia.py</code> y con el modelo guardado en <code>outputs/models/serie1_modelo_p2.json</code>. Datos: Louisiana Sugarcane yield data (2010-2021), USDA-ARS / Ag Data Commons.</div></footer>
+
+<script>
+window.addEventListener("error", e => { const b = document.getElementById("jsErr"); if (b) { b.hidden = false; b.querySelector("span").textContent += (e.message || "error") + ". "; } });
+// algunos visores integrados reemplazan console por un objeto incompleto: nunca depender de él
+const note = (lvl, ...a) => { try { const f = typeof console !== "undefined" && console[lvl]; if (typeof f === "function") f.apply(console, a); } catch (e) {} };
+const D = /*__DATA__*/null;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = (v, d = 0) => Number(v).toLocaleString("es-GT", { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (v, d = 0) => fmt(v * 100, d) + " %";
+const money = (v, pre = "") => (v < 0 ? "−" : "") + pre + "$" + fmt(Math.abs(v));
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs = {}, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function h(tag, attrs = {}, html = "") { const e = document.createElement(tag); for (const k in attrs) e.setAttribute(k, attrs[k]); e.innerHTML = html; return e; }
+
+/* ---------- tooltip ---------- */
+const tip = document.getElementById("tip");
+function bindTip(node, html) {
+  node.classList.add("hit"); node.setAttribute("tabindex", "0");
+  const show = ev => { tip.innerHTML = html; tip.style.opacity = 1; move(ev); };
+  const move = ev => {
+    const r = node.getBoundingClientRect();
+    const x = ev && ev.clientX != null ? ev.clientX : r.left + r.width / 2;
+    const y = ev && ev.clientY != null ? ev.clientY : r.top;
+    const w = tip.offsetWidth, hh = tip.offsetHeight;
+    tip.style.left = Math.min(window.innerWidth - w - 8, Math.max(8, x - w / 2)) + "px";
+    tip.style.top = Math.max(8, y - hh - 12) + "px";
+  };
+  node.addEventListener("mouseenter", show); node.addEventListener("mousemove", move);
+  node.addEventListener("focus", () => show(null));
+  node.addEventListener("mouseleave", () => tip.style.opacity = 0); node.addEventListener("blur", () => tip.style.opacity = 0);
+}
+
+/* ---------- helpers de gráficas ---------- */
+function svgBox(container, w, hgt) { const s = el("svg", { viewBox: `0 0 ${w} ${hgt}`, role: "img" }); container.appendChild(s); return s; }
+function title(container, text, legend) {
+  container.appendChild(h("div", { class: "chart-title" }, text));
+  if (legend) { const L = h("div", { class: "legend" }); legend.forEach(([lab, color, line]) => L.appendChild(h("span", {}, `<i class="${line ? "line" : ""}" style="background:${color}"></i>${lab}`))); container.appendChild(L); }
+}
+function niceTicks(min, max, n = 5) {
+  const span = max - min, step0 = span / n, mag = Math.pow(10, Math.floor(Math.log10(step0)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => span / s <= n) || 10 * mag;
+  const out = []; for (let v = Math.ceil(min / step) * step; v <= max + 1e-9; v += step) out.push(+v.toFixed(10)); return out;
+}
+
+/* barras horizontales */
+function hbars(id, rows, { titleText, valueFmt, max, colorFn, labelW = 190, barH = 22, gap = 14, w = 680 }) {
+  const c = document.getElementById(id); title(c, titleText);
+  const H = rows.length * (barH + gap) + 30, s = svgBox(c, w, H), x0 = labelW, x1 = w - 70;
+  const M = max ?? Math.max(...rows.map(r => r.v));
+  const sx = v => x0 + (v / M) * (x1 - x0);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(0, M, 4).forEach(t => { el("line", { x1: sx(t), x2: sx(t), y1: 0, y2: H - 22 }, g); const tx = el("text", { x: sx(t), y: H - 6, "text-anchor": "middle", class: "lab" }, s); tx.textContent = valueFmt(t); });
+  rows.forEach((r, i) => {
+    const y = i * (barH + gap) + 4;
+    const lab = el("text", { x: x0 - 10, y: y + barH / 2 + 4, "text-anchor": "end", class: "lab" }, s); lab.textContent = r.label;
+    const wpx = Math.max(2, sx(r.v) - x0);
+    const p = el("path", { d: `M${x0},${y} h${wpx - 4} a4,4 0 0 1 4,4 v${barH - 8} a4,4 0 0 1 -4,4 h${-(wpx - 4)} z`, fill: colorFn ? colorFn(r) : css("--cane") }, s);
+    bindTip(p, r.tip || `<b>${r.label}</b><br>${valueFmt(r.v)}`);
+    const v = el("text", { x: x0 + wpx + 8, y: y + barH / 2 + 4, class: "val" }, s); v.textContent = valueFmt(r.v);
+  });
+  el("line", { x1: x0, x2: x0, y1: 0, y2: H - 22, class: "base" }, s);
+}
+
+/* columnas verticales */
+function vbars(id, rows, { titleText, valueFmt, yLabel, w = 680, hgt = 260, color }) {
+  const c = document.getElementById(id); title(c, titleText);
+  const s = svgBox(c, w, hgt), L = 56, R = 16, T = 20, B = 34;
+  const M = Math.max(...rows.map(r => r.v)) * 1.12;
+  const sy = v => hgt - B - (v / M) * (hgt - B - T);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(0, M, 4).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); const tx = el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s); tx.textContent = fmt(t); });
+  const band = (w - L - R) / rows.length, bw = Math.min(24, band * 0.5);
+  rows.forEach((r, i) => {
+    const cx = L + band * i + band / 2, y = sy(r.v), hh = hgt - B - y;
+    const p = el("path", { d: `M${cx - bw / 2},${hgt - B} v${-(hh - 4)} a4,4 0 0 1 4,-4 h${bw - 8} a4,4 0 0 1 4,4 v${hh - 4} z`, fill: color || css("--cane") }, s);
+    bindTip(p, r.tip || `<b>${r.label}</b><br>${valueFmt(r.v)}`);
+    const v = el("text", { x: cx, y: y - 7, "text-anchor": "middle", class: "val" }, s); v.textContent = valueFmt(r.v);
+    const lb = el("text", { x: cx, y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s); lb.textContent = r.label;
+  });
+  el("line", { x1: L, x2: w - R, y1: hgt - B, y2: hgt - B, class: "base" }, s);
+  if (yLabel) { const yl = el("text", { x: 12, y: hgt / 2, transform: `rotate(-90 12 ${hgt / 2})`, "text-anchor": "middle", class: "lab" }, s); yl.textContent = yLabel; }
+}
+
+/* líneas */
+function lines(id, xs, series, { titleText, xLabels, yMin, yMax, yFmt, yLabel, w = 680, hgt = 300, band, endLabels = true }) {
+  const c = document.getElementById(id); title(c, titleText, series.map(sr => [sr.name, sr.color, true]));
+  const s = svgBox(c, w, hgt), L = 58, R = endLabels ? 120 : 20, T = 14, B = 34;
+  const sx = i => L + (i / (xs.length - 1)) * (w - L - R), sy = v => hgt - B - ((v - yMin) / (yMax - yMin)) * (hgt - B - T);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(yMin, yMax, 5).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); const tx = el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s); tx.textContent = yFmt(t); });
+  xs.forEach((x, i) => { const tx = el("text", { x: sx(i), y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s); tx.textContent = xLabels ? xLabels[i] : x; });
+  if (band) { let d = band.lo.map((v, i) => `${i ? "L" : "M"}${sx(i)},${sy(v)}`).join(" "); d += " " + band.hi.map((v, i) => `L${sx(band.hi.length - 1 - i)},${sy(band.hi[band.hi.length - 1 - i])}`).join(" ") + " Z"; el("path", { d, fill: band.color, opacity: 0.12 }, s); }
+  series.forEach(sr => {
+    el("path", { d: sr.values.map((v, i) => `${i ? "L" : "M"}${sx(i)},${sy(v)}`).join(" "), fill: "none", stroke: sr.color, "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }, s);
+    sr.values.forEach((v, i) => { const cdot = el("circle", { cx: sx(i), cy: sy(v), r: 4.5, fill: sr.color, stroke: css("--surface"), "stroke-width": 2 }, s); bindTip(cdot, `<b>${sr.name}</b><br>${xLabels ? xLabels[i] : xs[i]}: ${yFmt(v)}${sr.extra ? sr.extra(i) : ""}`); });
+    if (endLabels) { const last = sr.values.length - 1; const t = el("text", { x: sx(last) + 10, y: sy(sr.values[last]) + 4 + (sr.dy || 0), class: "val" }, s); t.textContent = yFmt(sr.values[last]); }
+  });
+  if (yLabel) { const yl = el("text", { x: 12, y: (hgt - B) / 2, transform: `rotate(-90 12 ${(hgt - B) / 2})`, "text-anchor": "middle", class: "lab" }, s); yl.textContent = yLabel; }
+}
+
+/* ===================== contenido ===================== */
+// ciclo del hero
+(function () {
+  const g = document.getElementById("cycleGrid"), lab = document.getElementById("cycleLabels");
+  const names = ["Plantía", "Soca 1", "Soca 2", "Soca 3", "Soca 4"];
+  D.decline.adj.forEach((v, i) => {
+    const col = h("div", { class: "cyc" });
+    col.appendChild(h("div", { class: "pct" }, Math.round(v * 100) + "%"));
+    const b = h("div", { class: "bar" }); b.style.height = (v * 150) + "px"; col.appendChild(b);
+    bindTip(b, `<b>${names[i]}</b><br>${pct(v)} del azúcar de la plantía<br>IC 95 %: ${pct(D.decline.lo[i])} – ${pct(D.decline.hi[i])}`);
+    g.appendChild(col); lab.appendChild(h("div", {}, `<b>${names[i]}</b>${i === 0 ? "corte 0" : "corte " + i}`));
+  });
+  const col = h("div", { class: "cyc renew" }); col.appendChild(h("div", { class: "pct", style: "color:var(--sugar)" }, "↺"));
+  const b = h("div", { class: "bar" }); b.style.height = "150px"; col.appendChild(b); bindTip(b, "<b>Renovar</b><br>Se ara y se resiembra: US$1,100/acre y el lote vuelve a plantía.");
+  g.appendChild(col); lab.appendChild(h("div", {}, "<b>Renovar</b>volver a sembrar"));
+})();
+
+// unidades
+document.getElementById("unitChips").innerHTML = [
+  "1 acre = 0.405 ha", "1 t corta = 0.907 t métricas", "TCA × 2.24 = TCH (t/ha)", "TRS lb/t × 0.5 = kg/t",
+  `${fmt(D.base.sugar)} lb azúcar/acre ≈ ${fmt(D.base.sugar * 0.0011209, 1)} t/ha (TAH)`
+].map(t => `<span class="chip">${t}</span>`).join("");
+
+// calculadora
+(function () {
+  const price = document.getElementById("price"), fallow = document.getElementById("fallow");
+  const box = document.getElementById("chartCalc");
+  function margins(p) {
+    return D.q1.core.map((c, i) => c.sugar * p - 14 * (c.sugar / c.trs) - 350 - (i === 0 ? 1100 : 0));
+  }
+  function render() {
+    const p = +price.value, f = fallow.checked ? 1 : 0;
+    document.getElementById("priceLbl").textContent = "US$" + p.toFixed(2);
+    const m = margins(p); let cum = 0;
+    const avg = m.map((v, i) => { cum += v; return cum / (i + 1 + f); });
+    const best = avg.indexOf(Math.max(...avg));
+    document.getElementById("bestN").textContent = (best + 1) + (best === 0 ? " corte" : " cortes");
+    document.getElementById("bestTxt").textContent = avg[best] >= 0
+      ? `Plantía + ${best} soca${best === 1 ? "" : "s"} · ${money(avg[best], "US")} por acre al año`
+      : `A este precio ningún ciclo cubre costos. El que menos pierde es plantía + ${best} socas (${money(avg[best], "US")} por acre al año).`;
+    box.innerHTML = "";
+    const w = 640, hgt = 300, L = 64, R = 16, T = 26, B = 52;
+    title(box, "Margen promedio por acre al año, según cuántos cortes dure el ciclo");
+    const s = svgBox(box, w, hgt);
+    const lo = Math.min(0, ...avg) * 1.15, hi = Math.max(...avg, 100) * 1.18;
+    const sy = v => hgt - B - ((v - lo) / (hi - lo)) * (hgt - B - T);
+    const g = el("g", { class: "grid" }, s);
+    niceTicks(lo, hi, 5).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); const tx = el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s); tx.textContent = money(t); });
+    const band = (w - L - R) / 5, bw = 26;
+    avg.forEach((v, i) => {
+      const cx = L + band * i + band / 2, y0 = sy(0), y = sy(v), top = Math.min(y, y0), hh = Math.max(2, Math.abs(y - y0));
+      const r = el("rect", { x: cx - bw / 2, y: top, width: bw, height: hh, rx: 4, fill: i === best ? css("--cane") : css("--neutral") }, s);
+      bindTip(r, `<b>Ciclo de ${i + 1} corte${i ? "s" : ""}</b><br>Margen promedio: ${money(v, "US")}/acre/año<br>Margen de ese corte: ${money(m[i], "US")}`);
+      const tv = el("text", { x: cx, y: v >= 0 ? y - 7 : sy(0) - 7, "text-anchor": "middle", class: "val" }, s); tv.textContent = money(v);
+      const tl = el("text", { x: cx, y: hgt - B + 20, "text-anchor": "middle", class: "lab" }, s); tl.textContent = (i + 1) + (i ? " cortes" : " corte");
+      const t2 = el("text", { x: cx, y: hgt - B + 36, "text-anchor": "middle", class: "lab" }, s); t2.textContent = i === 0 ? "solo plantía" : "hasta soca " + i;
+    });
+    el("line", { x1: L, x2: w - R, y1: sy(0), y2: sy(0), class: "base" }, s);
+  }
+  price.addEventListener("input", render); fallow.addEventListener("change", render); render();
+})();
+
+// embudo
+(function () {
+  const f = document.getElementById("funnel"), maxC = Math.max(...D.funnel.map(r => r.clones));
+  const desc = { 2: "Estación experimental, parcelas sin repetir", 3: "Estaciones, 2 repeticiones", 4: "Más localidades, 2 repeticiones", 5: "Fincas de productores, 3 repeticiones" };
+  D.funnel.forEach(r => {
+    const row = h("div", { class: "frow" });
+    row.appendChild(h("div", { class: "st" }, `Etapa ${r.stage}<span>${r.rows.toLocaleString("es-GT")} filas</span>`));
+    const right = h("div");
+    const bar = h("div", { class: "fbar" }, `${r.clones} clones`); bar.style.width = Math.max(18, (r.clones / maxC) * 100) + "%";
+    bindTip(bar, `<b>Etapa ${r.stage}</b><br>${r.clones} clones · ${r.locs} localidades · ${r.trials} ensayos<br>Cortes medidos: hasta ${r.cropmax === 0 ? "plantía" : "soca " + r.cropmax}`);
+    right.appendChild(bar);
+    right.appendChild(h("div", { class: "fmeta" }, `<span class="chip cane">${desc[r.stage]}</span><span class="chip">${r.locs} localidades</span><span class="chip">${r.trials} ensayos</span><span class="chip">hasta ${r.cropmax === 0 ? "plantía" : "soca " + r.cropmax}</span>`));
+    row.appendChild(right); f.appendChild(row);
+  });
+})();
+document.getElementById("checkChips").innerHTML = D.checks.map(c => `<span class="chip mono">${c}</span>`).join("");
+
+// cronograma de ensayos
+(function () {
+  const years = [2015, 2016, 2017, 2018, 2019, 2020], cohorts = [2015, 2016, 2017, 2018];
+  const lab = ["Plantía", "Soca 1", "Soca 2", "Soca 3"];
+  let html = `<table class="tl" aria-label="Ensayos sembrados en distintos años en una misma finca"><thead><tr><th class="row">Sembrado en ↓ · Año de cosecha →</th>${years.map(y => `<th>${y}</th>`).join("")}</tr></thead><tbody>`;
+  cohorts.forEach(c => {
+    html += `<tr><th class="row">${c}</th>`;
+    years.forEach(y => { const k = y - c; html += (k >= 0 && k <= 3) ? `<td class="c${k}${y === 2018 ? " hl" : ""}">${lab[k]}</td>` : `<td class="empty"></td>`; });
+    html += "</tr>";
+  });
+  document.getElementById("timeline").innerHTML = html + "</tbody></table>";
+})();
+
+// fila de ejemplo
+(function () {
+  const r = D.row;
+  document.getElementById("nRows").textContent = fmt(D.n_raw);
+  const F = [
+    ["CLONE", r.CLONE, "El clon (candidato o variedad)."], ["YEAR", r.YEAR, "Año de cosecha."], ["STAGE", r.STAGE, "Etapa del programa (2 a 5)."],
+    ["LOC", r.LOC, "Localidad: aquí, una finca de productor."], ["CROP", r.CROP, "Número de corte: 0 = plantía, 1 = soca 1…"], ["REP", r.REP, "Repetición dentro del ensayo."],
+    ["TCA", fmt(r.TCA, 1), "Toneladas de caña por acre: cantidad."], ["TRS_TON", fmt(r.TRS_TON, 1), "Libras de azúcar por tonelada: calidad."], ["T_SPACRE", fmt(r.T_SPACRE, 0), "Libras de azúcar por acre: el resultado."],
+    ["POPN", fmt(r.POPN, 0), "Tallos por acre."], ["MSTWT", fmt(r.MSTWT, 2), "Peso medio del tallo, en libras."], ["FIBER", r.FIBER == null ? "vacío" : fmt(r.FIBER, 1), "% de fibra. Casi siempre vacío en etapa 5."],
+  ];
+  const card = document.getElementById("rowCard");
+  card.appendChild(h("div", { class: "row-raw" }, D.row_raw));
+  const grid = h("div", { class: "fields" });
+  F.forEach(([k, v, d]) => grid.appendChild(h("div", { class: "field" + (k === "T_SPACRE" ? " target" : "") }, `<div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div>`)));
+  card.appendChild(grid);
+  document.getElementById("eqSugar").innerHTML = `<div class="box">${fmt(r.TCA, 1)}<small>TCA · t/acre</small></div><span class="op">×</span><div class="box">${fmt(r.TRS_TON, 1)}<small>TRS · lb/t</small></div><span class="op">=</span><div class="box res">${fmt(r.TCA * r.TRS_TON, 0)}<small>lb azúcar/acre</small></div><span class="small muted">El archivo dice ${fmt(r.T_SPACRE, 0)}. Cuadra.</span>`;
+  document.getElementById("eqCane").innerHTML = `<div class="box">${fmt(r.POPN, 0)}<small>POPN · tallos/acre</small></div><span class="op">×</span><div class="box">${fmt(r.MSTWT, 2)}<small>MSTWT · lb/tallo</small></div><span class="op">÷ 2000 =</span><div class="box res">${fmt(r.POPN * r.MSTWT / 2000, 1)}<small>t caña/acre</small></div><span class="small muted">El archivo dice ${fmt(r.TCA, 1)}. Cuadra.</span>`;
+})();
+
+// hallazgos · el archivo
+document.getElementById("statCorrupt").innerHTML = `<div><span class="n">${fmt(D.corrupt.n)}</span><span class="l">filas partidas</span></div><div><span class="n">${pct(D.corrupt.share, 1)}</span><span class="l">del archivo</span></div><div><span class="n">2010-2019</span><span class="l">ninguna en 2020-2021</span></div>`;
+document.getElementById("diffRow").innerHTML = `<div class="bad"><span class="tag">Archivo</span>${D.corrupt.raw}</div><div class="good"><span class="tag">Reparada</span>${D.corrupt.fixed}</div>`;
+document.getElementById("statUnits").innerHTML = `<div><span class="n">${D.units.median.toFixed(4)}</span><span class="l">mediana de T_SPACRE ÷ (TCA × TRS)</span></div><div><span class="n">${fmt(D.units.off2)}</span><span class="l">filas de ${fmt(D.n_clean)} se alejan más de 2 %</span></div>`;
+document.getElementById("statPopn").innerHTML = D.popn.map(p => `<div><span class="n">${fmt(p.v, p.v < 100 ? 1 : 0)}</span><span class="l">POPN mediana ${p.y}</span></div>`).join("") + `<div><span class="n">${pct(D.fiber_cov.old, 0)} → ${pct(D.fiber_cov.new, 0)}</span><span class="l">fibra medida, 2010-19 vs 2020-21</span></div>`;
+
+// hallazgos · el diseño
+vbars("chartStage", D.stage.map(r => ({ label: "Etapa " + r.stage, v: r.tca, tip: `<b>Etapa ${r.stage}</b><br>${fmt(r.tca, 1)} t caña/acre · TRS ${fmt(r.trs, 0)} lb/t` })), { titleText: "Toneladas de caña por acre en plantía, mismas variedades testigo", valueFmt: v => fmt(v, 1), yLabel: "t/acre" });
+document.getElementById("txtInfl").textContent = `${fmt(D.infl.median, 2)} veces (${D.infl.pairs} pares)`;
+hbars("chartVar", D.anova.map(r => ({ label: r.name, v: r.pct, tip: `<b>${r.name}</b><br>${fmt(r.pct, 1)} % de la variación` })), { titleText: "% de la variación en azúcar por acre que explica cada factor (etapa 5)", valueFmt: v => fmt(v, 0) + " %", colorFn: r => r.label.startsWith("Residual") ? css("--neutral") : css("--cane"), labelW: 210 });
+(function () {
+  const ys = D.year.map(r => r.year), vs = D.year.map(r => r.v);
+  const iMin = vs.indexOf(Math.min(...vs)), iMax = vs.indexOf(Math.max(...vs));
+  lines("chartYear", ys, [{ name: "Testigos, etapa 5", color: css("--cane"), values: vs }], { titleText: `Azúcar por acre de los testigos: ${ys[iMin]} rindió ${pct(1 - vs[iMin] / vs[iMax])} menos que ${ys[iMax]}`, hgt: 260, yMin: 0, yMax: Math.ceil(Math.max(...vs) * 1.15 / 1000) * 1000, yFmt: v => fmt(v), yLabel: "lb/acre", endLabels: false });
+})();
+
+// hallazgos · las socas
+(function () {
+  const c = document.getElementById("chartSurv"); title(c, "Rendimiento en plantía relativo al promedio del ensayo", [["No continúan", css("--neutral")], ["Continúan", css("--cane")]]);
+  const w = 680, rowH = 46, hgt = D.surv.length * rowH + 36, L = 190, R = 30, s = svgBox(c, w, hgt);
+  const lo = 0.94, hi = 1.10, sx = v => L + ((v - lo) / (hi - lo)) * (w - L - R);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(lo, hi, 4).forEach(t => { el("line", { x1: sx(t), x2: sx(t), y1: 0, y2: hgt - 26 }, g); const tx = el("text", { x: sx(t), y: hgt - 8, "text-anchor": "middle", class: "lab" }, s); tx.textContent = fmt(t, 2); });
+  el("line", { x1: sx(1), x2: sx(1), y1: 0, y2: hgt - 26, class: "base" }, s);
+  D.surv.forEach((r, i) => {
+    const y = i * rowH + 20;
+    const lb = el("text", { x: L - 12, y: y + 4, "text-anchor": "end", class: "lab" }, s); lb.textContent = r.label;
+    el("line", { x1: sx(r.no), x2: sx(r.yes), y1: y, y2: y, stroke: css("--rule"), "stroke-width": 3 }, s);
+    const a = el("circle", { cx: sx(r.no), cy: y, r: 6, fill: css("--neutral"), stroke: css("--surface"), "stroke-width": 2 }, s); bindTip(a, `<b>${r.label}</b><br>No continúan: ${fmt(r.no, 3)}`);
+    const b = el("circle", { cx: sx(r.yes), cy: y, r: 6, fill: css("--cane"), stroke: css("--surface"), "stroke-width": 2 }, s); bindTip(b, `<b>${r.label}</b><br>Continúan: ${fmt(r.yes, 3)}`);
+  });
+})();
+lines("chartDecline", [0, 1, 2, 3, 4], [
+  { name: "Promedio crudo", color: css("--neutral"), values: D.decline.raw, dy: -6 },
+  { name: "Cada clon vs su plantía", color: css("--violet"), values: D.decline.within, dy: 8 },
+  { name: "Ajustada por lugar y año", color: css("--cane"), values: D.decline.adj, extra: i => `<br>IC 95 %: ${pct(D.decline.lo[i])} – ${pct(D.decline.hi[i])}<br>${fmt(D.decline.n[i])} parcelas` },
+], { titleText: "Azúcar por acre relativo a la plantía, etapa 5", xLabels: ["Plantía", "Soca 1", "Soca 2", "Soca 3", "Soca 4"], yMin: 0.5, yMax: 1.05, yFmt: v => pct(v), band: { lo: D.decline.lo, hi: D.decline.hi, color: css("--cane") } });
+
+// hallazgos · las variedades
+(function () {
+  const c = document.getElementById("chartLong"); title(c, "Rendimiento que conserva cada variedad en cada corte (1 = no cae)", [["Candidato", css("--cane")], ["Testigo", css("--violet")]]);
+  const rows = [...D.longev].sort((a, b) => b.ret - a.ret);
+  const w = 680, rowH = 22, hgt = rows.length * rowH + 40, L = 110, R = 24, s = svgBox(c, w, hgt);
+  const lo = 0.78, hi = 1.02, sx = v => L + ((v - lo) / (hi - lo)) * (w - L - R);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(lo, hi, 6).forEach(t => { el("line", { x1: sx(t), x2: sx(t), y1: 0, y2: hgt - 28 }, g); const tx = el("text", { x: sx(t), y: hgt - 10, "text-anchor": "middle", class: "lab" }, s); tx.textContent = fmt(t, 2); });
+  rows.forEach((r, i) => {
+    const y = i * rowH + 12, col = r.check ? css("--violet") : css("--cane");
+    const lb = el("text", { x: L - 10, y: y + 4, "text-anchor": "end", class: "lab", "font-family": "var(--f-mono)" }, s); lb.textContent = r.clone;
+    el("line", { x1: sx(r.lo), x2: sx(Math.min(r.hi, hi)), y1: y, y2: y, stroke: css("--rule"), "stroke-width": 3, "stroke-linecap": "round" }, s);
+    const d = el(r.check ? "rect" : "circle", r.check ? { x: sx(r.ret) - 5, y: y - 5, width: 10, height: 10, rx: 2, fill: col, stroke: css("--surface"), "stroke-width": 2 } : { cx: sx(r.ret), cy: y, r: 5.5, fill: col, stroke: css("--surface"), "stroke-width": 2 }, s);
+    bindTip(d, `<b>${r.clone}</b> (${r.check ? "testigo" : "candidato"})<br>Conserva ${pct(r.ret, 1)} por corte<br>IC 95 %: ${pct(r.lo, 1)} – ${pct(r.hi, 1)}<br>${r.n} parcelas, ${r.cuts} cortes medidos`);
+  });
+})();
+(function () {
+  const c = document.getElementById("chartEvid"); title(c, "Azúcar por acre vs testigos del mismo ensayo, según cuánta evidencia hay", [["Con socas medidas", css("--cane")], ["Solo plantía de un año", css("--violet")]]);
+  const pts = D.evid, w = 680, hgt = 330, L = 64, R = 20, T = 14, B = 40, s = svgBox(c, w, hgt);
+  const lx = v => Math.log10(v), xmin = lx(6), xmax = lx(200);
+  const ymin = -1200, ymax = 1800;
+  const sx = v => L + ((lx(v) - xmin) / (xmax - xmin)) * (w - L - R), sy = v => hgt - B - ((v - ymin) / (ymax - ymin)) * (hgt - B - T);
+  const g = el("g", { class: "grid" }, s);
+  [-1000, -500, 0, 500, 1000, 1500].forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); const tx = el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s); tx.textContent = (t > 0 ? "+" : "") + fmt(t); });
+  [10, 20, 50, 100, 200].forEach(t => { el("line", { x1: sx(t), x2: sx(t), y1: T, y2: hgt - B }, g); const tx = el("text", { x: sx(t), y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s); tx.textContent = t; });
+  const xl = el("text", { x: (L + w - R) / 2, y: hgt - 4, "text-anchor": "middle", class: "lab" }, s); xl.textContent = "Ensayos en etapa 5 (escala logarítmica)";
+  el("line", { x1: L, x2: w - R, y1: sy(0), y2: sy(0), class: "base" }, s);
+  pts.forEach(p => {
+    const col = p.only_pc ? css("--violet") : css("--cane");
+    const d = p.only_pc ? el("rect", { x: sx(p.trials) - 5, y: sy(p.d) - 5, width: 10, height: 10, rx: 2, fill: col, stroke: css("--surface"), "stroke-width": 2 }, s) : el("circle", { cx: sx(p.trials), cy: sy(p.d), r: 5.5, fill: col, stroke: css("--surface"), "stroke-width": 2 }, s);
+    bindTip(d, `<b>${p.clone}</b>${p.check ? " (testigo)" : ""}<br>${p.d >= 0 ? "+" : ""}${fmt(p.d)} lb/acre vs testigos<br>${p.trials} ensayos · ${p.years} año${p.years > 1 ? "s" : ""} · hasta ${p.last === 0 ? "plantía" : "soca " + p.last}`);
+    if (p.label) { const right = sx(p.trials) > w - 130; const t = el("text", { x: sx(p.trials) + (right ? -10 : 9), y: sy(p.d) + 4, "text-anchor": right ? "end" : "start", class: "lab", "font-family": "var(--f-mono)" }, s); t.textContent = p.clone; }
+  });
+})();
+hbars("chartTon", [
+  { label: "Valor del azúcar de 1 t de caña", v: D.ton.value, tip: `<b>Valor del azúcar</b><br>${fmt(D.ton.trs, 0)} lb/t × US$0.20 = US$${fmt(D.ton.value, 1)}` },
+  { label: "Costo de cortarla y llevarla", v: 14, tip: "<b>Corte, alce y transporte</b><br>US$14 por tonelada" },
+], { titleText: `Una tonelada de caña típica (TRS ${fmt(D.ton.trs, 0)} lb/t) vale mucho más de lo que cuesta cortarla`, max: 60, valueFmt: v => "US$" + fmt(v, 0), colorFn: r => r.label.startsWith("Costo") ? css("--neutral") : css("--cane"), labelW: 230 });
+document.getElementById("txtRho").textContent = fmt(D.rho, 2);
+
+/* ===================== Pregunta 1 ===================== */
+const Q = D.q1;
+const VARS = [...Q.vars].sort((a, b) => a.rank - b.rank);
+const VBY = Object.fromEntries(VARS.map(v => [v.clone, v]));
+const ACRE_HA = 2.471;
+function curveFor(v, mode) {
+  return Q.core.map((c, k) => {
+    const kr = (!v || mode === "lin") ? k : Math.min(k, v.last);
+    const sugar = c.sugar * Math.exp((v ? v.a : 0) + (v ? v.b : 0) * kr), trs = c.trs * (v ? v.trs_rel : 1);
+    return { sugar, trs, tca: sugar / trs };
+  });
+}
+function econ(curve, p, fallow) {
+  const m = curve.map((c, k) => c.sugar * p - 14 * c.tca - 350 - (k === 0 ? 1100 : 0));
+  let cum = 0; const avg = m.map((x, i) => { cum += x; return cum / (i + 1 + fallow); });
+  let best = 0; avg.forEach((x, i) => { if (x > avg[best]) best = i; });
+  return { m, avg, best, n: best + 1, v: avg[best] };
+}
+function breakEven(curve, fallow) {
+  let lo = 0.02, hi = 0.6; if (econ(curve, hi, fallow).v < 0) return NaN;
+  for (let i = 0; i < 50; i++) { const mid = (lo + hi) / 2; if (econ(curve, mid, fallow).v >= 0) hi = mid; else lo = mid; }
+  return hi;
+}
+// autoverificación: mismas cifras que el notebook (supuestos de la prueba)
+(function () {
+  const ref = econ(curveFor(null), 0.20, 0).v; let worst = Math.abs(ref - Q.ref.margen);
+  VARS.forEach(v => { worst = Math.max(worst, Math.abs(econ(curveFor(v, "cons"), 0.20, 0).v - v.margen)); });
+  if (worst > 0.5) note("warn", "La calculadora no coincide con el notebook. Diferencia máxima US$", worst); else note("info", "Calculadora verificada contra el notebook. Diferencia máxima US$", worst.toFixed(4));
+})();
+const usd = (v, d = 0) => (v < 0 ? "−" : "") + "US$" + fmt(Math.abs(v), d);
+const signed = (v, d = 0) => (v >= 0 ? "+" : "−") + "US$" + fmt(Math.abs(v), d);
+const pctS = v => Math.abs(v - 1) < 0.0005 ? "0.0 %" : (v >= 1 ? "+" : "−") + fmt(Math.abs(v - 1) * 100, 1) + " %";
+const certLabel = c => ({ alta: "Certeza alta", media: "Certeza media", baja: "Certeza baja" })[c];
+const certColor = c => ({ alta: "var(--cane)", media: "var(--sugar)", baja: "var(--neutral)" })[c];
+const cutsTxt = n => n === 1 ? "1 corte (solo plantía)" : `${n} cortes (plantía + ${n - 1} soca${n > 2 ? "s" : ""})`;
+const lastTxt = k => k === 0 ? "plantía" : "soca " + k;
+
+document.getElementById("q1Lede").textContent =
+  `De ${Q.summary.n_variedades_etapa5} variedades en etapa 5, ${Q.summary.n_elegibles} tienen evidencia suficiente. ` +
+  `Tres le ganan al testigo promedio por más de US$200 por acre al año, y para las tres conviene renovar a los ${VARS[0].ciclo} cortes.`;
+
+// podio
+(function () {
+  const box = document.getElementById("podium");
+  VARS.slice(0, 3).forEach((v, i) => {
+    const warn = v.last < 3 ? `<div class="warn">Medida solo hasta ${lastTxt(v.last)}. Su ciclo de ${v.ciclo} cortes supone que conserva la ventaja que tenía en la ${lastTxt(v.last)}.</div>` : "";
+    const card = h("div", { class: "pod" + (i === 0 ? " first" : "") }, `
+      <div class="pod-top"><span class="rk">#${v.rank}</span><span class="badge ${v.certeza}"><i style="background:${certColor(v.certeza)}"></i>${certLabel(v.certeza)}</span></div>
+      <div class="nm">${v.clone}</div>
+      <div><div class="gain">${signed(v.ganancia)}</div><div class="sub">por acre al año más que el testigo promedio (${signed(v.ganancia * ACRE_HA)} por hectárea). IC 90 %: ${fmt(v.g05)} a ${fmt(v.g95)}.</div></div>
+      <div><div class="small muted" style="margin-bottom:4px">En el top 3 en el ${fmt(v.p_top3 * 100)} % de las réplicas</div><div class="meter"><span style="width:${v.p_top3 * 100}%"></span></div></div>
+      <dl class="kv"><dt>Renovar cada</dt><dd>${cutsTxt(v.ciclo)}</dd><dt>Plantía vs testigos</dt><dd>${pctS(v.plantia)}</dd><dt>Ventaja por corte</dt><dd>${pctS(v.retencion)}</dd><dt>TRS vs testigos</dt><dd>${pctS(v.trs_rel)}</dd><dt>Evidencia</dt><dd>${v.anios} años · ${v.ensayos} ensayos · hasta ${lastTxt(v.last)}</dd></dl>
+      ${warn}`);
+    const btn = h("button", { class: "linkbtn", type: "button" }, "Ver en la calculadora →");
+    btn.addEventListener("click", () => { selectVar(v.clone); document.getElementById("calc2-anchor").scrollIntoView({ behavior: "smooth" }); });
+    card.appendChild(btn); box.appendChild(card);
+  });
+})();
+
+// cómo se calculó (ejemplo)
+(function () {
+  const v = VBY["HOCP14-885"] || VARS[0], cv = curveFor(v, "cons"), e = econ(cv, 0.20, 0);
+  const steps = [
+    ["Una regla fija", Q.core_checks.length + " testigos", `Las variedades ${Q.core_checks.join(", ")} estuvieron en etapa 5 los 12 años. Todo se compara contra ellas.`],
+    ["Comparar en el mismo ensayo", pctS(v.plantia), `En plantía, ${v.clone} rindió eso más que los testigos de su mismo ensayo: mismo lugar, año y suelo.`],
+    ["Medir si aguanta", pctS(v.retencion) + " por corte", `Su ventaja cambia eso en cada soca. Su caña trae ${pctS(v.trs_rel)} de azúcar por tonelada que los testigos.`],
+    ["Pasar a dinero", usd(e.v), `Margen promedio por acre al año de su mejor ciclo (${e.n} cortes) con precio de US$0.20/lb y los costos de la prueba.`],
+    ["Comparar con la referencia", signed(e.v - Q.ref.margen), `El testigo promedio deja ${usd(Q.ref.margen)}. La diferencia es la ganancia de sembrar ${v.clone}.`],
+  ];
+  document.getElementById("howSteps").innerHTML = steps.map(([t, n, p]) => `<li><h3>${t}</h3><div class="num">${n}</div><p>${p}</p></li>`).join("");
+})();
+
+// tabla
+const COLS = [
+  { k: "rank", t: "#", f: v => v.rank },
+  { k: "clone", t: "Variedad", l: true, f: v => `<span class="mono">${v.clone}</span><span class="vt ${v.check ? "t" : "c"}">${v.check ? "testigo" : "candidato"}</span>` },
+  { k: "plantia", t: "Plantía", f: v => pctS(v.plantia) },
+  { k: "retencion", t: "Por corte", f: v => pctS(v.retencion) },
+  { k: "trs_rel", t: "TRS", f: v => pctS(v.trs_rel) },
+  { k: "last", t: "Datos hasta", f: v => lastTxt(v.last) },
+  { k: "ciclo", t: "Ciclo", f: v => v.ciclo + " cortes" },
+  { k: "margen", t: "Margen/año", f: v => usd(v.margen) },
+  { k: "ganancia", t: "Ganancia (IC 90 %)", f: v => gainBar(v) },
+  { k: "p_top3", t: "Top 3", f: v => `<span class="minimeter"><span style="width:${v.p_top3 * 100}%"></span></span>${fmt(v.p_top3 * 100)} %` },
+  { k: "certeza", t: "Certeza", l: true, f: v => `<span class="badge ${v.certeza}"><i style="background:${certColor(v.certeza)}"></i>${v.certeza}</span>` },
+];
+const GMIN = Math.min(...VARS.map(v => v.g05)) - 10, GMAX = Math.max(...VARS.map(v => v.g95)) + 10;
+function gainBar(v) {
+  const W = 90, H = 16, sx = x => ((x - GMIN) / (GMAX - GMIN)) * W, col = v.ganancia >= 0 ? css("--cane") : css("--neutral");
+  return `<span style="display:inline-flex;align-items:center;gap:8px"><span style="min-width:58px;text-align:right">${signed(v.ganancia)}</span><svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true">
+    <line x1="${sx(0)}" x2="${sx(0)}" y1="1" y2="${H - 1}" stroke="${css("--ink-3")}" stroke-width="1"/>
+    <line x1="${sx(v.g05)}" x2="${sx(v.g95)}" y1="${H / 2}" y2="${H / 2}" stroke="${css("--rule")}" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="${sx(v.ganancia)}" cy="${H / 2}" r="4.5" fill="${col}" stroke="${css("--surface")}" stroke-width="1.5"/></svg></span>`;
+}
+let sortKey = "rank", sortAsc = true, selected = VARS[0].clone;
+function renderTable() {
+  const rows = [...VARS].sort((a, b) => { const x = a[sortKey], y = b[sortKey]; const c = typeof x === "string" ? x.localeCompare(y) : x - y; return sortAsc ? c : -c; });
+  const head = COLS.map(c => `<th class="${c.l ? "l" : ""}" data-k="${c.k}" scope="col">${c.t}${sortKey === c.k ? (sortAsc ? " ↑" : " ↓") : ""}</th>`).join("");
+  const body = rows.map(v => `<tr data-c="${v.clone}" class="${v.clone === selected ? "sel" : ""}" tabindex="0">${COLS.map(c => `<td class="${c.l ? "l" : ""}">${c.f(v)}</td>`).join("")}</tr>`).join("");
+  const box = document.getElementById("rankTable");
+  box.innerHTML = `<table class="rank"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+  box.querySelectorAll("th").forEach(th => th.addEventListener("click", () => { const k = th.dataset.k; sortAsc = sortKey === k ? !sortAsc : (k === "rank" || k === "clone"); sortKey = k; renderTable(); }));
+  box.querySelectorAll("tbody tr").forEach(tr => {
+    const go = () => { selectVar(tr.dataset.c); document.getElementById("calc2-anchor").scrollIntoView({ behavior: "smooth" }); };
+    tr.addEventListener("click", go); tr.addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  });
+}
+document.getElementById("tblNote").textContent = `${Q.summary.n_elegibles} variedades (${Q.summary.n_elegibles_testigos} testigos y ${Q.summary.n_elegibles - Q.summary.n_elegibles_testigos} candidatos), con los supuestos de la prueba. Plantía, por corte y TRS son relativos a los testigos núcleo. Clic en un encabezado para ordenar; clic en una fila para verla en la calculadora.`;
+
+// calculadora por variedad
+let exMode = "cons";
+const sel = document.getElementById("selVar");
+sel.innerHTML = VARS.map(v => `<option value="${v.clone}">#${v.rank} · ${v.clone}${v.check ? " (testigo)" : ""}</option>`).join("");
+function selectVar(c) { selected = c; sel.value = c; renderTable(); renderCalc2(); }
+function smallLines(id, titleText, xLabels, series, yFmt, opts = {}) {
+  const c = document.getElementById(id); c.innerHTML = ""; title(c, titleText, series.map(s => [s.name, s.color, true]));
+  const w = opts.w || 680, hgt = opts.hgt || 230, L = 70, R = 34, T = 12, B = 40, s = svgBox(c, w, hgt);
+  const all = series.flatMap(s => s.values.filter(v => v != null));
+  let lo = opts.yMin ?? Math.min(0, ...all), hi = opts.yMax ?? Math.max(...all) * 1.1;
+  const sx = i => L + (i / (xLabels.length - 1)) * (w - L - R), sy = v => hgt - B - ((v - lo) / (hi - lo)) * (hgt - B - T);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(lo, hi, 4).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); const tx = el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s); tx.textContent = yFmt(t); });
+  xLabels.forEach((x, i) => { if (i % (opts.every || 1)) return; const tx = el("text", { x: sx(i), y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s); tx.textContent = x; });
+  if (opts.xTitle) { const xt = el("text", { x: (L + w - R) / 2, y: hgt - 4, "text-anchor": "middle", class: "lab" }, s); xt.textContent = opts.xTitle; }
+  if (lo < 0) el("line", { x1: L, x2: w - R, y1: sy(0), y2: sy(0), class: "base" }, s);
+  if (opts.vline != null) { el("line", { x1: sx(opts.vline), x2: sx(opts.vline), y1: T, y2: hgt - B, stroke: css("--sugar"), "stroke-width": 1.5, "stroke-dasharray": "3 3" }, s); }
+  series.forEach(sr => {
+    const pts = sr.values.map((v, i) => [i, v]).filter(p => p[1] != null);
+    const solid = sr.dashFrom == null ? pts : pts.filter(p => p[0] <= sr.dashFrom), dash = sr.dashFrom == null ? [] : pts.filter(p => p[0] >= sr.dashFrom);
+    const path = arr => arr.map((p, i) => `${i ? "L" : "M"}${sx(p[0])},${sy(p[1])}`).join(" ");
+    if (solid.length > 1) el("path", { d: path(solid), fill: "none", stroke: sr.color, "stroke-width": 2, "stroke-linejoin": "round" }, s);
+    if (dash.length > 1) el("path", { d: path(dash), fill: "none", stroke: sr.color, "stroke-width": 2, "stroke-dasharray": "5 4" }, s);
+    if (sr.dots !== false) pts.forEach(([i, v]) => {
+      const big = sr.mark === i;
+      const d = el("circle", { cx: sx(i), cy: sy(v), r: big ? 7 : 4, fill: big ? css("--surface") : sr.color, stroke: big ? sr.color : css("--surface"), "stroke-width": big ? 3 : 1.5 }, s);
+      bindTip(d, `<b>${sr.name}</b><br>${xLabels[i]}: ${yFmt(v)}${sr.tipExtra ? sr.tipExtra(i) : ""}`);
+    });
+  });
+}
+function renderCalc2() {
+  const v = VBY[selected], p = +document.getElementById("price2").value, f = document.getElementById("fallow2").checked ? 1 : 0;
+  document.getElementById("price2Lbl").textContent = "US$" + p.toFixed(2);
+  const cv = curveFor(v, exMode), cr = curveFor(null), ev = econ(cv, p, f), er = econ(cr, p, f);
+  const be = breakEven(cv, f), gain = ev.v - er.v;
+  const ext = v.last < 4;
+  document.getElementById("exNote").textContent = ext
+    ? (exMode === "cons" ? `Desde la ${lastTxt(v.last + 1)} se asume que conserva la ventaja medida en la ${lastTxt(v.last)} (línea punteada).` : `Desde la ${lastTxt(v.last + 1)} se prolonga la tendencia medida. Es optimista: no hay datos que la confirmen.`)
+    : "Esta variedad tiene datos hasta la soca 4: el tratamiento no cambia nada.";
+  document.getElementById("kpis").innerHTML = `
+    <div class="kpi"><div class="l">Ciclo óptimo</div><div class="v">${ev.n} cortes</div><div class="s">${ev.n === 1 ? "solo plantía" : "plantía + " + (ev.n - 1) + " soca" + (ev.n > 2 ? "s" : "")}</div></div>
+    <div class="kpi"><div class="l">Margen promedio anual</div><div class="v">${usd(ev.v)}</div><div class="s">por acre · ${usd(ev.v * ACRE_HA)} por ha</div></div>
+    <div class="kpi"><div class="l">Ganancia vs testigos</div><div class="v ${gain >= 0 ? "pos" : ""}">${signed(gain)}</div><div class="s">por acre al año · testigo: ${usd(er.v)} con ${er.n} cortes</div></div>
+    <div class="kpi"><div class="l">Precio de equilibrio</div><div class="v">${isNaN(be) ? "—" : "US$" + be.toFixed(3)}</div><div class="s">por libra; abajo de eso pierde dinero</div></div>`;
+  document.getElementById("bootNote").textContent = `Certeza (bootstrap con los supuestos de la prueba): en el top 3 en ${fmt(v.p_top3 * 100)} % de ${Q.summary.bootstrap.replicas} réplicas; ganancia IC 90 % de ${usd(v.g05)} a ${usd(v.g95)} por acre al año.`;
+  const cutLab = ["Plantía", "Soca 1", "Soca 2", "Soca 3", "Soca 4"], cycLab = ["1", "2", "3", "4", "5"];
+  smallLines("chCurve", "Azúcar por acre en cada corte", cutLab, [
+    { name: "Testigo promedio", color: css("--neutral"), values: cr.map(c => c.sugar) },
+    { name: v.clone, color: css("--cane"), values: cv.map(c => c.sugar), dashFrom: ext ? v.last : null, tipExtra: i => i > v.last ? "<br><i>sin datos de la variedad</i>" : "" },
+  ], x => fmt(x), { yMin: 0, xTitle: "lb de azúcar por acre" });
+  smallLines("chCycle", "Margen promedio anual si se renueva tras n cortes", cycLab, [
+    { name: "Testigo promedio", color: css("--neutral"), values: er.avg, mark: er.best },
+    { name: v.clone, color: css("--cane"), values: ev.avg, mark: ev.best, tipExtra: i => `<br>margen de ese corte: ${usd(ev.m[i])}` },
+  ], x => usd(x), { xTitle: "cortes antes de renovar (círculo = óptimo)" });
+  const prices = []; for (let x = 0.10; x <= 0.3001; x += 0.01) prices.push(+x.toFixed(2));
+  const pi = prices.indexOf(+p.toFixed(2));
+  smallLines("chPrice", "Mejor margen anual según el precio del azúcar", prices.map(x => x.toFixed(2)), [
+    { name: "Testigo promedio", color: css("--neutral"), values: prices.map(x => econ(cr, x, f).v), dots: false },
+    { name: v.clone, color: css("--cane"), values: prices.map(x => econ(cv, x, f).v), dots: false },
+  ], x => usd(x), { hgt: 220, vline: pi, every: 2, xTitle: "US$ por libra (línea punteada = precio elegido)" });
+}
+document.getElementById("price2").addEventListener("input", renderCalc2);
+document.getElementById("fallow2").addEventListener("change", renderCalc2);
+sel.addEventListener("change", () => selectVar(sel.value));
+[["exCons", "cons"], ["exLin", "lin"]].forEach(([id, m]) => document.getElementById(id).addEventListener("click", () => {
+  exMode = m; document.getElementById("exCons").setAttribute("aria-pressed", m === "cons"); document.getElementById("exLin").setAttribute("aria-pressed", m === "lin"); renderCalc2();
+}));
+renderTable(); renderCalc2();
+
+// certeza
+(function () {
+  const rows = VARS.slice(0, 10);
+  document.getElementById("certIntro").textContent = `Se repitió todo el análisis ${fmt(Q.summary.bootstrap.replicas)} veces, cada vez con una muestra distinta de ensayos completos (con reemplazo). Si una variedad queda arriba en casi todas las repeticiones, la recomendación no depende de unos pocos ensayos con suerte.`;
+  document.getElementById("certMean").textContent = `HOCP14-885 queda en el top 3 en ${fmt(rows[0].p_top3 * 100)} % de las réplicas y HOL15-508 en ${fmt(rows[1].p_top3 * 100)} %. L15-306 (${fmt(rows[2].p_top3 * 100)} %) se disputa el tercer lugar con L14-267 y L01-299. Las tres primeras le ganan al testigo promedio en todas las réplicas.`;
+  const c = document.getElementById("chCert"); title(c, "Ganancia vs testigos (US$/acre/año): mediana del bootstrap e intervalo 90 %", [["Candidato", css("--cane")], ["Testigo", css("--violet")]]);
+  const w = 680, rowH = 30, hgt = rows.length * rowH + 36, L = 110, R = 120, s = svgBox(c, w, hgt);
+  const lo = Math.min(0, ...rows.map(r => r.g05)) - 20, hi = Math.max(...rows.map(r => r.g95)) + 20;
+  const sx = v => L + ((v - lo) / (hi - lo)) * (w - L - R);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(lo, hi, 5).forEach(t => { el("line", { x1: sx(t), x2: sx(t), y1: 0, y2: hgt - 26 }, g); const tx = el("text", { x: sx(t), y: hgt - 8, "text-anchor": "middle", class: "lab" }, s); tx.textContent = fmt(t); });
+  el("line", { x1: sx(0), x2: sx(0), y1: 0, y2: hgt - 26, class: "base" }, s);
+  rows.forEach((r, i) => {
+    const y = i * rowH + 16, col = r.check ? css("--violet") : css("--cane");
+    const lb = el("text", { x: L - 10, y: y + 4, "text-anchor": "end", class: "lab", "font-family": "var(--f-mono)" }, s); lb.textContent = r.clone;
+    el("line", { x1: sx(r.g05), x2: sx(r.g95), y1: y, y2: y, stroke: css("--rule"), "stroke-width": 6, "stroke-linecap": "round" }, s);
+    const d = el(r.check ? "rect" : "circle", r.check ? { x: sx(r.g50) - 5.5, y: y - 5.5, width: 11, height: 11, rx: 2, fill: col, stroke: css("--surface"), "stroke-width": 2 } : { cx: sx(r.g50), cy: y, r: 6, fill: col, stroke: css("--surface"), "stroke-width": 2 }, s);
+    bindTip(d, `<b>${r.clone}</b><br>Mediana: ${signed(r.g50)}<br>IC 90 %: ${fmt(r.g05)} a ${fmt(r.g95)}<br>Top 3: ${fmt(r.p_top3 * 100)} % · Top 1: ${fmt(r.p_top1 * 100)} %`);
+    const t = el("text", { x: w - R + 12, y: y + 4, class: "val" }, s); t.textContent = `top 3: ${fmt(r.p_top3 * 100)} %`;
+  });
+})();
+
+// grilla de precio × ciclo
+function renderPriceGrid() {
+  const f = document.getElementById("fallow3").checked ? 1 : 0, prices = []; for (let x = 0.10; x <= 0.3001; x += 0.02) prices.push(+x.toFixed(2));
+  const rows = [{ name: "Testigo promedio", cv: curveFor(null) }, ...VARS.slice(0, 6).map(v => ({ name: v.clone, cv: curveFor(v, "cons") }))];
+  let html = `<table class="pgrid"><thead><tr><th class="row">Precio US$/lb →</th>${prices.map(p => `<th>${p.toFixed(2)}</th>`).join("")}</tr></thead><tbody>`;
+  rows.forEach(r => {
+    html += `<tr><th class="row">${r.name}</th>`;
+    prices.forEach(p => { const e = econ(r.cv, p, f); html += `<td class="k${Math.min(5, Math.max(3, e.n))}${e.v < 0 ? " loss" : ""}${Math.abs(p - 0.20) < 1e-9 ? " now" : ""}" title="${r.name} · US$${p.toFixed(2)}/lb · ${e.n} cortes · ${usd(e.v)}/acre/año">${e.n}</td>`; });
+    html += "</tr>";
+  });
+  document.getElementById("priceGrid").innerHTML = html + "</tbody></table>";
+  document.querySelectorAll("#priceGrid td").forEach(td => { const t = td.getAttribute("title"); td.removeAttribute("title"); bindTip(td, t.replace(/ · /g, "<br>")); });
+}
+document.getElementById("fallow3").addEventListener("change", renderPriceGrid); renderPriceGrid();
+
+// ambientes
+(function () {
+  const ramp = { bajo: css("--ramp1"), medio: css("--ramp2"), alto: css("--ramp3") };
+  hbars("chLocs", Q.locs.map(l => ({ label: l.loc, v: l.potencial, g: l.grupo, tip: `<b>${l.loc}</b><br>Potencial: ${fmt(l.potencial)} lb/acre (plantía equivalente)<br>Grupo: ${l.grupo} · ${l.anios} años · variación entre años ${fmt(l.cv * 100)} %` })),
+    { titleText: "Potencial de cada finca: azúcar de los testigos núcleo (plantía equivalente, lb/acre)", valueFmt: v => fmt(v), colorFn: r => ramp[r.g], labelW: 110, barH: 16, gap: 8 });
+  const legend = h("div", { class: "legend" }, ["bajo", "medio", "alto"].map(k => `<span><i style="background:${ramp[k]};border-radius:3px"></i>Potencial ${k}</span>`).join(""));
+  const lc = document.getElementById("chLocs"); lc.insertBefore(legend, lc.children[1]);
+  const A = Q.summary.ambiente_pct;
+  document.getElementById("locNote").textContent = `La finca explica ${fmt(A["C(LOC)"])} % de la variación del potencial, el año ${fmt(A["C(YEAR)"])} % y la combinación de ambos el resto. El potencial de una finca sirve como guía, pero cambia bastante de un año a otro.`;
+  // barras agrupadas por ambiente
+  const c = document.getElementById("chAmb"); title(c, "Ventaja sobre los testigos núcleo según el potencial del ambiente", ["bajo", "medio", "alto"].map(k => ["Ambiente " + k, ramp[k]]));
+  const rows = Q.amb, w = 680, hgt = 260, L = 50, R = 10, T = 14, B = 36, s = svgBox(c, w, hgt);
+  const hi = Math.max(...rows.flatMap(r => [r.bajo, r.medio, r.alto])) - 1, M = Math.ceil(hi * 20) / 20 + 0.02;
+  const sy = v => hgt - B - (v / M) * (hgt - B - T);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(0, M, 4).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); const tx = el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s); tx.textContent = "+" + fmt(t * 100) + "%"; });
+  const band = (w - L - R) / rows.length, bw = Math.min(20, band / 4.2);
+  rows.forEach((r, i) => {
+    const cx = L + band * i + band / 2;
+    ["bajo", "medio", "alto"].forEach((k, j) => {
+      const x = cx + (j - 1) * (bw + 3) - bw / 2, v = r[k] - 1, y = sy(Math.max(0, v)), hh = Math.max(2, sy(0) - y);
+      const p = el("path", { d: `M${x},${sy(0)} v${-(hh - 3)} a3,3 0 0 1 3,-3 h${bw - 6} a3,3 0 0 1 3,3 v${hh - 3} z`, fill: ramp[k] }, s);
+      bindTip(p, `<b>${r.clone}</b> · ambiente ${k}<br>${pctS(r[k])} vs testigos núcleo<br>${r["n_" + k]} parcelas`);
+    });
+    const lb = el("text", { x: cx, y: hgt - B + 18, "text-anchor": "middle", class: "lab", "font-family": "var(--f-mono)" }, s); lb.textContent = r.clone;
+  });
+  el("line", { x1: L, x2: w - R, y1: sy(0), y2: sy(0), class: "base" }, s);
+  const T_ = Q.summary.trampa;
+  document.getElementById("trapCards").innerHTML = `
+    <div class="card bad"><div class="small muted">Primera versión (con la trampa)</div><div class="n">${fmt(T_.neg_con_trampa * 100)} %</div><p class="small muted">de las variedades parecían "mejores en fincas pobres". Pendiente mediana ${T_.mediana_con_trampa.toFixed(3)}.</p></div>
+    <div class="card"><div class="small muted">Corregida (índice con otras parcelas)</div><div class="n">${fmt(T_.neg_corregida * 100)} %</div><p class="small muted">Pendiente mediana ${T_.mediana_corregida.toFixed(3)}: el efecto general baja a un tercio y quedan diferencias reales entre variedades.</p></div>`;
+})();
+
+// evaluación gerencial
+(function () {
+  const [a, b, c] = VARS, k = 1000;
+  document.getElementById("gerencial").innerHTML = `
+    <div class="card"><h3>Qué significa para el ingenio</h3><p>Hay variedades que, en el mismo campo y año, dejan entre ${usd(c.ganancia)} y ${usd(a.ganancia)} más por acre al año que el testigo promedio. La diferencia viene del azúcar por acre y de que su ventaja no se pierde en las socas.</p></div>
+    <div class="card"><h3>Decisión recomendada</h3><ul><li>Ampliar <b class="mono">${a.clone}</b> (la de más evidencia) y validar a escala <b class="mono">${b.clone}</b> y <b class="mono">${c.clone}</b>.</li><li>Renovar cada ${a.ciclo} cortes. Entre 4 y 5 cortes la diferencia es pequeña.</li><li>Medir ${b.clone} y ${c.clone} hasta la soca 4 antes de escalar.</li></ul></div>
+    <div class="card"><h3>Impacto estimado</h3><p>Por cada 1,000 acres (405 ha) sembrados con ${a.clone} en lugar del testigo promedio: <b>${signed(Math.round(a.ganancia) * k)}</b> al año (IC 90 %: ${usd(Math.round(a.g05) * k)} a ${usd(Math.round(a.g95) * k)}).</p></div>
+    <div class="card"><h3>Nivel de certeza</h3><p>Alta para ${a.clone} y ${b.clone} (top 3 en ${fmt(a.p_top3 * 100)} % y ${fmt(b.p_top3 * 100)} % de las réplicas), media para ${c.clone} (${fmt(c.p_top3 * 100)} %). La certeza es estadística: no cubre el traslado de Louisiana a Guatemala.</p></div>
+    <div class="card wide"><h3>Riesgos</h3><ul>
+      <li><b>Validez externa:</b> son datos de Louisiana (subtropical, con heladas). Las variedades no se trasladan a Guatemala; lo que se traslada es el método.</li>
+      <li><b>Extrapolación:</b> ${b.clone} y ${c.clone} no tienen soca 3 medida.</li>
+      <li><b>Precio:</b> bajo ~US$${a.equilibrio.toFixed(2)}/lb ni la mejor variedad cubre costos. El precio cambia cuánto se gana y cuándo renovar, no cuál variedad elegir.</li>
+      <li><b>Barbecho:</b> si se deja un año sin caña antes de resembrar, el óptimo sube a 5 cortes para varias variedades.</li></ul></div>`;
+})();
+
+</script>
+<script>
+/* ===================== Pregunta 2 (bloque aparte: si otra sección falla, esta igual se dibuja) ===================== */
+(function () {
+  const Q2 = D.q2, MP = Q2.model, R2 = Q2.res, M1 = R2.metricas_e1, M2 = R2.metricas_e2;
+  const BASE = MP.base_corte_log, CORE = MP.testigos_nucleo, NUEVA = "__nueva__";
+  const CORTES = ["Plantía", "Soca 1", "Soca 2", "Soca 3", "Soca 4"];
+  const corteTxt = k => k === 0 ? "plantía" : "soca " + k;
+  const sgn = (v, d = 0) => (v >= 0 ? "+" : "−") + fmt(Math.abs(v) * 100, d) + " %";
+  const ok = v => v != null && isFinite(v);
+  const num = (v, d = 0) => (v < 0 ? "−" : "") + fmt(Math.abs(v), d);
+  const LB_TO_TAH = 0.00112085;   // lb/acre -> t de azúcar por hectárea
+  const b1 = MP.escenario_1.banda80_log, b2 = MP.escenario_2.banda80_log;
+  const cob1 = R2.cobertura["Escenario 1"]["cobertura banda 80 %"], cob2 = R2.cobertura["Escenario 2"]["cobertura banda 80 %"];
+
+  /* ---------- el modelo, igual que el notebook 03 ---------- */
+  function predict(clone, loc, k, loteRel) {
+    const v = MP.variedades[clone];
+    const varRel = v ? v.a + v.b * Math.min(k, v.kmax) : 0;
+    const nueva = loc === NUEVA, e = nueva ? MP.escenario_2 : MP.escenario_1;
+    const base = BASE[String(k)], fincaRel = nueva ? 0 : (MP.fincas_loc_rel[loc] ?? 0);
+    const relVar = e.constante + e.coef.var_rel * varRel;
+    const hasLote = !nueva && ok(loteRel);
+    const relLote = hasLote ? e.coef.lote_ant_rel * Math.log(loteRel) + e.coef.tiene_lote_ant : 0;
+    const p = Math.exp(base + fincaRel + relVar + relLote);
+    return { p, lo: p * Math.exp(e.banda80_log[0]), hi: p * Math.exp(e.banda80_log[1]), base: Math.exp(base), fincaRel, relVar, relLote, hasLote, varRel };
+  }
+  const coreAvg = (loc, k) => CORE.reduce((s, c) => s + predict(c, loc, k, null).p, 0) / CORE.length;
+
+  // autoverificación contra las tablas del notebook 03 (lotes en pie 2022 y plantía 2022)
+  let worst = 0, nchk = 0;
+  Q2.lotes22.forEach(([loc, , clone, k, , vent, pred]) => { worst = Math.max(worst, Math.abs(predict(clone, loc, k, vent).p - pred)); nchk++; });
+  Object.entries(Q2.plantia22).forEach(([loc, row]) => Q2.top3.forEach(c => { worst = Math.max(worst, Math.abs(predict(c, loc, 0, null).p - row[c])); nchk++; }));
+  const chkTxt = `Verificado contra el notebook 03: ${fmt(nchk)} predicciones, diferencia máxima ${fmt(worst, 1)} lb/acre (redondeo).`;
+  if (worst > 1) note("warn", "Pregunta 2: la calculadora no coincide con el notebook", worst); else note("info", chkTxt);
+
+  /* ---------- encabezado ---------- */
+  const r1 = M1.Ridge, r2 = M2.Ridge, ing = M1.Ingenuo, soc = R2.por_corte["socas|Ridge"];
+  document.getElementById("q2Lede").textContent =
+    `Con lo que se sabe al cerrar una zafra, el modelo estima el azúcar por acre de cada variedad en cada finca para la siguiente. ` +
+    `Distingue variedades y las ordena razonablemente bien dentro de cada lote. Pero ${pct(R2.parte_error_nivel)} de su error es lo que le pasa ` +
+    `a todo el lote ese año (clima, suelo, manejo), y eso no se puede anticipar con estos datos.`;
+  document.getElementById("q2Kpis").innerHTML = [
+    [pct(r1["MAPE_%"] / 100), "error típico por parcela, finca conocida", `${fmt(r1.MAE)} lb/acre · promedio histórico ${pct(ing["MAPE_%"] / 100)}`],
+    [pct(r2["MAPE_%"] / 100), "error típico, finca nueva", `${fmt(r2.MAE)} lb/acre`],
+    [fmt(r1.orden_spearman, 2), "orden de variedades dentro del lote (ρ)", `${fmt(soc.orden_spearman, 2)} en socas · 1 = perfecto`],
+    [pct(R2.parte_error_nivel), "del error lo comparte todo el lote ese año", "clima, suelo y manejo"],
+    [`${num((Math.exp(b1[0]) - 1) * 100)}/+${fmt((Math.exp(b1[1]) - 1) * 100)} %`, "banda de error para 2022", `cubrió ${pct(cob1)} de los casos en validación`],
+  ].map(([v, l, s]) => `<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div><div class="s">${s}</div></div>`).join("");
+
+  /* ---------- validación interactiva ---------- */
+  const YEARS = Array.from({ length: 12 }, (_, i) => 2010 + i), TEST = YEARS.filter(y => y >= 2013);
+  const LOCS = Object.keys(Q2.presencia).sort();
+  let vMode = 1, vYear = 2018, vLoc = "ALMA";
+  const vLocSel = document.getElementById("vLoc");
+  vLocSel.innerHTML = LOCS.map(l => `<option ${l === vLoc ? "selected" : ""}>${l}</option>`).join("");
+  function renderVal() {
+    document.getElementById("vYearLbl").textContent = vYear;
+    document.getElementById("vLocWrap").hidden = vMode === 1;
+    let t = '<table class="tl vgrid"><thead><tr><th class="row"></th>' + YEARS.map(y => `<th>${String(y).slice(2)}</th>`).join("") + "</tr></thead><tbody>";
+    if (vMode === 1) {
+      TEST.forEach(tt => {
+        t += `<tr class="${tt === vYear ? "on" : "off"}"><th class="row">predice ${tt}</th>` +
+          YEARS.map(y => `<td class="${y === 2010 ? "vh" : y < tt ? "vt" : y === tt ? "vp" : "vf"}"></td>`).join("") + "</tr>";
+      });
+    } else {
+      LOCS.forEach(l => {
+        const pres = new Set(Q2.presencia[l]);
+        t += `<tr class="${l === vLoc ? "on" : ""}"><th class="row">${l}</th>` + YEARS.map(y => {
+          if (!pres.has(y)) return '<td class="vn"></td>';
+          if (l === vLoc) return `<td class="${y < vYear ? "vx" : y === vYear ? "vp" : "vf"}"></td>`;
+          return `<td class="${y < vYear ? "vt" : "vf"}"></td>`;
+        }).join("") + "</tr>";
+      });
+    }
+    document.getElementById("valGrid").innerHTML = t + "</tbody></table>";
+    const items = vMode === 1
+      ? [["solo historia", "td.vh"], ["entrenamiento", "td.vt"], ["prueba", "td.vp"], ["futuro: no se usa", "td.vf"]]
+      : [["entrena (otras fincas)", "td.vt"], ["prueba", "td.vp"], [`historia de ${vLoc} borrada`, "td.vx"], ["futuro: no se usa", "td.vf"]];
+    const sw = { "td.vh": "color-mix(in srgb, var(--cane) 32%, var(--surface))", "td.vt": "var(--cane)", "td.vp": "var(--sugar)", "td.vf": "transparent;box-shadow:inset 0 0 0 1px var(--rule)", "td.vx": "repeating-linear-gradient(135deg, var(--neutral) 0 3px, transparent 3px 7px)" };
+    document.getElementById("valLegend").innerHTML = items.map(([l, k]) => `<span><i class="sq" style="background:${sw[k]}"></i>${l}</span>`).join("");
+    const nTrain = vYear - 2011;
+    document.getElementById("valNote").textContent = vMode === 1
+      ? `Para predecir ${vYear} se entrena con ${nTrain} zafra${nTrain > 1 ? "s" : ""} (2011-${vYear - 1}). 2010 solo aporta historia a las variables: no tiene años anteriores para describirse.`
+      : (Q2.presencia[vLoc].includes(vYear)
+        ? `${vLoc} en ${vYear}: se entrena con las otras fincas hasta ${vYear - 1}. Todo lo de ${vLoc} se borra: no aporta filas, ni su nivel, ni lo que sus variedades hicieron ahí. Se repite para las 14 fincas y los 9 años.`
+        : `${vLoc} no tuvo ensayos de etapa 5 en ${vYear}: no hay nada que predecir ahí ese año.`);
+  }
+  const segVal = [document.getElementById("vE1"), document.getElementById("vE2")];
+  segVal.forEach((b, i) => b.addEventListener("click", () => { vMode = i + 1; segVal.forEach((x, j) => x.setAttribute("aria-pressed", j === i)); renderVal(); }));
+  document.getElementById("vYear").addEventListener("input", e => { vYear = +e.target.value; renderVal(); });
+  vLocSel.addEventListener("change", e => { vLoc = e.target.value; renderVal(); });
+  renderVal();
+
+  /* ---------- variables ---------- */
+  const FEATS = [
+    ["Nivel típico del corte", "<code>base_corte</code>", "Cuánto da un testigo núcleo en ese corte en un año promedio. Es la caída de socas de la pregunta 1.", [1, 1]],
+    ["Historia de la variedad", "<code>var_rel</code>", "Su ventaja sobre los testigos en etapa 5, en ese corte. Con poca evidencia se acerca a 0 (encogimiento).", [1, 1]],
+    ["Historia de la finca", "<code>loc_rel</code>", "Qué tan buena es la finca frente a las demás en el mismo año y corte, en años anteriores.", [1, 0]],
+    ["El lote el año pasado", "<code>lote_ant_rel</code>", "Cómo le fue a esta variedad en este mismo lote en el corte anterior, frente a los testigos del lote. Solo existe en socas.", [1, 0]],
+  ];
+  document.getElementById("featCards").innerHTML = FEATS.map(([t, c, d, k]) =>
+    `<div class="sc"><h3>${t}</h3><div class="small">${c}</div><p>${d}</p><div class="know"><span class="${k[0] ? "y" : "n"}">Finca conocida</span><span class="${k[1] ? "y" : "n"}">Finca nueva</span></div></div>`).join("");
+  document.getElementById("leakChips").innerHTML = ["TCA", "TRS_TON", "POPN", "MSTWT", "FIBER"].map(c => `<span class="chip mono">${c} del año</span>`).join("");
+
+  /* ---------- primer intento ---------- */
+  const DD = R2.diagnostico_directo, PA = DD.por_anio, yrsD = TEST.map(String);
+  document.getElementById("directIntro").innerHTML =
+    `Lo directo es una regresión con todas las variables. En la validación tuvo un error de <b>${fmt(DD.mae_directo)} lb/acre</b>; ` +
+    `la regla de la pregunta 1 (nivel + ventaja histórica, con peso 1, sin aprender nada) tuvo <b>${fmt(DD.mae_regla)}</b>. ` +
+    `La gráfica muestra por qué: cuánto vale la historia de la variedad <em>dentro</em> de cada lote, contra cuánto le cree la regresión.`;
+  lines("chDirect", yrsD, [
+    { name: "Peso real de la historia (dentro del lote)", color: css("--cane"), values: yrsD.map(y => PA[y].peso_real_dentro_del_lote) },
+    { name: "Peso que aprende la regresión", color: css("--violet"), values: yrsD.map(y => PA[y].peso_aprendido_var_rel), dy: 4 },
+  ], { titleText: "Cuánto vale la historia de la variedad, por zafra predicha", yMin: 0, yMax: 1.2, yFmt: v => fmt(v, 2), endLabels: true });
+  document.getElementById("directMean").textContent =
+    `Con pocos años, la regresión aprende la suerte de los años con que se entrena (2011 y 2012 fueron ${sgn(Math.exp(PA["2011"].suerte_del_anio) - 1)} y ` +
+    `${sgn(Math.exp(PA["2012"].suerte_del_anio) - 1)}) y aprende el peso de la historia cuando la historia era corta y valía poco. ` +
+    `Desde 2014 la historia vale 0.7-1.1 dentro del lote, pero la regresión le cree 0.3-0.7.`;
+
+  /* ---------- dos piezas ---------- */
+  const c1 = MP.escenario_1.coef;
+  document.getElementById("twoPieces").innerHTML =
+    `<div class="box">Azúcar esperado<small>log lb/acre</small></div><span class="op">=</span>` +
+    `<div class="box">Nivel del lote<small>historia: corte + finca</small></div><span class="op">+</span>` +
+    `<div class="box res">Ventaja de la variedad<small>${fmt(c1.var_rel, 2)}·historia + ${fmt(c1.lote_ant_rel, 2)}·lote anterior</small></div>`;
+  document.getElementById("twoNote").innerHTML =
+    `La ventaja la aprende Ridge (una regresión lineal con una penalización mínima) con 3 números. En palabras: si la historia dice que la variedad rinde 10 % más que los testigos, ` +
+    `se espera ${sgn(Math.exp(c1.var_rel * Math.log(1.1)) - 1, 1)}; si además el año pasado, en este lote, rindió 10 % más que los testigos del lote, se suma ` +
+    `${sgn(Math.exp(c1.lote_ant_rel * Math.log(1.1)) - 1, 1)}. Lo que dio el lote completo el año pasado no entra: es clima, y el clima no se repite ` +
+    `(correlación del efecto año con el siguiente: ${fmt(R2.efecto_anio_autocorr, 2)}).`;
+
+  /* ---------- comparación de modelos ---------- */
+  const MODELS = ["Ingenuo", "Agrónomo", "Regla P1", "Ridge", "Random Forest", "XGBoost"];
+  const DESC = { "Ingenuo": "promedio histórico por corte: el mismo número para todas las variedades", "Agrónomo": "socas: lo que dio el lote el año pasado × la caída típica", "Regla P1": "nivel + ventaja histórica con peso 1, sin aprender nada", "Ridge": "dos piezas; la ventaja con 3 coeficientes", "Random Forest": "dos piezas; la ventaja con 300 árboles y 7 variables", "XGBoost": "dos piezas; la ventaja con 300 árboles potenciados" };
+  const METRICS = {
+    MAE: { key: "MAE", lab: "Error absoluto medio, lb de azúcar por acre · menor es mejor", f: v => fmt(v) },
+    R2: { key: "R2", lab: "R² en lb/acre · mayor es mejor", f: v => fmt(v, 2) },
+    orden: { key: "orden_spearman", lab: "Orden de variedades dentro del lote (ρ de Spearman) · mayor es mejor", f: v => fmt(v, 2) },
+    ventaja: { key: "R2_ventaja", lab: "R² de la ventaja contra testigos del lote · mayor es mejor", f: v => fmt(v, 2) },
+  };
+  let mk = "MAE", subset = "todo";
+  const getv = (esc, n, key) => {
+    if (subset === "todo") { const t = esc === 1 ? M1 : M2; return t[n] ? t[n][key] : null; }
+    if (esc === 2) return null;
+    const r = R2.por_corte[`${subset}|${n}`]; return r ? r[key] : null;
+  };
+  function renderModels() {
+    const c = document.getElementById("chModels"); c.innerHTML = "";
+    const m = METRICS[mk];
+    title(c, m.lab, subset === "todo" ? [["Finca conocida", css("--cane")], ["Finca nueva", css("--violet")]] : [[`Finca conocida · solo ${subset}`, css("--cane")]]);
+    const w = 680, rowH = 36, L = 128, R = 64, T = 6, B = 28, H = T + MODELS.length * rowH + B;
+    const vals = MODELS.flatMap(n => [getv(1, n, m.key), getv(2, n, m.key)]).filter(ok);
+    let lo = Math.min(...vals), hi = Math.max(...vals); const pad = (hi - lo) * 0.18 || 0.05; lo -= pad; hi += pad;
+    const s = svgBox(c, w, H), sx = v => L + (v - lo) / (hi - lo) * (w - L - R);
+    const g = el("g", { class: "grid" }, s);
+    niceTicks(lo, hi, 5).forEach(t => { el("line", { x1: sx(t), x2: sx(t), y1: T, y2: H - B }, g); const tx = el("text", { x: sx(t), y: H - 8, "text-anchor": "middle", class: "lab" }, s); tx.textContent = m.f(t); });
+    MODELS.forEach((n, i) => {
+      const y = T + i * rowH + rowH / 2, a = getv(1, n, m.key), b = getv(2, n, m.key);
+      const lab = el("text", { x: L - 12, y: y + 4, "text-anchor": "end", class: "lab" }, s); lab.textContent = n;
+      if (n === "Ridge") { lab.setAttribute("font-weight", "700"); lab.style.fill = css("--ink"); }
+      if (ok(a) && ok(b)) el("line", { x1: sx(a), x2: sx(b), y1: y, y2: y, stroke: css("--rule"), "stroke-width": 3 }, s);
+      const tipTxt = () => {
+        const t1 = subset === "todo" ? M1[n] : R2.por_corte[`${subset}|${n}`], t2 = subset === "todo" ? M2[n] : null;
+        const row = (t, nm) => t ? `<br><b>${nm}</b>: error ${fmt(t.MAE)} lb/acre · R² ${fmt(t.R2, 2)}${ok(t.orden_spearman) ? " · orden " + fmt(t.orden_spearman, 2) : ""}${ok(t.R2_ventaja) ? " · R² ventaja " + fmt(t.R2_ventaja, 2) : ""}` : "";
+        return `<b>${n}</b><br>${DESC[n]}${row(t1, "Finca conocida")}${row(t2, "Finca nueva")}`;
+      };
+      if (ok(a)) { const p = el("circle", { cx: sx(a), cy: y, r: 7, fill: css("--cane"), stroke: css("--surface"), "stroke-width": 2 }, s); bindTip(p, tipTxt()); const t = el("text", { x: sx(a) + (ok(b) && b > a ? -12 : 12), y: y - 10, "text-anchor": ok(b) && b > a ? "end" : "start", class: "val" }, s); t.textContent = m.f(a); }
+      if (ok(b)) { const d = el("rect", { x: sx(b) - 6, y: y - 6, width: 12, height: 12, transform: `rotate(45 ${sx(b)} ${y})`, fill: css("--violet"), stroke: css("--surface"), "stroke-width": 2 }, s); bindTip(d, tipTxt()); const t = el("text", { x: sx(b) + (b >= a || !ok(a) ? 12 : -12), y: y - 10, "text-anchor": b >= a || !ok(a) ? "start" : "end", class: "val" }, s); t.textContent = m.f(b); }
+      if (!ok(a) && !ok(b)) { const t = el("text", { x: L + 6, y: y + 4, class: "lab" }, s); t.textContent = "no aplica: da el mismo número a todas las variedades"; }
+    });
+    const notes = {
+      MAE: "Las tres referencias y los tres algoritmos quedan a menos de 20 lb/acre entre sí, salvo el ingenuo y el agrónomo. Saber la variedad y la finca es lo que reduce el error.",
+      R2: "R² bajo para todos: la mayor parte de la variación es el clima del lote-año, que nadie ve venir.",
+      orden: "Qué tan bien coincide el orden predicho de las variedades con el real dentro de cada lote. Es lo que importa para decidir qué sembrar.",
+      ventaja: "Solo la pieza que se aprende: la ventaja de cada variedad contra los testigos de su lote. Aquí Ridge gana a todos en finca conocida.",
+    };
+    document.getElementById("modelsNote").textContent = notes[mk] + (subset === "plantía" ? " En plantía la regla, el agrónomo y Ridge ordenan igual (los tres usan solo la historia de la variedad), y nadie predice bien la ventaja: la primera cosecha en un lote nuevo es la verdadera prueba." : subset === "socas" ? " En socas, lo que la variedad hizo en el mismo lote el año pasado mejora mucho la predicción." : "");
+  }
+  document.querySelectorAll("#metricSeg button").forEach(b => b.addEventListener("click", () => { mk = b.dataset.m; document.querySelectorAll("#metricSeg button").forEach(x => x.setAttribute("aria-pressed", x === b)); renderModels(); }));
+  document.querySelectorAll("#subsetSeg button").forEach(b => b.addEventListener("click", () => { subset = b.dataset.s; document.querySelectorAll("#subsetSeg button").forEach(x => x.setAttribute("aria-pressed", x === b)); renderModels(); }));
+  renderModels();
+
+  const CMP = R2.comparaciones;
+  const verdict = (d, lo, hi, a, b) => hi < 0 ? `<span class="badge alta">${a} mejor</span>` : lo > 0 ? `<span class="badge alta">${b} mejor</span>` : `<span class="badge baja">empate</span>`;
+  document.getElementById("cmpRows").innerHTML = Object.entries(CMP).map(([k, r]) => {
+    const [a, b] = k.split(" − ");
+    const err = `<div class="ci">Error total: <b>${r["Δ MAE lb/acre"] >= 0 ? "+" : "−"}${fmt(Math.abs(r["Δ MAE lb/acre"]))}</b> lb/acre (IC90 ${num(r["IC90 bajo"])} a ${num(r["IC90 alto"])}) ${verdict(0, r["IC90 bajo"], r["IC90 alto"], a, b)}</div>`;
+    const ven = ok(r["Δ error ventaja (pp)"]) ? `<div class="ci">Error de ventaja: <b>${r["Δ error ventaja (pp)"] >= 0 ? "+" : "−"}${fmt(Math.abs(r["Δ error ventaja (pp)"]), 1)}</b> pp (IC90 ${num(r["IC90 bajo (pp)"], 1)} a ${num(r["IC90 alto (pp)"], 1)}) ${verdict(0, r["IC90 bajo (pp)"], r["IC90 alto (pp)"], a, b)}</div>` : `<div class="ci muted">Error de ventaja: no aplica (${b === "Ingenuo" ? "el ingenuo" : "el agrónomo"} no separa nivel y ventaja)</div>`;
+    return `<div class="row"><div class="nm">${a} <span class="muted">vs</span> ${b}</div>${err}${ven}</div>`;
+  }).join("");
+
+  /* ---------- explorador de lotes ---------- */
+  const G = Q2.grupos, GBY = Object.fromEntries(G.map(g => [g.id, g])), CL = Q2.clones;
+  const yS = document.getElementById("lYear"), lS = document.getElementById("lLoc"), tS = document.getElementById("lLote");
+  const gYears = [...new Set(G.map(g => g.year))].sort();
+  yS.innerHTML = gYears.map(y => `<option>${y}</option>`).join("");
+  function fillLoc(sel) {
+    const locs = [...new Set(G.filter(g => g.year === +yS.value).map(g => g.loc))].sort();
+    lS.innerHTML = locs.map(l => `<option ${l === sel ? "selected" : ""}>${l}</option>`).join("");
+  }
+  function fillLote(sel) {
+    const gs = G.filter(g => g.year === +yS.value && g.loc === lS.value).sort((a, b) => a.crop - b.crop);
+    tS.innerHTML = gs.map(g => `<option value="${g.id}" ${g.id === sel ? "selected" : ""}>${corteTxt(g.crop)} · sembrado ${g.plant} · ${g.rows.length} var.</option>`).join("");
+  }
+  function setLote(id) {
+    const g = GBY[id]; yS.value = g.year; fillLoc(g.loc); fillLote(id); renderLote();
+  }
+  function renderLote() {
+    const g = GBY[tS.value]; if (!g) return;
+    const c = document.getElementById("chLote"); c.innerHTML = "";
+    const rows = g.rows.map(([ci, real, pred]) => ({ clone: CL[ci], real, pred, core: CORE.includes(CL[ci]) })).sort((a, b) => b.pred - a.pred);
+    title(c, `${g.loc} · zafra ${g.year} · ${corteTxt(g.crop)}`, [["predicho", css("--ink-2")], ["real", css("--cane")], ["real, testigo núcleo", css("--neutral")]]);
+    const w = 680, rowH = 26, L = 120, R = 30, T = 26, B = 30, H = T + rows.length * rowH + B;
+    const all = rows.flatMap(r => [r.real, r.pred]);
+    const lo = Math.min(...all) * 0.92, hi = Math.max(...all) * 1.05;
+    const s = svgBox(c, w, H), sx = v => L + (v - lo) / (hi - lo) * (w - L - R);
+    const gg = el("g", { class: "grid" }, s);
+    niceTicks(lo, hi, 6).forEach(t => { el("line", { x1: sx(t), x2: sx(t), y1: T - 8, y2: H - B }, gg); const tx = el("text", { x: sx(t), y: H - 8, "text-anchor": "middle", class: "lab" }, s); tx.textContent = fmt(t / 1000, 1) + "k"; });
+    const gm = a => Math.exp(a.reduce((x, v) => x + Math.log(v), 0) / a.length);
+    const mp = gm(rows.map(r => r.pred)), mr = gm(rows.map(r => r.real));
+    [[mp, css("--ink-3"), "promedio predicho"], [mr, css("--cane"), "promedio real"]].forEach(([v, col, lab]) => {
+      el("line", { x1: sx(v), x2: sx(v), y1: T - 6, y2: H - B, stroke: col, "stroke-dasharray": "4 4", "stroke-width": 1.5 }, s);
+      const izq = v === Math.min(mp, mr);
+      const t = el("text", { x: sx(v) + (izq ? -4 : 4), y: T - 12, "text-anchor": izq ? "end" : "start", class: "lab" }, s); t.textContent = lab;
+    });
+    rows.forEach((r, i) => {
+      const y = T + i * rowH + rowH / 2;
+      const lb = el("text", { x: L - 10, y: y + 4, "text-anchor": "end", class: "lab", "font-family": "var(--f-mono)" }, s); lb.textContent = r.clone;
+      if (r.core) lb.style.fill = css("--ink-3");
+      el("line", { x1: sx(r.pred), x2: sx(r.real), y1: y, y2: y, stroke: css("--rule"), "stroke-width": 3 }, s);
+      const pc = el("circle", { cx: sx(r.pred), cy: y, r: 6, fill: css("--surface"), stroke: css("--ink-2"), "stroke-width": 1.8 }, s);
+      const rc = el("circle", { cx: sx(r.real), cy: y, r: 6, fill: r.core ? css("--neutral") : css("--cane") }, s);
+      const tt = `<b>${r.clone}</b>${r.core ? " · testigo núcleo" : ""}<br>Predicho: ${fmt(r.pred)} lb/acre<br>Real: ${fmt(r.real)} lb/acre<br>Real vs predicho: ${sgn(r.real / r.pred - 1)}`;
+      bindTip(pc, tt); bindTip(rc, tt);
+    });
+    document.getElementById("loteStats").innerHTML =
+      `<div><span class="n">${sgn(g.nivel)}</span><span class="l">nivel: todo el lote vs lo predicho</span></div>` +
+      `<div><span class="n">${g.rho == null ? "—" : fmt(g.rho, 2)}</span><span class="l">orden de las variedades (ρ)</span></div>` +
+      `<div><span class="n">${g.rows.length}</span><span class="l">variedades en el lote</span></div>`;
+    const rhoTxt = g.rho == null ? "" : g.rho >= 0.6 ? "El orden de las variedades se acierta bien" : g.rho >= 0.3 ? "El orden se acierta a medias" : "En este lote el orden casi no se acierta";
+    const an = Math.abs(g.nivel);
+    document.getElementById("loteMean").textContent = an >= 0.15
+      ? `Todo el lote quedó ${sgn(g.nivel)} de lo predicho: casi todas las variedades se mueven juntas, por el clima o el manejo de ese año. ${rhoTxt}.`
+      : an >= 0.07 ? `Todo el lote quedó ${sgn(g.nivel)} de lo predicho, una desviación moderada. ${rhoTxt}.`
+      : `El nivel del lote se acertó (${sgn(g.nivel)}). ${rhoTxt}. Las diferencias que quedan son propias de cada variedad.`;
+  }
+  yS.addEventListener("change", () => { fillLoc(lS.value); fillLote(); renderLote(); });
+  lS.addEventListener("change", () => { fillLote(); renderLote(); });
+  tS.addEventListener("change", renderLote);
+  const EXN = ["Año malo", "Año normal", "Año bueno"];
+  document.getElementById("loteIntro").innerHTML =
+    `Cada punto relleno es lo que dio una variedad; cada círculo vacío, lo que el modelo predijo en diciembre. Explorá cualquiera de los ${fmt(G.length)} lotes de la validación ` +
+    `o empezá por tres ejemplos con un orden típico (ρ cercano a la mediana de todos los lotes, ${fmt(R2.rho_mediano_lotes, 2)}).`;
+  document.getElementById("loteEx").innerHTML = R2.lotes_ejemplo.map((id, i) => `<button type="button" class="chip" data-id="${id}" style="cursor:pointer">${EXN[i]}: ${GBY[id].loc} ${GBY[id].year}</button>`).join("");
+  document.querySelectorAll("#loteEx button").forEach(b => b.addEventListener("click", () => setLote(b.dataset.id)));
+  setLote(R2.lotes_ejemplo[0]);
+
+  /* ---------- error por zafra ---------- */
+  (function () {
+    const ez = R2.error_por_zafra_pct, cz = R2.cobertura_por_zafra, ys = Object.keys(ez).sort();
+    const c = document.getElementById("chZafra");
+    title(c, "Real vs predicho por zafra (mediana de todas las parcelas)", [["por encima de lo planificado", css("--cane")], ["por debajo", css("--violet")]]);
+    const w = 680, hgt = 260, L = 50, R = 16, T = 22, B = 30, s = svgBox(c, w, hgt);
+    const vals = ys.map(y => ez[y]), M = Math.max(5, ...vals.map(Math.abs)) * 1.25;
+    const sy = v => T + (M - v) / (2 * M) * (hgt - T - B), band = (w - L - R) / ys.length, bw = Math.min(34, band * 0.55);
+    const g = el("g", { class: "grid" }, s);
+    niceTicks(-M, M, 6).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); const tx = el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s); tx.textContent = (t > 0 ? "+" : "") + fmt(t) + " %"; });
+    ys.forEach((y, i) => {
+      const v = ez[y], cx = L + band * i + band / 2, y0 = sy(0), y1 = sy(v);
+      const p = el("rect", { x: cx - bw / 2, y: Math.min(y0, y1), width: bw, height: Math.max(2, Math.abs(y1 - y0)), rx: 3, fill: v >= 0 ? css("--cane") : css("--violet") }, s);
+      bindTip(p, `<b>Zafra ${y}</b><br>Lo real quedó ${v >= 0 ? "+" : "−"}${fmt(Math.abs(v), 1)} % vs lo predicho${cz[y] != null ? `<br>La banda de error cubrió ${pct(cz[y])} de los casos` : "<br>(primer año: no hay errores previos para calibrar la banda)"}`);
+      const t = el("text", { x: cx, y: v >= 0 ? y1 - 6 : y1 + 15, "text-anchor": "middle", class: "val" }, s); t.textContent = (v >= 0 ? "+" : "−") + fmt(Math.abs(v)) + " %";
+      const lb = el("text", { x: cx, y: hgt - 8, "text-anchor": "middle", class: "lab" }, s); lb.textContent = y;
+    });
+    el("line", { x1: L, x2: w - R, y1: sy(0), y2: sy(0), class: "base" }, s);
+    const mn = Math.min(...vals), mx = Math.max(...vals), yMn = ys[vals.indexOf(mn)], yMx = ys[vals.indexOf(mx)];
+    document.getElementById("zafraMean").textContent =
+      `En promedio el modelo no se sesga, pero cada zafra se corre junta: de ${sgn(mn / 100)} (${yMn}) a ${sgn(mx / 100)} (${yMx}). ` +
+      `En los años más extremos la banda cubrió menos (${pct(cz["2019"])} en 2019, ${pct(cz["2021"])} en 2021).`;
+    document.getElementById("zafraDecide").textContent =
+      `Presupuestar con la banda (${sgn(Math.exp(b1[0]) - 1)} / ${sgn(Math.exp(b1[1]) - 1)}) y leerla como una banda de ~${pct(Math.round(cob1 * 20) / 20)}, no de 80 %: en validación cubrió ${pct(cob1)}.`;
+  })();
+
+  /* ---------- calculadora 2022 ---------- */
+  const cVar = document.getElementById("cVar"), cLoc = document.getElementById("cLoc"), cCut = document.getElementById("cCut");
+  const cLote = document.getElementById("cLote"), cLoteV = document.getElementById("cLoteV");
+  const allV = Object.keys(MP.variedades);
+  const top3 = Q2.top3, otras = allV.filter(c => !top3.includes(c) && !CORE.includes(c)).sort();
+  const opt = c => `<option value="${c}">${c} · ${MP.variedades[c].n} parcelas</option>`;
+  cVar.innerHTML = `<optgroup label="Recomendadas en la pregunta 1">${top3.map(opt).join("")}</optgroup>` +
+    `<optgroup label="Testigos núcleo">${CORE.map(opt).join("")}</optgroup><optgroup label="Otras con historia en etapa 5">${otras.map(opt).join("")}</optgroup>`;
+  const FINCAS = Object.keys(MP.fincas_loc_rel).sort((a, b) => MP.fincas_loc_rel[b] - MP.fincas_loc_rel[a]);
+  cLoc.innerHTML = FINCAS.map(l => `<option value="${l}">${l} · ${sgn(Math.exp(MP.fincas_loc_rel[l]) - 1)}</option>`).join("") + `<option value="${NUEVA}">Finca nueva (sin historia)</option>`;
+  cCut.innerHTML = CORTES.map((t, k) => `<button type="button" data-k="${k}" aria-pressed="${k === 0}">${t}</button>`).join("");
+  let cK = 0, loteExact = null;   // ventaja exacta cuando se carga una fila de la tabla; el control la redondea
+  cCut.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { cK = +b.dataset.k; loteExact = null; cCut.querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b)); renderCalc3(); }));
+  function renderCalc3() {
+    const clone = cVar.value, loc = cLoc.value, v = MP.variedades[clone], nueva = loc === NUEVA;
+    const loteOk = cK > 0 && !nueva;
+    cLote.disabled = !loteOk; cLoteV.disabled = !loteOk || !cLote.checked;
+    const lr = loteOk && cLote.checked ? (loteExact ?? 1 + (+cLoteV.value) / 100) : null;
+    document.getElementById("cLoteLbl").textContent = loteExact != null ? sgn(loteExact - 1, 1) : (+cLoteV.value >= 0 ? "+" : "−") + Math.abs(+cLoteV.value) + " %";
+    const r = predict(clone, loc, cK, lr), ref = coreAvg(loc, cK);
+    const notes = [`${clone}: ${v.n} parcelas en etapa 5, medida hasta ${corteTxt(v.kmax)}.`];
+    if (v.n < 15) notes.push("Poca evidencia: el modelo la acerca a los testigos.");
+    if (cK > v.kmax) notes.push(`Sin datos de ${corteTxt(cK)}: su ventaja se congela en ${corteTxt(v.kmax)}.`);
+    if (!loteOk) notes.push(cK === 0 ? "En plantía no existe cosecha anterior del lote." : "En una finca nueva no hay cosecha anterior.");
+    document.getElementById("cVarNote").textContent = notes.join(" ");
+    document.getElementById("cKpis").innerHTML =
+      `<div class="kpi" style="grid-column:1/-1"><div class="l">Azúcar esperado en 2022 · ${corteTxt(cK)}</div><div class="v" style="font-size:2rem">${fmt(r.p)} <span style="font-size:1rem;font-weight:600">lb/acre</span></div>` +
+      `<div class="s">banda: ${fmt(r.lo)} a ${fmt(r.hi)} · cubrió ${pct(nueva ? cob2 : cob1)} de los casos en validación</div></div>` +
+      `<div class="kpi"><div class="l">En toneladas de azúcar por hectárea</div><div class="v">${fmt(r.p * LB_TO_TAH, 1)}</div><div class="s">${fmt(r.lo * LB_TO_TAH, 1)} a ${fmt(r.hi * LB_TO_TAH, 1)} t/ha</div></div>` +
+      `<div class="kpi"><div class="l">Contra el testigo promedio en la misma finca y corte</div><div class="v ${r.p >= ref ? "pos" : ""}">${sgn(r.p / ref - 1, 1)}</div><div class="s">testigo: ${fmt(ref)} lb/acre</div></div>`;
+    const steps = [[`Base: testigo típico en ${corteTxt(cK)}`, fmt(r.base) + " lb/acre"]];
+    steps.push([nueva ? "Finca nueva: se supone promedio" : `Finca ${loc}`, sgn(Math.exp(r.fincaRel) - 1, 1)]);
+    steps.push([`Ventaja de ${clone} (${fmt(MP[nueva ? "escenario_2" : "escenario_1"].coef.var_rel, 2)} × historia ${sgn(Math.exp(r.varRel) - 1, 1)})`, sgn(Math.exp(r.relVar) - 1, 1)]);
+    if (r.hasLote) steps.push(["Lote el año pasado", sgn(Math.exp(r.relLote) - 1, 1)]);
+    steps.push(["Azúcar esperado", fmt(r.p) + " lb/acre"]);
+    document.getElementById("cBreak").innerHTML = steps.map((s, i) => `<div class="bd ${i === steps.length - 1 ? "tot" : ""}"><span>${s[0]}</span><span>${s[1]}</span></div>`).join("");
+    document.getElementById("cCheck").textContent = chkTxt;
+    // curva del ciclo
+    const ks = [0, 1, 2, 3, 4], pv = ks.map(k => predict(clone, loc, k, null)), pr = ks.map(k => coreAvg(loc, k));
+    const c = document.getElementById("chCycle3"); c.innerHTML = "";
+    const all = pv.flatMap(x => [x.lo, x.hi]).concat(pr);
+    lines("chCycle3", CORTES, [
+      { name: clone, color: css("--cane"), values: pv.map(x => x.p) },
+      { name: "Testigo promedio", color: css("--neutral"), values: pr, dy: 10 },
+    ], { titleText: `Ciclo esperado en ${nueva ? "una finca nueva" : loc} (sin dato del lote anterior)`, yMin: Math.floor(Math.min(...all) / 1000) * 1000, yMax: Math.ceil(Math.max(...all) / 1000) * 1000,
+         yFmt: v => fmt(v), band: { lo: pv.map(x => x.lo), hi: pv.map(x => x.hi), color: css("--cane") } });
+    // lotes en pie de la finca
+    const lt = Q2.lotes22.filter(x => x[0] === loc).sort((a, b) => a[3] - b[3] || b[6] - a[6]);
+    document.getElementById("lotesTitle").textContent = nueva ? "Lotes en pie: una finca nueva no tiene" : `Lotes en pie en ${loc} para 2022 (${lt.length})`;
+    document.getElementById("lotesTbl").innerHTML = !lt.length ? '<p class="small muted" style="padding:12px">Sin lotes de etapa 5 en pie en esta finca.</p>' :
+      `<table class="rank" style="min-width:560px"><thead><tr><th class="l">Variedad</th><th>Corte 2022</th><th>Real 2021</th><th>Ventaja 2021</th><th>Esperado 2022</th><th>Banda</th></tr></thead><tbody>` +
+      lt.map((x, i) => `<tr data-i="${i}"><td class="l mono">${x[2]}${CORE.includes(x[2]) ? '<span class="vt t">testigo</span>' : top3.includes(x[2]) ? '<span class="vt c">top 3</span>' : ""}</td><td>${corteTxt(x[3])}</td><td>${fmt(x[4])}</td><td>${ok(x[5]) ? sgn(x[5] - 1) : "—"}</td><td><b>${fmt(x[6])}</b></td><td>${fmt(x[7])}-${fmt(x[8])}</td></tr>`).join("") + "</tbody></table>";
+    document.querySelectorAll("#lotesTbl tbody tr").forEach(tr => tr.addEventListener("click", () => {
+      const x = lt[+tr.dataset.i];
+      if (!MP.variedades[x[2]]) return;
+      cVar.value = x[2]; cK = x[3]; cCut.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", +b.dataset.k === cK));
+      if (ok(x[5])) { cLote.checked = true; loteExact = x[5]; cLoteV.value = Math.max(-30, Math.min(40, Math.round((x[5] - 1) * 100))); } else { cLote.checked = false; loteExact = null; }
+      renderCalc3();
+    }));
+  }
+  [cVar, cLoc].forEach(x => x.addEventListener("change", () => { loteExact = null; renderCalc3(); }));
+  cLote.addEventListener("change", renderCalc3); cLoteV.addEventListener("input", () => { loteExact = null; renderCalc3(); });
+  cVar.value = top3[0]; cLoc.value = "ALMA"; renderCalc3();
+
+  /* ---------- evaluación gerencial ---------- */
+  const cm = R2.comparaciones["Regla P1 − Ingenuo"], ef = R2.error_por_zafra_pct;
+  document.getElementById("gerencial2").innerHTML = `
+    <div class="card"><h3>Qué significa para el ingenio</h3><p>Se puede estimar el azúcar por acre de una variedad en una finca con un error típico de ${pct(r1["MAPE_%"] / 100)} por parcela (una variedad en una finca y zafra), y ordenar las variedades dentro de un lote razonablemente bien (ρ = ${fmt(r1.orden_spearman, 2)}; ${fmt(soc.orden_spearman, 2)} en socas). ${pct(R2.parte_error_nivel)} del error es lo que le pasa a todo el lote ese año. El método de la pregunta 1 es casi todo el poder predictivo: un modelo de 3 coeficientes basta.</p></div>
+    <div class="card"><h3>Decisión recomendada</h3><ul><li>Planificar con <b>Ridge en dos piezas</b>: nivel de la finca + ventaja de la variedad.</li><li>Presupuestar con la banda, no con el punto.</li><li>En fincas nuevas, usar el modelo de finca nueva hasta la primera cosecha.</li><li>No invertir en modelos más complejos: la siguiente mejora viene de datos de clima y manejo por lote.</li></ul></div>
+    <div class="card"><h3>Impacto estimado</h3><p>Frente al promedio histórico, el error por parcela baja de ${pct(ing["MAPE_%"] / 100)} a ${pct(r1["MAPE_%"] / 100)}. Casi toda esa mejora ya la da la regla de la pregunta 1 (${num(cm["Δ MAE lb/acre"])} lb/acre, IC90 ${num(cm["IC90 bajo"])} a ${num(cm["IC90 alto"])}). Sobre todo, el modelo <b>distingue variedades</b>: el promedio histórico da el mismo número para todas. El valor está en decidir qué variedad va en qué finca, no en adivinar la zafra total.</p></div>
+    <div class="card"><h3>Nivel de certeza</h3><p>Alta en que el método supera al promedio histórico y en que los modelos complejos no agregan (bootstrap por finca-año). Media en la cifra de cada lote: la banda cubrió ${pct(cob1)} de los casos (finca conocida) y ${pct(cob2)} (finca nueva).</p></div>
+    <div class="card wide"><h3>Riesgos</h3><ul>
+      <li><b>Clima:</b> una zafra como 2019 o 2021 deja todo el programa ${fmt(Math.abs(ef["2021"]))}-${fmt(Math.abs(ef["2019"]))} % abajo de lo planificado. El modelo no lo anticipa.</li>
+      <li><b>Validez externa:</b> entrenado en Louisiana. Para el ingenio se traslada la estructura (nivel + ventaja contra testigos), no los números: hay que recalibrar con 2-3 zafras propias.</li>
+      <li><b>Finca nueva:</b> aquí cuesta poco (${sgn(R2.costo_finca_nueva_lb / r1.MAE)} de error) porque las fincas de Louisiana se parecen; en Guatemala, con más diferencias de suelo, altura y lluvia, costaría más.</li>
+      <li><b>Poca evidencia:</b> las variedades con pocas parcelas se acercan a los testigos por diseño: su predicción es prudente.</li></ul></div>`;
+})();
+</script>
+<script>
+/* ===================== Pregunta 3 ===================== */
+(function () {
+  const Q3 = D.q3, R3 = Q3.res, V3 = Q3.vars;
+  const GRUPOS = R3.orden_grupos;
+  const GCOL = Object.fromEntries(GRUPOS.map((g, i) => [g, `var(--g${i + 1})`]));
+  const gcol = g => css(`--g${GRUPOS.indexOf(g) + 1}`);
+  const P = Object.fromEntries(R3.perfil.map(p => [p.grupo, p]));
+  const top3 = D.q2 ? D.q2.top3 : [];
+  const sp = (v, d = 1) => (v >= 0 ? "+" : "−") + fmt(Math.abs(v), d) + " %";
+  const est = R3.estabilidad.find(e => e.k === R3.k);
+
+  document.getElementById("q3Lede").textContent =
+    `Las 23 variedades con evidencia suficiente se describen con cuatro números: caña, calidad, longevidad y estabilidad. ` +
+    `No forman tipos naturales (son un continuo), pero ${R3.k} perfiles se reproducen al remuestrear ensayos y, aunque se ` +
+    `armaron sin mirar la economía, explican el ${pct(R3.eta2)} de la diferencia de ganancia de la pregunta 1.`;
+  document.getElementById("q3Kpis").innerHTML = [
+    ["23", "variedades segmentadas", "las de la pregunta 1"],
+    [String(R3.k), "perfiles", "elegidos por reproducibilidad"],
+    [fmt(est.ARI_mediana, 2), "reproducibilidad (ARI)", "1 = idéntico al remuestrear"],
+    [pct(R3.eta2), "de la ganancia P1 explicada", `p < ${R3.p_eta2 < 0.0001 ? "0.0001" : fmt(R3.p_eta2, 4)}`],
+    [pct(R3.ruido_mediana), "de la varianza bruta era ruido", "se resta antes de medir estabilidad"],
+  ].map(([v, l, s]) => `<div class="kpi"><div class="v">${v}</div><div class="l">${l}</div><div class="s">${s}</div></div>`).join("");
+  document.getElementById("q3Ruido").textContent = `en mediana era el ${pct(R3.ruido_mediana)} de la varianza bruta, así que sin restarlo la "estabilidad" mediría cuántas repeticiones tuvo cada variedad.`;
+
+  document.getElementById("q3Feats").innerHTML = [
+    ["Productividad", "TCH", "Caña por área en plantía, contra los testigos."],
+    ["Calidad", "rendimiento", "Azúcar recuperable por tonelada (TRS), contra los testigos."],
+    ["Longevidad", "persistencia", "Cuánto gana o pierde en caña por cada corte, contra los testigos."],
+    ["Estabilidad", "predecible", "Variación de su ventaja entre fincas y años que no explica la calidad de la finca, sin ruido de parcela."],
+  ].map(([t, c, d]) => `<div class="sc"><h3>${t}</h3><div class="small"><span class="chip">${c}</span></div><p>${d}</p></div>`).join("");
+
+  const C = R3.correlaciones, nm = { productividad: "caña", calidad: "calidad", longevidad: "longevidad", estabilidad: "estabilidad" };
+  const pares = [["productividad", "calidad"], ["calidad", "longevidad"], ["longevidad", "estabilidad"], ["productividad", "longevidad"]];
+  const cc = document.getElementById("q3Corr");
+  cc.innerHTML = pares.map(([a, b]) => `<span class="chip cane" data-a="${a}" data-b="${b}">${nm[a]} ↔ ${nm[b]}: <b>${C[a][b] >= 0 ? "+" : "−"}${fmt(Math.abs(C[a][b]), 2)}</b></span>`).join("");
+  cc.querySelectorAll("span").forEach(s => { const r = C[s.dataset.a][s.dataset.b]; bindTip(s, `Correlación ${fmt(r, 2)}: ${r < -0.3 ? "cuando una sube, la otra tiende a bajar" : r > 0.3 ? "tienden a ir juntas" : "relación débil"}`); });
+
+  /* mapa */
+  let activo = null;
+  const leg = document.getElementById("q3Legend");
+  leg.innerHTML = GRUPOS.map(g => `<button type="button" class="chip" data-g="${g}" style="cursor:pointer"><i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${GCOL[g]};margin-right:6px"></i>${g}</button>`).join("");
+  leg.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { activo = activo === b.dataset.g ? null : b.dataset.g; leg.querySelectorAll("button").forEach(x => x.style.outline = x.dataset.g === activo ? "2px solid var(--ink)" : "none"); renderMap(); }));
+  function renderMap() {
+    const c = document.getElementById("chMap"); c.innerHTML = "";
+    title(c, "Productividad (caña) contra calidad (TRS), en % frente a los testigos");
+    const w = 860, hgt = 520, L = 56, R = 20, T = 16, B = 44, s = svgBox(c, w, hgt);
+    const xs = V3.map(v => v.cana), ys = V3.map(v => v.trs);
+    const x0 = Math.min(...xs) - 3, x1 = Math.max(...xs) + 3, y0 = Math.min(...ys) - 2.5, y1 = Math.max(...ys) + 2.5;
+    const sx = v => L + (v - x0) / (x1 - x0) * (w - L - R), sy = v => hgt - B - (v - y0) / (y1 - y0) * (hgt - B - T);
+    const g = el("g", { class: "grid" }, s);
+    niceTicks(x0, x1, 8).forEach(t => { el("line", { x1: sx(t), x2: sx(t), y1: T, y2: hgt - B }, g); const tx = el("text", { x: sx(t), y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s); tx.textContent = (t > 0 ? "+" : "") + fmt(t) + " %"; });
+    niceTicks(y0, y1, 6).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); const tx = el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s); tx.textContent = (t > 0 ? "+" : "") + fmt(t) + " %"; });
+    el("line", { x1: sx(0), x2: sx(0), y1: T, y2: hgt - B, class: "base" }, s); el("line", { x1: L, x2: w - R, y1: sy(0), y2: sy(0), class: "base" }, s);
+    [-10, -5, 0, 5, 10, 15, 20].forEach(a => {   // misma azúcar en plantía: (1+x)(1+y) = 1+a
+      const pts = []; for (let x = x0; x <= x1; x += 0.25) { const y = ((1 + a / 100) / (1 + x / 100) - 1) * 100; if (y >= y0 && y <= y1) pts.push([sx(x), sy(y)]); }
+      if (pts.length < 2) return;
+      el("path", { d: pts.map((p, i) => `${i ? "L" : "M"}${p[0]},${p[1]}`).join(" "), fill: "none", stroke: a === 0 ? css("--ink-3") : css("--rule"), "stroke-dasharray": "5 5", "stroke-width": a === 0 ? 1.4 : 1 }, s);
+      const t = el("text", { x: pts[0][0] + 4, y: pts[0][1] + 12, class: "lab", "font-size": "11" }, s); t.textContent = `azúcar ${a > 0 ? "+" : ""}${a} %`;
+    });
+    V3.slice().sort((a, b) => b.lon - a.lon).forEach(v => {
+      const on = !activo || v.grupo === activo, r = 6 + Math.max(0, v.lon + 10) * 0.9;
+      const ci = el("circle", { cx: sx(v.cana), cy: sy(v.trs), r, fill: gcol(v.grupo), "fill-opacity": on ? 0.88 : 0.12, stroke: css("--surface"), "stroke-width": 2 }, s);
+      bindTip(ci, `<b>${v.clone}</b>${v.check ? " · testigo núcleo" : ""}<br>${v.grupo}<br>Caña ${sp(v.cana)} · TRS ${sp(v.trs)}<br>Por corte ${sp(v.lon)} · σ ${fmt(v.sigma, 1)} %<br>Ganancia P1: ${usd(v.gan)}/acre/año · certeza ${pct(v.certeza)}`);
+      if ((activo && v.grupo === activo) || (!activo && (top3.includes(v.clone) || v.grupo === GRUPOS[3]))) {
+        const t = el("text", { x: sx(v.cana) + r + 4, y: sy(v.trs) + 4, class: "val", "font-family": "var(--f-mono)", "font-size": "11.5" }, s); t.textContent = v.clone;
+      }
+    });
+    const xl = el("text", { x: (L + w - R) / 2, y: hgt - 6, "text-anchor": "middle", class: "lab" }, s); xl.textContent = "Caña por área en plantía vs testigos";
+  }
+  renderMap();
+
+  /* tarjetas de grupos */
+  const DEC = {
+    [GRUPOS[0]]: "Núcleo de la expansión: la ventaja crece en las socas.",
+    [GRUPOS[1]]: "No ampliar: el azúcar por acre queda igual que los testigos y son menos estables.",
+    [GRUPOS[2]]: "No son base de expansión: la ventaja de plantía se va en las socas. Revisar su fibra (bagazo).",
+    [GRUPOS[3]]: "Retirar de la expansión; evaluar reemplazar al testigo inestable en ensayos nuevos.",
+    [GRUPOS[4]]: "Mantener solo donde ya están; no ampliar.",
+  };
+  document.getElementById("q3Groups").innerHTML = GRUPOS.map(g => {
+    const p = P[g], j = R3.jaccard[g], miembros = V3.filter(v => v.grupo === g).sort((a, b) => a.rank - b.rank);
+    return `<div class="sc" style="border-top:4px solid ${GCOL[g]}"><span class="badge ${j >= 0.75 ? "alta" : "media"}">${j >= 0.75 ? "grupo firme" : "bordes difusos"} · Jaccard ${fmt(j, 2)}</span>
+      <h3>${g}</h3>
+      <dl class="kv"><dt>Caña</dt><dd>${sp(p["caña %"])}</dd><dt>TRS</dt><dd>${sp(p["TRS %"])}</dd><dt>Azúcar plantía</dt><dd>${sp(p["azúcar plantía %"])}</dd>
+      <dt>Por corte</dt><dd>${sp(p["caña por corte %"])}</dd><dt>σ interacción</dt><dd>${fmt(p["σ interacción %"], 1)} %</dd>
+      <dt>Ganancia P1</dt><dd>${usd(p["ganancia P1 US$/acre/año (mediana)"])}/acre/año (mediana)</dd></dl>
+      <div class="chips">${miembros.map(v => `<span class="chip mono">${v.clone}${v.check ? " ·T" : ""}</span>`).join("")}</div>
+      <p><b>Decisión:</b> ${DEC[g]}</p></div>`;
+  }).join("");
+
+  /* grupos naturales */
+  const ks = R3.silueta.map(s => String(s.k));
+  document.getElementById("q3NatIntro").textContent =
+    `Un algoritmo siempre devuelve grupos. La prueba: se compara la separación de los grupos (silueta) con la de 200 tablas sin estructura, ` +
+    `con cada indicador barajado por separado. Y se mide cuánto se reproduce cada partición al remuestrear ensayos 300 veces.`;
+  lines("chSil", ks, [
+    { name: "Variedades reales", color: css("--cane"), values: R3.silueta.map(s => s.silueta) },
+    { name: "Azar (percentil 95)", color: css("--neutral"), values: R3.silueta.map(s => s.nulo_p95), dy: 4 },
+  ], { titleText: "Separación (silueta) por número de grupos", yMin: 0.2, yMax: 0.4, yFmt: v => fmt(v, 2), hgt: 240 });
+  lines("chAri", ks, [{ name: "Reproducibilidad (mediana)", color: css("--violet"), values: R3.estabilidad.map(e => e.ARI_mediana) }],
+        { titleText: "Reproducibilidad al remuestrear (ARI)", yMin: 0, yMax: 1, yFmt: v => fmt(v, 2), hgt: 240,
+          band: { lo: R3.estabilidad.map(e => e.ARI_p10), hi: R3.estabilidad.map(e => e.ARI_p90), color: css("--violet") } });
+  document.getElementById("q3NatMean").textContent =
+    `Ninguna partición supera al azar (p ≥ ${fmt(Math.min(...R3.silueta.map(s => s.p)), 3)}): las variedades son un continuo. Dos grupos son los más reproducibles ` +
+    `(${fmt(R3.estabilidad[0].ARI_mediana, 2)}) pero solo separan tonelaje de calidad; ${R3.k} es el más reproducible entre 3 y 7 sin grupos de una sola variedad (${fmt(est.ARI_mediana, 2)}).`;
+
+  /* certeza */
+  const ordenV = V3.slice().sort((a, b) => GRUPOS.indexOf(a.grupo) - GRUPOS.indexOf(b.grupo) || a.rank - b.rank);
+  document.getElementById("q3Cert").innerHTML = `<table class="rank" style="min-width:560px"><thead><tr><th class="l">Variedad</th><th class="l">Grupo</th><th>Certeza</th><th>Años de datos</th><th>Ganancia P1</th></tr></thead><tbody>` +
+    ordenV.map(v => `<tr><td class="l mono">${v.clone}${v.check ? '<span class="vt t">testigo</span>' : ""}${top3.includes(v.clone) ? '<span class="vt c">top 3</span>' : ""}</td>
+      <td class="l"><i style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${GCOL[v.grupo]};margin-right:6px"></i>${v.grupo}</td>
+      <td><span class="minimeter"><span style="width:${v.certeza * 100}%;background:${v.certeza < 0.6 ? "var(--sugar)" : "var(--cane)"}"></span></span>${pct(v.certeza)}</td>
+      <td>${v.anios}</td><td>${usd(v.gan)}</td></tr>`).join("") + "</tbody></table>";
+  const dud = V3.filter(v => v.certeza < 0.6).map(v => v.clone);
+  document.getElementById("q3CertNote").textContent = `Asignación dudosa (< 60 %): ${dud.join(", ")}. HOCP14-885 es la única con mucha caña y mucha calidad a la vez, así que no se parece del todo a ningún grupo. Para estas, decide la pregunta 1.`;
+
+  document.getElementById("gerencial3").innerHTML = `
+    <div class="card"><h3>Qué significa para el ingenio</h3><p>No hay variedad que gane en todo: hay un compromiso entre tonelaje y calidad, la calidad viene con longevidad, y la longevidad con estabilidad. Los ${R3.k} perfiles separan bien el dinero (${pct(R3.eta2)} de la ganancia de la pregunta 1).</p></div>
+    <div class="card"><h3>Decisión recomendada</h3><ul><li>Ampliar desde "${GRUPOS[0]}".</li><li>No ampliar "${GRUPOS[1]}" ni "${GRUPOS[4]}".</li><li>Retirar "${GRUPOS[3]}" y revisar el testigo inestable.</li><li>Clasificar cada variedad nueva con sus 4 números antes de que acumule años de margen.</li></ul></div>
+    <div class="card"><h3>Impacto estimado</h3><p>Entre el mejor y el peor perfil hay ${usd(P[GRUPOS[0]]["ganancia P1 US$/acre/año (mediana)"] - P[GRUPOS[3]]["ganancia P1 US$/acre/año (mediana)"])}/acre/año de diferencia en la mediana. El valor es una regla para dar rol a cada variedad nueva.</p></div>
+    <div class="card"><h3>Nivel de certeza</h3><p>Alta en el compromiso caña-calidad y en que los grupos separan la ganancia. Media en las fronteras: varias variedades, entre ellas las dos primeras de la pregunta 1, tienen asignación dudosa.</p></div>
+    <div class="card wide"><h3>Riesgos</h3><ul><li><b>Continuo, no tipos:</b> las del borde cambian de grupo al remuestrear.</li><li><b>Estabilidad de las nuevas:</b> medida con 2-4 años; la de las antiguas con 8-12. Puede estar sobreestimada.</li><li><b>Fibra:</b> sin datos para 7 de las 23.</li><li><b>Validez externa:</b> se traslada el método, no las variedades.</li></ul></div>`;
+})();
+
+/* ===================== Pregunta 4 ===================== */
+(function () {
+  const R4 = D.q4.res, VCOMP = R4.componentes, SM = R4.supuestos_metricos;
+  const TCH = 2.2417, KG = 0.5;
+  const top3 = D.q2 ? D.q2.top3 : [];
+
+  document.getElementById("q4Hyp").innerHTML = [
+    ["E1", "El litoral con bancos de arena retiene menos agua: rinden más las variedades tolerantes a sequía o con riego.", "Interacción variedad × grupo de suelo."],
+    ["E2", "El oriente (Santa Rosa, Taxisco) es más seco y con otros vientos que el occidente (Retalhuleu).", "Zonas con lluvia y viento por estación."],
+    ["E3", "Cerca de los volcanes (300-400 msnm) hay otros suelos y más lluvia.", "Estrato y suelo en la zona de manejo."],
+    ["E4", "Hay lotes que nunca se renovaron, otros que se renuevan de más y otros tarde.", "Auditoría de renovaciones."],
+    ["E5", "La distancia al ingenio encarece cosecha y renovación.", "Economía por zona de costo."],
+    ["E6", "Hay variedades generalistas y otras especialistas de una zona.", "Estabilidad y respuesta (pregunta 3) por zona."],
+  ].map(([k, h, t]) => `<div class="sc"><span class="badge media">${k} · por confirmar</span><p>${h}</p><div class="know"><span class="y">${t}</span></div></div>`).join("");
+
+  document.getElementById("q4Rules").innerHTML = ["doble captura", "rendimiento imposible", "número con coma decimal", "estrato inexistente"]
+    .map(r => `<span class="chip cane">✓ rechaza: ${r}</span>`).join("");
+  document.getElementById("q4Tables").innerHTML = [
+    ["finca", "altitud, estrato, distancia al ingenio, coordenadas"], ["lote", "área, grupo de suelo, drenaje, riego, polígono"],
+    ["siembra", "fecha, variedad: cada renovación abre un ciclo"], ["cosecha", "zafra, fecha, número de corte, toneladas, rendimiento, fibra, tercio"],
+    ["clima_diario", "lluvia, temperatura, radiación, viento por estación"], ["manejo", "fertilización, riego, madurante"],
+    ["costo_lote", "corte, alce, transporte, renovación por lote"], ["ensayo + parcela", "variedad, testigo, repetición, TCH, rendimiento, roya"],
+  ].map(([t, d]) => `<div class="sc"><h3 class="mono" style="font-size:.95rem">${t}</h3><p>${d}</p></div>`).join("");
+
+  /* auditoría simulada */
+  const ej = R4.auditoria.ejemplos, anios = [...new Set(Object.values(ej).flat().map(r => r[0]))].sort();
+  let t = '<table class="tl vgrid" style="min-width:640px"><thead><tr><th class="row"></th>' + anios.map(a => `<th>${String(a).slice(2)}</th>`).join("") + "</tr></thead><tbody>";
+  Object.entries(ej).forEach(([diag, filas]) => {
+    const m = Object.fromEntries(filas.map(([z, k]) => [z, k]));
+    t += `<tr><th class="row" style="font-family:var(--f-body)">${diag}</th>` + anios.map(a => {
+      const k = m[a]; if (k == null) return '<td class="vn"></td>';
+      const cls = k === 0 ? "c0" : k <= 2 ? "c1" : k <= 4 ? "c2" : "c3";
+      return `<td class="${cls}" style="height:26px;font-size:.75rem">${k === 0 ? "P" : k}</td>`;
+    }).join("") + "</tr>";
+  });
+  document.getElementById("q4Audit").innerHTML = t + "</tbody></table>";
+  const A = R4.auditoria;
+  document.getElementById("q4AuditStats").innerHTML =
+    `<div><span class="n">${fmt(A.cerrados_bien)}/${fmt(A.cerrados)}</span><span class="l">ciclos cerrados bien clasificados (simulación)</span></div>` +
+    `<div><span class="n">${pct(A.perdidas_sin_corte)}</span><span class="l">de las renovaciones se pierden sin número de corte (simulación)</span></div>`;
+
+  /* distancia */
+  const curvas = { "Testigo promedio": curveFor(null) };
+  top3.forEach(c => { curvas[c] = curveFor(VBY[c], "cons"); });
+  const COLS = { "Testigo promedio": css("--neutral"), [top3[0]]: css("--cane"), [top3[1]]: css("--violet"), [top3[2]]: css("--g1") };
+  function ciclo(curve, ct, rv) {
+    const m = curve.map((c, k) => c.tca * TCH * (c.trs * KG) * SM.precio_kg - ct * c.tca * TCH - SM.mantenimiento_ha - (k === 0 ? rv : 0));
+    let cum = 0, best = 0; const avg = m.map((x, i) => { cum += x; return cum / (i + 1); });
+    avg.forEach((x, i) => { if (x > avg[best]) best = i; });
+    return { n: best + 1, v: avg[best] };
+  }
+  function renderDist() {
+    const ct = +document.getElementById("dCost").value, rv = +document.getElementById("dRen").value;
+    document.getElementById("dCostLbl").textContent = `US$${fmt(ct, 2)}/t`;
+    document.getElementById("dRenLbl").textContent = `US$${fmt(rv)}/ha`;
+    document.getElementById("dKpis").innerHTML = Object.entries(curvas).map(([nm, cv]) => {
+      const r = ciclo(cv, ct, rv);
+      return `<div class="kpi"><div class="l">${nm}</div><div class="v ${r.v >= 0 ? "pos" : ""}">${r.v >= 0 ? "" : "−"}US$${fmt(Math.abs(r.v))}</div><div class="s">por ha/año · renovar cada ${r.n} cortes</div></div>`;
+    }).join("");
+    const c = document.getElementById("chDist"); c.innerHTML = "";
+    const xs = []; for (let x = 10; x <= 60; x += 5) xs.push(x);
+    const series = Object.entries(curvas).map(([nm, cv]) => ({ name: nm, color: COLS[nm], values: xs.map(x => ciclo(cv, x, rv).v) }));
+    const all = series.flatMap(s => s.values);
+    lines("chDist", xs.map(x => "$" + x), series, { titleText: `Margen del mejor ciclo según el costo por tonelada (renovación US$${fmt(rv)}/ha)`,
+      yMin: Math.floor(Math.min(...all) / 500) * 500, yMax: Math.ceil(Math.max(...all) / 500) * 500, yFmt: v => fmt(v), endLabels: false });
+    const be = Object.entries(curvas).map(([nm, cv]) => {          // costo en que el margen llega a 0 (bisección)
+      let lo = 10, hi = 100; for (let i = 0; i < 50; i++) { const m = (lo + hi) / 2; if (ciclo(cv, m, rv).v > 0) lo = m; else hi = m; } return [nm, hi]; });
+    const base = ciclo(curvas["Testigo promedio"], ct, rv), b2 = ciclo(curvas["Testigo promedio"], ct + 1, rv);
+    document.getElementById("dMean").textContent =
+      `Cada US$1/t adicional cuesta ~US$${fmt(base.v - b2.v)}/ha/año al testigo. Con esta renovación, el testigo deja de cubrir costos a ~US$${fmt(be[0][1])}/t; ` +
+      be.slice(1).map(([nm, x]) => `${nm} a ~US$${fmt(x)}/t`).join(", ") + `. El ciclo óptimo cambia sobre todo con el costo de renovar.`;
+  }
+  ["dCost", "dRen"].forEach(id => document.getElementById(id).addEventListener("input", renderDist));
+  document.getElementById("dCost").value = SM.corte_t.toFixed(2); document.getElementById("dRen").value = Math.round(SM.renovacion_ha);   // supuestos de la prueba
+  renderDist();
+
+  /* potencia */
+  const Phi = z => { const t = 1 / (1 + 0.2316419 * Math.abs(z)); const d = 0.3989423 * Math.exp(-z * z / 2);
+    const p = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - p : p; };
+  const potencia = (delta, L, Y, R, f) => {
+    const v = 2 * (f * VCOMP.GL / L + f * VCOMP.GY / Y + f * VCOMP.GLY / (L * Y) + VCOMP.e / (L * Y * R));
+    const z = Math.log(1 + delta) / Math.sqrt(v); return Phi(z - 1.959964) + Phi(-z - 1.959964);
+  };
+  function renderPow() {
+    const d = +document.getElementById("pDelta").value / 100, Y = +document.getElementById("pY").value, R = +document.getElementById("pR").value, f = +document.getElementById("pF").value;
+    document.getElementById("pDeltaLbl").textContent = fmt(d * 100, 1) + " %";
+    document.getElementById("pYLbl").textContent = Y; document.getElementById("pRLbl").textContent = R; document.getElementById("pFLbl").textContent = "×" + fmt(f, 2);
+    let need = null; for (let L = 2; L <= 200; L++) if (potencia(d, L, Y, R, f) >= 0.8) { need = L; break; }
+    const p15 = potencia(d, 15, Y, R, f), pR1 = potencia(d, 15, Y, R + 1, f), Lx = Math.round(15 * (R + 1) / R), pLx = potencia(d, Lx, Y, R, f);
+    document.getElementById("pKpis").innerHTML =
+      `<div class="kpi"><div class="l">Fincas para 80 % de potencia</div><div class="v">${need ? need : "> 200"}</div><div class="s">${need ? "por cohorte" : "no se alcanza: la interacción variedad × año pone un piso"}</div></div>` +
+      `<div class="kpi"><div class="l">Potencia con 15 fincas</div><div class="v">${pct(p15)}</div><div class="s">probabilidad de detectar la ventaja</div></div>` +
+      `<div class="kpi"><div class="l">Mismo esfuerzo extra (+${fmt(100 / R)} % de parcelas)</div><div class="v" style="font-size:1.1rem">${Lx} fincas: +${fmt((pLx - p15) * 100, 1)} pp</div><div class="s">${R + 1} repeticiones: +${fmt((pR1 - p15) * 100, 1)} pp</div></div>`;
+    const gL = pLx - p15, gR = pR1 - p15, rEl = document.getElementById("pRatio");   // potencia extra: fincas vs repeticiones
+    if (rEl) rEl.textContent = gR > 1e-4 ? fmt(gL / gR, 1) + " veces" : "mucho más que";
+    const c = document.getElementById("chPow"); c.innerHTML = "";
+    const Ls = []; for (let L = 2; L <= 40; L += 2) Ls.push(L);
+    lines("chPow", Ls.map(String), [
+      { name: `${R} repeticiones`, color: css("--cane"), values: Ls.map(L => potencia(d, L, Y, R, f)) },
+      { name: `${R + 1} repeticiones`, color: css("--violet"), values: Ls.map(L => potencia(d, L, Y, R + 1, f)), dy: -6 },
+    ], { titleText: "Potencia según el número de fincas", yMin: 0, yMax: 1, yFmt: v => pct(v), endLabels: true });
+  }
+  ["pDelta", "pY", "pR", "pF"].forEach(id => document.getElementById(id).addEventListener("input", renderPow));
+  renderPow();
+
+  document.getElementById("q4Road").innerHTML = [
+    ["Zafra 1", "Ordenar los registros en el modelo de datos; auditoría de renovaciones y regla por lote."],
+    ["Zafra 1", "Costo y distancia por lote: ciclo óptimo por zona de costo."],
+    ["Zafra 1-2", "Zonificar lotes con estrato, suelo, lluvia, viento y drenaje."],
+    ["Desde zafra 1", "Una cohorte de ensayos por año en 20 fincas (5 por estrato), con testigos estables."],
+    ["Zafra 3-4", "Repetir las preguntas 1-3 con datos propios."],
+  ].map(([w, d]) => `<li><h3>${w}</h3><p>${d}</p></li>`).join("");
+
+  document.getElementById("gerencial4").innerHTML = `
+    <div class="card"><h3>Qué significa para el ingenio</h3><p>No hay que esperar a los ensayos para decidir con datos propios: los registros de cosecha ya permiten auditar renovaciones y costos por lote. Qué variedad sembrar en cada ambiente sí necesita ensayos, porque los datos comerciales mezclan variedad y lugar.</p></div>
+    <div class="card"><h3>Decisión recomendada</h3><ul><li>Adoptar el modelo de datos mínimo (número de corte y siembra obligatorios).</li><li>Auditar renovaciones en la primera zafra.</li><li>Zonificar con la clasificación de CENGICAÑA.</li><li>Una cohorte anual de ensayos en 20 fincas, 5 por estrato.</li></ul></div>
+    <div class="card"><h3>Impacto estimado</h3><p>La auditoría no requiere inversión nueva y ataca dos pérdidas directas: renovar antes de recuperar la renovación y cosechar socas vencidas. Su tamaño solo lo pueden decir los registros del ingenio.</p></div>
+    <div class="card"><h3>Nivel de certeza</h3><p>Alta en el método (validado con simulación y con PostgreSQL) y en que la finca pesa más que la repetición. Media en el número de fincas: depende de cuánto mayor sea la interacción variedad × ambiente en la costa sur.</p></div>
+    <div class="card wide"><h3>Riesgos</h3><ul><li><b>Registros incompletos:</b> sin número de corte no se ven las renovaciones que repiten variedad (una de cada cuatro en la simulación).</li><li><b>Variedad confundida con lugar</b> en los datos comerciales: generan hipótesis, no recomendaciones.</li><li><b>Tiempo:</b> una cohorte tarda 4-5 años en medir longevidad.</li><li><b>Tamaños:</b> calculados con la variabilidad de Louisiana; la primera cohorte permite recalcularlos.</li></ul></div>`;
+})();
+
+/* ===================== Cierre ===================== */
+(function () {
+  const v1 = [...D.q1.vars].sort((a, b) => a.rank - b.rank), r2 = D.q2.res.metricas_e1.Ridge, R3 = D.q3.res;
+  document.getElementById("cierreCards").innerHTML = `
+    <div class="card"><h3>1 · Qué ampliar y cuándo renovar</h3><p>Ampliar <b class="mono">${v1[0].clone}</b> y validar <b class="mono">${v1[1].clone}</b> y <b class="mono">${v1[2].clone}</b>: ${usd(v1[2].ganancia)} a ${usd(v1[0].ganancia)} más por acre al año que el testigo. Renovar cada ${v1[0].ciclo} cortes. El precio cambia cuánto se gana, no cuál elegir.</p></div>
+    <div class="card"><h3>2 · Cuánto azúcar esperar</h3><p>Error típico de ${pct(r2["MAPE_%"] / 100)} por parcela; ordena variedades (ρ ${fmt(r2.orden_spearman, 2)}). ${pct(D.q2.res.parte_error_nivel)} del error es clima y manejo del lote-año: presupuestar con banda y medir clima.</p></div>
+    <div class="card"><h3>3 · Qué rol darle a cada variedad</h3><p>${R3.k} perfiles reproducibles que explican el ${pct(R3.eta2)} de la ganancia. Compromiso tonelaje-calidad; la calidad viene con longevidad. Uno de los testigos es inestable.</p></div>
+    <div class="card"><h3>4 · Cómo decidir con datos propios</h3><p>Auditar renovaciones con los registros que ya existen; zonificar con CENGICAÑA; ensayos en 20 fincas por cohorte (5 por estrato) con testigos estables. Con el mismo esfuerzo extra, sumar fincas da 2.6 veces más potencia que sumar repeticiones (más si la interacción en Guatemala es mayor).</p></div>`;
+})();
+</script>
+</body>
+</html>
