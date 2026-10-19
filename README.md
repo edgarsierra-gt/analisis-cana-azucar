@@ -40,6 +40,30 @@ Explicación visual e interactiva: `docs/serie1_explicacion.html`.
 4. Documento explicativo interactivo: `python docs/build_serie1_explicacion.py` (desde la raíz) regenera
    `docs/serie1_explicacion.html` con las cifras de los notebooks. Se abre en cualquier navegador; no necesita servidor.
 
+## Serie IV · API en producción
+
+Los modelos de la Serie I se exponen como una API REST (FastAPI), con validación de entradas y documentación OpenAPI.
+No necesita los datasets: carga los JSON de `outputs/models/` y usa el mismo código de `src/` que los notebooks.
+Detalle de cada consulta, ejemplos y para qué sirve: [`docs/api.md`](docs/api.md).
+
+| Qué | Comando (desde la raíz, con Docker Desktop abierto) |
+|---|---|
+| Levantar la API | `docker compose up --build` → documentación interactiva en `http://localhost:8000/docs` |
+| Correr todas las pruebas, incluida PostgreSQL 16 | `docker compose --profile pruebas run --rm pruebas` |
+| Sin Docker | `pip install -r requirements.txt`, luego `uvicorn api.main:app --reload` y `pytest` |
+
+| Consulta | Pregunta |
+|---|---|
+| `GET /campo/variedades`, `POST /campo/ciclo` | 1 · ranking, ciclo de renovación y precio de equilibrio |
+| `POST /campo/pronostico` | 2 · azúcar por acre esperado, con banda |
+| `POST /campo/segmento` | 3 · grupo de una variedad |
+| `POST /campo/auditoria`, `POST /campo/auditoria/csv` | 4 · auditoría de renovaciones por lote |
+
+Las pruebas (`tests/test_api.py`) llaman a la API y reproducen las cifras de control de la Serie I: margen de
+referencia US$526.3/acre/año, las 23 variedades del notebook 02, las 509 predicciones de 2022 (≤ 1 lb/acre), el 100 % de
+las asignaciones de grupos y 1,143/1,143 ciclos de la auditoría. Última corrida dentro de Docker, con PostgreSQL 16:
+52 pruebas aprobadas (`outputs/tests/pytest_docker.txt`).
+
 ## Estructura
 - `src/campo_data.py` — carga y limpieza del dataset de campo (reglas documentadas; la usarán notebooks y API)
 - `src/campo_economia.py` — comparación contra testigos, curvas por variedad y economía del ciclo de renovación
@@ -54,6 +78,12 @@ Explicación visual e interactiva: `docs/serie1_explicacion.html`.
 - `sql/esquema_campo.sql` — modelo de datos de campo para PostgreSQL (pregunta 4)
 - `tests/test_esquema_postgres.py` — prueba de punta a punta del esquema (requiere `CAMPO_PG_DSN`; sin ella se omite). Última corrida
   contra PostgreSQL 16: `outputs/tests/pytest_postgres.txt` (5 aprobadas)
+- `outputs/tests/pytest_docker.txt` — salida de todas las pruebas dentro de Docker (API + PostgreSQL 16: 52 aprobadas)
+- `api/` — API de la Serie IV: `main.py` (rutas y OpenAPI), `esquemas.py` (validación de entradas), `servicios.py`
+  (cálculos sobre los JSON), `requirements.txt` (dependencias de la imagen Docker)
+- `Dockerfile`, `docker-compose.yml` — imagen de la API y servicios de pruebas (PostgreSQL 16 temporal)
+- `tests/test_api.py` — pruebas de la API con las cifras de control de la Serie I
+- `docs/api.md` — documentación de la API: qué es, para qué sirve, cada consulta con ejemplo
 - `notebooks/` — un notebook por etapa de análisis
 - `outputs/figures`, `outputs/tables` — generados por los notebooks
 - `bitacora.md` — decisiones, hipótesis descartadas y uso de IA

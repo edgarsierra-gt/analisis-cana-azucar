@@ -478,3 +478,61 @@ las predicciones de P2.
 
 La prueba del esquema contra PostgreSQL se omite sin `CAMPO_PG_DSN`; su última corrida sigue en
 `outputs/tests/pytest_postgres.txt`.
+
+---
+
+## Serie IV · API en producción (`api/`, `docs/api.md`)
+
+**D42. La API lee los artefactos JSON; no re-entrena ni usa pickles.** Al arrancar carga `serie1_curvas.json`,
+`serie1_modelo_p2.json` y `serie1_segmentos.json`, y calcula con los mismos módulos de `src/` que los notebooks. Así
+sus respuestas son las cifras de los notebooks y no necesita los datasets.
+*Descartado:* pickles de scikit-learn (dependen de la versión exacta y no se pueden leer) y re-entrenar al arrancar
+(obligaría a llevar los datasets a la imagen).
+
+**D43. Endpoints por pregunta.** `GET /campo/variedades` y `POST /campo/ciclo` (P1), `POST /campo/pronostico` (P2),
+`POST /campo/segmento` (P3), `POST /campo/auditoria` y `/campo/auditoria/csv` (P4), más `GET /salud`. Cada respuesta
+trae lo necesario para decidir, no solo el número: ciclo óptimo con el margen de cada ciclo posible, pronóstico con
+banda y desglose, grupo con el segundo más cercano, auditoría con decisión por lote.
+
+**D44. Validación de entradas con rangos plausibles** (pydantic): precio US$0.05-1.00/lb, corte 0-4, TCH 0-400 t/ha,
+etc. Los errores devuelven 422 con un mensaje en español que dice qué corregir. Una variedad sin historia en etapa 5 se
+rechaza: predecirla como si fuera un testigo promedio daría una cifra sin respaldo (es el escenario 3, pendiente).
+
+**D45. Segmento con entradas en %**, como la tabla del notebook 04 (más fácil de llenar que logaritmos); la API las
+pasa a logaritmo. Con los valores redondeados de la tabla se reproducen las 23 asignaciones; la menor diferencia entre
+el centro más cercano y el segundo es 0.54 desviaciones, así que el redondeo no cambia ninguna. Como no hay grupos
+naturales (D31), la respuesta incluye el segundo grupo y las distancias.
+
+**D46. Pronóstico con la cobertura real de la banda** (74 % en escenario 1, 71 % en escenario 2), no el 80 % nominal
+(D27). La respuesta da lb/acre y t/ha.
+
+**D47. Auditoría desde JSON o CSV.** El CSV se valida fila por fila con el mismo esquema que el JSON. El óptimo es el
+del testigo con los supuestos en unidades métricas (4 cortes), igual que el notebook 05. Sin la columna `corte` la API
+responde, pero avisa (`corte_registrado: false`).
+
+**D48. Docker.** Una sola imagen (`python:3.12-slim`, dependencias en `api/requirements.txt`) corre la API y las
+pruebas; no lleva datasets, notebooks ni PDF. `docker compose up --build` levanta la API; el perfil `pruebas` agrega un
+PostgreSQL 16 temporal (en memoria, sin puertos expuestos) para correr también la prueba del esquema SQL. La imagen lee
+`PORT`, así que sirve igual en Cloud Run. `CORS_ORIGINS` limita qué sitios pueden consultarla.
+La prueba del esquema ahora crea un esquema temporal y lo borra, para poder repetirla en la misma base.
+*Verificación:* `docker compose up --build` levanta la API sana (healthcheck) y responde en `/docs`; dentro de Docker
+pasan las 52 pruebas (47 de la API y 5 del esquema contra PostgreSQL 16), también al repetirlas sobre la misma base
+(`outputs/tests/pytest_docker.txt`). La imagen pesa 448 MB y corre con un usuario sin privilegios.
+
+**D49. Pruebas de la API** (`tests/test_api.py`): reproducen las cifras de control de la Serie I (US$526.3/acre/año;
+ciclo, margen, ganancia y precio de equilibrio de las 23 variedades; 509 predicciones de 2022 con diferencia ≤ 1 lb/acre;
+100 % de asignaciones; 1,143/1,143 ciclos y auditoría igual a pandas; CSV igual a JSON), las cifras de los ejemplos de
+`docs/api.md` y que las entradas inválidas devuelvan 422.
+
+### Uso de IA
+
+- **Qué hizo:** escribió el código de la API, las pruebas, el Docker y la documentación según mi diseño de endpoints
+  y respuestas.
+- **Cómo lo verifiqué:** con las pruebas automáticas contra las cifras de control de los notebooks, y comparando cada
+  ejemplo de `docs/api.md` con una llamada real.
+- **Errores de la IA que corregí:**
+  1. La primera versión de la prueba de las 509 predicciones mandaba la ventaja del lote como `NaN` en los 8 lotes que
+     no la tienen, y fallaba. Ahora se manda como "sin dato", igual que la calculadora del HTML.
+  2. Las decisiones de la auditoría salían con 10 decimales; ahora se redondean a 2.
+  3. Docker Compose tomaba el nombre del proyecto de la carpeta local, y los contenedores salían con un nombre que no
+     es neutro. Se fijó `name: analisis-cana` en `docker-compose.yml`.
