@@ -1,0 +1,16 @@
+Regla,Filas
+filas_originales,29529
+T_SPACRE/TRS partidos por coma decimal → reconstruidos,10485
+Ceros en T_SPACRE (vienen con TCA vacío) → faltante,14
+Ceros en TRS → faltante,1
+Ceros en TCA → faltante,2
+Ceros en POPN → faltante,1
+Ceros en MSTWT → faltante,1
+POPN 2020-2021 en unidad desconocida → faltante,1125
+"TCA > 100 t/acre o MSTWT > 6 lb (p. ej. 518 t/acre, error ×10) → faltante",5
+TRS fuera de 120-400 lb/t (p. ej. 478) → faltante,4
+Fibra fuera de 6-22 % (p. ej. 4.1 %) → faltante,66
+'DOMINGUES' (plantía 2019) = 'DOMINGUE' (socas 2020-21): mismo ensayo,39
+Filas idénticas en llave y mediciones (doble captura),126
+Filas sin variable objetivo,198
+filas_finales,29205
