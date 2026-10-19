@@ -1,0 +1,65 @@
+# Pruebas de la API y del esquema SQL dentro de Docker (python:3.12-slim + PostgreSQL 16), 2026-10-19
+# docker compose --profile pruebas run --rm pruebas
+============================= test session starts ==============================
+platform linux -- Python 3.12.15, pytest-9.1.1, pluggy-1.7.0 -- /usr/local/bin/python3.12
+cachedir: .pytest_cache
+rootdir: /app
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.15.1
+collecting ... collected 52 items
+
+tests/test_api.py::test_salud PASSED                                     [  1%]
+tests/test_api.py::test_openapi_documenta_los_endpoints PASSED           [  3%]
+tests/test_api.py::test_p1_margen_de_referencia PASSED                   [  5%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HOCP14-885] PASSED [  7%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HOL15-508] PASSED [  9%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[L15-306] PASSED [ 11%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[L14-267] PASSED [ 13%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[L01-299] PASSED [ 15%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HO12-615] PASSED [ 17%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HOCP09-804] PASSED [ 19%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HO13-739] PASSED [ 21%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[L01-283] PASSED [ 23%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[L12-201] PASSED [ 25%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[L99-226] PASSED [ 26%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HO11-573] PASSED [ 28%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[L03-371] PASSED [ 30%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HO12-630] PASSED [ 32%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HOCP00-950] PASSED [ 34%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HO05-961] PASSED [ 36%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HOCP04-838] PASSED [ 38%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[L11-183] PASSED [ 40%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HO07-613] PASSED [ 42%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[L09-112] PASSED [ 44%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HO09-840] PASSED [ 46%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[L99-233] PASSED [ 48%]
+tests/test_api.py::test_p1_cada_variedad_reproduce_el_notebook[HOCP96-540] PASSED [ 50%]
+tests/test_api.py::test_p1_ranking_top3 PASSED                           [ 51%]
+tests/test_api.py::test_p1_precio_cambia_cuanto_se_gana_no_cual_variedad PASSED [ 53%]
+tests/test_api.py::test_p1_barbecho_y_extrapolacion PASSED               [ 55%]
+tests/test_api.py::test_p2_reproduce_las_509_predicciones_2022 PASSED    [ 57%]
+tests/test_api.py::test_p2_finca_nueva_usa_escenario_2 PASSED            [ 59%]
+tests/test_api.py::test_p3_reproduce_el_100_por_ciento_de_las_asignaciones PASSED [ 61%]
+tests/test_api.py::test_p4_auditoria_api_igual_a_pandas_y_1143_ciclos PASSED [ 63%]
+tests/test_api.py::test_p4_csv_igual_a_json PASSED                       [ 65%]
+tests/test_api.py::test_p4_sin_numero_de_corte_pierde_renovaciones PASSED [ 67%]
+tests/test_api.py::test_ejemplos_de_la_documentacion PASSED              [ 69%]
+tests/test_api.py::test_entradas_invalidas_devuelven_422[/campo/ciclo-cuerpo0] PASSED [ 71%]
+tests/test_api.py::test_entradas_invalidas_devuelven_422[/campo/ciclo-cuerpo1] PASSED [ 73%]
+tests/test_api.py::test_entradas_invalidas_devuelven_422[/campo/ciclo-cuerpo2] PASSED [ 75%]
+tests/test_api.py::test_entradas_invalidas_devuelven_422[/campo/pronostico-cuerpo3] PASSED [ 76%]
+tests/test_api.py::test_entradas_invalidas_devuelven_422[/campo/pronostico-cuerpo4] PASSED [ 78%]
+tests/test_api.py::test_entradas_invalidas_devuelven_422[/campo/pronostico-cuerpo5] PASSED [ 80%]
+tests/test_api.py::test_entradas_invalidas_devuelven_422[/campo/pronostico-cuerpo6] PASSED [ 82%]
+tests/test_api.py::test_entradas_invalidas_devuelven_422[/campo/segmento-cuerpo7] PASSED [ 84%]
+tests/test_api.py::test_entradas_invalidas_devuelven_422[/campo/auditoria-cuerpo8] PASSED [ 86%]
+tests/test_api.py::test_entradas_invalidas_devuelven_422[/campo/auditoria-cuerpo9] PASSED [ 88%]
+tests/test_api.py::test_csv_sin_columnas_devuelve_422 PASSED             [ 90%]
+tests/test_esquema_postgres.py::test_reglas_rechazan_errores[doble_captura] PASSED [ 92%]
+tests/test_esquema_postgres.py::test_reglas_rechazan_errores[rendimiento_imposible] PASSED [ 94%]
+tests/test_esquema_postgres.py::test_reglas_rechazan_errores[coma_decimal] PASSED [ 96%]
+tests/test_esquema_postgres.py::test_reglas_rechazan_errores[estrato_invalido] PASSED [ 98%]
+tests/test_esquema_postgres.py::test_vista_reproduce_auditoria PASSED    [100%]
+
+============================== 52 passed in 6.38s ==============================

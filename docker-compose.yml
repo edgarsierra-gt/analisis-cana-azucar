@@ -1,0 +1,42 @@
+# Serie IV · un solo comando:
+#   docker compose up --build                               API en http://localhost:8000/docs
+#   docker compose --profile pruebas run --rm pruebas       pytest completo, incluida la prueba contra PostgreSQL 16
+name: analisis-cana   # nombre fijo del proyecto (no depende de la carpeta)
+
+services:
+  api:
+    build: .
+    image: analisis-cana-api
+    ports:
+      - "8000:8000"
+    environment:
+      CORS_ORIGINS: "*"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/salud')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  db:
+    image: postgres:16-alpine
+    profiles: ["pruebas"]
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust   # base desechable solo para pruebas, sin datos ni puertos expuestos
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  pruebas:
+    image: analisis-cana-api
+    build: .
+    profiles: ["pruebas"]
+    command: ["pytest", "-v"]
+    environment:
+      CAMPO_PG_DSN: "host=db user=postgres dbname=postgres"
+    depends_on:
+      db:
+        condition: service_healthy

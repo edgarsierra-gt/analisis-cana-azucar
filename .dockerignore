@@ -1,0 +1,13 @@
+.git
+data
+notebooks
+docs
+outputs/figures
+outputs/tests
+**/__pycache__
+.pytest_cache
+.ipynb_checkpoints
+.env
+*.pdf
+*.zip
+CLAUDE.md
