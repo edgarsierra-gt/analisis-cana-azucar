@@ -1,0 +1,13 @@
+# Prueba del esquema SQL contra PostgreSQL 16.15 (base temporal), 2026-10-19
+# CAMPO_PG_DSN="host=/tmp port=55432 dbname=campo_test user=postgres" python -m pytest tests/ -v
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.7.0 -- /usr/bin/python
+collecting ... collected 5 items
+
+tests/test_esquema_postgres.py::test_reglas_rechazan_errores[doble_captura] PASSED [ 20%]
+tests/test_esquema_postgres.py::test_reglas_rechazan_errores[rendimiento_imposible] PASSED [ 40%]
+tests/test_esquema_postgres.py::test_reglas_rechazan_errores[coma_decimal] PASSED [ 60%]
+tests/test_esquema_postgres.py::test_reglas_rechazan_errores[estrato_invalido] PASSED [ 80%]
+tests/test_esquema_postgres.py::test_vista_reproduce_auditoria PASSED    [100%]
+
+============================== 5 passed in 1.51s ===============================
