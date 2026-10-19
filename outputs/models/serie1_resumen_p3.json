@@ -1,0 +1,253 @@
+{
+ "silueta": [
+  {
+   "k": 2,
+   "silueta": 0.288,
+   "nulo_p50": 0.2319,
+   "nulo_p95": 0.3741,
+   "p": 0.19
+  },
+  {
+   "k": 3,
+   "silueta": 0.3014,
+   "nulo_p50": 0.2362,
+   "nulo_p95": 0.315,
+   "p": 0.065
+  },
+  {
+   "k": 4,
+   "silueta": 0.251,
+   "nulo_p50": 0.2533,
+   "nulo_p95": 0.3197,
+   "p": 0.52
+  },
+  {
+   "k": 5,
+   "silueta": 0.2803,
+   "nulo_p50": 0.2578,
+   "nulo_p95": 0.3346,
+   "p": 0.315
+  },
+  {
+   "k": 6,
+   "silueta": 0.2851,
+   "nulo_p50": 0.255,
+   "nulo_p95": 0.3312,
+   "p": 0.24
+  },
+  {
+   "k": 7,
+   "silueta": 0.256,
+   "nulo_p50": 0.2521,
+   "nulo_p95": 0.3304,
+   "p": 0.455
+  }
+ ],
+ "estabilidad": [
+  {
+   "k": 2,
+   "ARI_mediana": 0.9131,
+   "ARI_p10": 0.668,
+   "ARI_p90": 1.0,
+   "ward_vs_kmeans": 0.5253
+  },
+  {
+   "k": 3,
+   "ARI_mediana": 0.5809,
+   "ARI_p10": 0.2278,
+   "ARI_p90": 1.0,
+   "ward_vs_kmeans": 0.579
+  },
+  {
+   "k": 4,
+   "ARI_mediana": 0.4391,
+   "ARI_p10": 0.2325,
+   "ARI_p90": 0.6486,
+   "ward_vs_kmeans": 0.6334
+  },
+  {
+   "k": 5,
+   "ARI_mediana": 0.6222,
+   "ARI_p10": 0.3614,
+   "ARI_p90": 0.8754,
+   "ward_vs_kmeans": 0.7577
+  },
+  {
+   "k": 6,
+   "ARI_mediana": 0.598,
+   "ARI_p10": 0.3615,
+   "ARI_p90": 0.827,
+   "ward_vs_kmeans": 0.6974
+  },
+  {
+   "k": 7,
+   "ARI_mediana": 0.5697,
+   "ARI_p10": 0.3564,
+   "ARI_p90": 0.788,
+   "ward_vs_kmeans": 0.7264
+  }
+ ],
+ "tamaños": {
+  "2": [
+   14,
+   9
+  ],
+  "3": [
+   14,
+   7,
+   2
+  ],
+  "4": [
+   9,
+   7,
+   5,
+   2
+  ],
+  "5": [
+   7,
+   6,
+   5,
+   3,
+   2
+  ],
+  "6": [
+   7,
+   5,
+   5,
+   3,
+   2,
+   1
+  ],
+  "7": [
+   7,
+   5,
+   5,
+   3,
+   1,
+   1,
+   1
+  ]
+ },
+ "k": 5,
+ "perfil": [
+  {
+   "grupo": "Completas: caña, calidad y longevidad",
+   "variedades": 6.0,
+   "caña %": 1.746,
+   "TRS %": 5.627,
+   "azúcar plantía %": 7.472,
+   "caña por corte %": 5.015,
+   "σ interacción %": 5.376,
+   "respuesta": -0.06,
+   "fibra pp": 0.169,
+   "con fibra medida": 6.0,
+   "ganancia P1 US$/acre/año (mediana)": 191.117,
+   "años de evidencia (mediana)": 4.0
+  },
+  {
+   "grupo": "Calidad sin caña",
+   "variedades": 5.0,
+   "caña %": -4.748,
+   "TRS %": 5.085,
+   "azúcar plantía %": 0.096,
+   "caña por corte %": 0.713,
+   "σ interacción %": 9.547,
+   "respuesta": -0.02,
+   "fibra pp": 0.344,
+   "con fibra medida": 3.0,
+   "ganancia P1 US$/acre/año (mediana)": 7.531,
+   "años de evidencia (mediana)": 9.0
+  },
+  {
+   "grupo": "Mucha caña, menos calidad",
+   "variedades": 3.0,
+   "caña %": 12.039,
+   "TRS %": -3.727,
+   "azúcar plantía %": 7.863,
+   "caña por corte %": -3.321,
+   "σ interacción %": 5.696,
+   "respuesta": 0.01,
+   "fibra pp": 0.942,
+   "con fibra medida": 1.0,
+   "ganancia P1 US$/acre/año (mediana)": 9.354,
+   "años de evidencia (mediana)": 3.0
+  },
+  {
+   "grupo": "Inestables y de vida corta",
+   "variedades": 2.0,
+   "caña %": 1.439,
+   "TRS %": -0.875,
+   "azúcar plantía %": 0.551,
+   "caña por corte %": -8.885,
+   "σ interacción %": 17.221,
+   "respuesta": -0.17,
+   "fibra pp": -1.057,
+   "con fibra medida": 1.0,
+   "ganancia P1 US$/acre/año (mediana)": -114.773,
+   "años de evidencia (mediana)": 11.0
+  },
+  {
+   "grupo": "Sin ventaja clara",
+   "variedades": 7.0,
+   "caña %": 0.676,
+   "TRS %": 0.288,
+   "azúcar plantía %": 0.965,
+   "caña por corte %": -1.835,
+   "σ interacción %": 6.908,
+   "respuesta": -0.01,
+   "fibra pp": -0.165,
+   "con fibra medida": 3.0,
+   "ganancia P1 US$/acre/año (mediana)": -22.565,
+   "años de evidencia (mediana)": 6.0
+  }
+ ],
+ "jaccard": {
+  "Completas: caña, calidad y longevidad": 0.698,
+  "Calidad sin caña": 0.726,
+  "Mucha caña, menos calidad": 0.84,
+  "Inestables y de vida corta": 0.846,
+  "Sin ventaja clara": 0.727
+ },
+ "eta2": 0.7419786780063905,
+ "p_eta2": 0.0,
+ "correlaciones": {
+  "productividad": {
+   "productividad": 1.0,
+   "calidad": -0.44,
+   "longevidad": -0.246,
+   "estabilidad": 0.196
+  },
+  "calidad": {
+   "productividad": -0.44,
+   "calidad": 1.0,
+   "longevidad": 0.479,
+   "estabilidad": 0.163
+  },
+  "longevidad": {
+   "productividad": -0.246,
+   "calidad": 0.479,
+   "longevidad": 1.0,
+   "estabilidad": 0.581
+  },
+  "estabilidad": {
+   "productividad": 0.196,
+   "calidad": 0.163,
+   "longevidad": 0.581,
+   "estabilidad": 1.0
+  }
+ },
+ "ruido_mediana": 0.6735261562646834,
+ "pca": [
+  48.4,
+  32.8,
+  11.8,
+  7.0
+ ],
+ "orden_grupos": [
+  "Completas: caña, calidad y longevidad",
+  "Calidad sin caña",
+  "Mucha caña, menos calidad",
+  "Inestables y de vida corta",
+  "Sin ventaja clara"
+ ]
+}

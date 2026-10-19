@@ -1,0 +1,156 @@
+{
+ "descripcion": "Serie I · P3. k-means sobre 4 indicadores estandarizados (log vs testigos núcleo). Para una variedad nueva: calcular indicadores con campo_segmentos.indicadores, estandarizar con media/desvío y asignar al centro más cercano.",
+ "indicadores": [
+  "productividad",
+  "calidad",
+  "longevidad",
+  "estabilidad"
+ ],
+ "media": {
+  "productividad": 0.012060779295704068,
+  "calidad": 0.020220214946902022,
+  "longevidad": -0.003823082300095155,
+  "estabilidad": -0.07820531310629633
+ },
+ "desvio": {
+  "productividad": 0.05518380612579203,
+  "calidad": 0.044508655832545437,
+  "longevidad": 0.046889033641951405,
+  "estabilidad": 0.03736464319439274
+ },
+ "k": 5,
+ "centros_z": {
+  "Completas: caña, calidad y longevidad": {
+   "productividad": 0.09516833282471009,
+   "calidad": 0.7756843316023024,
+   "longevidad": 1.1252052773263126,
+   "estabilidad": 0.6542891277205826
+  },
+  "Inestables y de vida corta": {
+   "productividad": 0.04027079476218944,
+   "calidad": -0.6518518992103063,
+   "longevidad": -1.902941722442013,
+   "estabilidad": -2.515777051528032
+  },
+  "Calidad sin caña": {
+   "productividad": -1.099979935569748,
+   "calidad": 0.6601375018843015,
+   "longevidad": 0.2330726513603682,
+   "estabilidad": -0.46206368574834344
+  },
+  "Mucha caña, menos calidad": {
+   "productividad": 1.8414158543913115,
+   "calidad": -1.3077336081403206,
+   "longevidad": -0.6387808127012882,
+   "estabilidad": 0.5687214378889508
+  },
+  "Sin ventaja clara": {
+   "productividad": -0.0965570673996908,
+   "calidad": -0.3896984108848207,
+   "longevidad": -0.313481291110261,
+   "estabilidad": 0.24428192168677665
+  }
+ },
+ "reproducibilidad_ari": 0.6221879666650609,
+ "jaccard": {
+  "Completas: caña, calidad y longevidad": 0.698,
+  "Calidad sin caña": 0.726,
+  "Mucha caña, menos calidad": 0.84,
+  "Inestables y de vida corta": 0.846,
+  "Sin ventaja clara": 0.727
+ },
+ "variedades": {
+  "HOCP14-885": {
+   "grupo": "Completas: caña, calidad y longevidad",
+   "certeza": 0.499
+  },
+  "HOL15-508": {
+   "grupo": "Completas: caña, calidad y longevidad",
+   "certeza": 0.592
+  },
+  "L15-306": {
+   "grupo": "Completas: caña, calidad y longevidad",
+   "certeza": 0.715
+  },
+  "L14-267": {
+   "grupo": "Completas: caña, calidad y longevidad",
+   "certeza": 0.725
+  },
+  "L01-299": {
+   "grupo": "Completas: caña, calidad y longevidad",
+   "certeza": 0.7
+  },
+  "HO13-739": {
+   "grupo": "Completas: caña, calidad y longevidad",
+   "certeza": 0.461
+  },
+  "HOCP09-804": {
+   "grupo": "Calidad sin caña",
+   "certeza": 0.876
+  },
+  "L01-283": {
+   "grupo": "Calidad sin caña",
+   "certeza": 0.882
+  },
+  "L03-371": {
+   "grupo": "Calidad sin caña",
+   "certeza": 0.912
+  },
+  "HOCP00-950": {
+   "grupo": "Calidad sin caña",
+   "certeza": 0.914
+  },
+  "HO05-961": {
+   "grupo": "Calidad sin caña",
+   "certeza": 0.833
+  },
+  "HO12-615": {
+   "grupo": "Mucha caña, menos calidad",
+   "certeza": 0.868
+  },
+  "HO11-573": {
+   "grupo": "Mucha caña, menos calidad",
+   "certeza": 0.862
+  },
+  "L09-112": {
+   "grupo": "Mucha caña, menos calidad",
+   "certeza": 0.813
+  },
+  "HO07-613": {
+   "grupo": "Inestables y de vida corta",
+   "certeza": 0.793
+  },
+  "HOCP96-540": {
+   "grupo": "Inestables y de vida corta",
+   "certeza": 0.793
+  },
+  "L12-201": {
+   "grupo": "Sin ventaja clara",
+   "certeza": 0.583
+  },
+  "L99-226": {
+   "grupo": "Sin ventaja clara",
+   "certeza": 0.642
+  },
+  "HO12-630": {
+   "grupo": "Sin ventaja clara",
+   "certeza": 0.722
+  },
+  "HOCP04-838": {
+   "grupo": "Sin ventaja clara",
+   "certeza": 0.763
+  },
+  "L11-183": {
+   "grupo": "Sin ventaja clara",
+   "certeza": 0.763
+  },
+  "HO09-840": {
+   "grupo": "Sin ventaja clara",
+   "certeza": 0.714
+  },
+  "L99-233": {
+   "grupo": "Sin ventaja clara",
+   "certeza": 0.664
+  }
+ }
+}
