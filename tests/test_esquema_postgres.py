@@ -1,11 +1,13 @@
 """Prueba de punta a punta del esquema de campo (Serie I · P4) contra un PostgreSQL real.
 
 Uso:  CAMPO_PG_DSN="host=... port=... user=... dbname=..." pytest tests/test_esquema_postgres.py
-Sin la variable CAMPO_PG_DSN (o sin psycopg) la prueba se omite. La base debe estar vacía: la prueba crea el esquema.
+Sin la variable CAMPO_PG_DSN (o sin psycopg) la prueba se omite. Crea un esquema temporal y lo borra al terminar,
+así que se puede repetir en la misma base.
 """
 import json
 import os
 import sys
+import uuid
 from pathlib import Path
 
 import pandas as pd
@@ -23,8 +25,12 @@ from campo_renovacion import auditar, curva_metrica, reconstruir_ciclos, resumir
 @pytest.fixture(scope="module")
 def conexion():
     cx = psycopg.connect(DSN, autocommit=True)
+    esquema = f"prueba_{uuid.uuid4().hex[:8]}"          # esquema temporal: la prueba se puede repetir en la misma base
+    cx.execute(f"CREATE SCHEMA {esquema}")
+    cx.execute(f"SET search_path TO {esquema}")
     cx.execute((ROOT / "sql" / "esquema_campo.sql").read_text(encoding="utf-8"))
     yield cx
+    cx.execute(f"DROP SCHEMA {esquema} CASCADE")
     cx.close()
 
 
