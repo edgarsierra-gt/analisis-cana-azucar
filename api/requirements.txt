@@ -1,0 +1,11 @@
+# Serie IV · dependencias de la imagen Docker de la API (más livianas que requirements.txt: sin notebooks ni modelos)
+pandas==3.0.5
+numpy==2.5.4
+fastapi==0.150.0
+pydantic==2.14.1
+uvicorn==0.54.0
+python-multipart==0.0.32
+# pruebas automatizadas (docker compose --profile pruebas)
+pytest==9.1.1
+httpx==0.28.1
+psycopg[binary]==3.3.6
