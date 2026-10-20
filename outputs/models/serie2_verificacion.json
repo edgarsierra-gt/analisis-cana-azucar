@@ -1,0 +1,57 @@
+{
+ "descripcion": "Serie II · verificación de sensores: centro y escala robusta de cada chequeo (referencia: 2 primeros días)",
+ "centro": {
+  "PT_8313A": 21.200000000000003,
+  "PT_8313B": -35.235833333333346,
+  "PT_8313C": 3.0349999999999824,
+  "PT_8313D": 39.94250000000001,
+  "PT_8313E": -14.267499999999984,
+  "PT_8313F": -2.929166666666667,
+  "O2 izq. − der.": -0.1299999999999999,
+  "Lecho izq. − der.": 81.83166666666693,
+  "Gases izq. − der.": -34.609166666666624,
+  "Retorno izq. − der.": 114.9849999999999,
+  "Vapor medido − virtual": 0.0023713802449805144,
+  "Agua − f(válvula)": -0.03595435072308106
+ },
+ "escala": {
+  "PT_8313A": 15.225066500000036,
+  "PT_8313B": 7.815772999999991,
+  "PT_8313C": 12.683643000000009,
+  "PT_8313D": 5.0309560000000175,
+  "PT_8313E": 9.037682500000038,
+  "PT_8313F": 13.44965300000002,
+  "O2 izq. − der.": 0.10378199999999976,
+  "Lecho izq. − der.": 76.11915500000072,
+  "Gases izq. − der.": 5.374425,
+  "Retorno izq. − der.": 8.945019999999786,
+  "Vapor medido − virtual": 0.2645090695851726,
+  "Agua − f(válvula)": 0.11740639366752818
+ },
+ "valvula_a_agua": [
+  0.057425892157021985,
+  1.84422721433306
+ ],
+ "virtual_dos_variables": {
+  "a": -1.9969543113848047,
+  "b": 952.1897927672392,
+  "c": 1.1086854106254396
+ },
+ "umbrales_z": {
+  "PT_8313A": 6,
+  "PT_8313B": 8,
+  "PT_8313C": 5,
+  "PT_8313D": 8,
+  "PT_8313E": 7,
+  "PT_8313F": 5,
+  "O2 izq. − der.": 5,
+  "Lecho izq. − der.": 5,
+  "Gases izq. − der.": 5,
+  "Retorno izq. − der.": 5,
+  "Vapor medido − virtual": 5,
+  "Agua − f(válvula)": 5
+ },
+ "centro_confirmado_retorno": 33.038333333333185,
+ "persistencia_min": 5,
+ "apagado_min": 15
+}

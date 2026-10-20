@@ -9,6 +9,8 @@ jupyter
 nbconvert
 pytest
 psycopg[binary]   # opcional: solo para tests/test_esquema_postgres.py
+# Serie II · tablas de vapor IAPWS-97 (eficiencia de la caldera)
+iapws==1.5.5
 # Serie IV · API
 fastapi==0.150.0
 uvicorn==0.54.0

@@ -1,0 +1,220 @@
+{
+ "reglas": {
+  "Hogar presurizado (mediana > 0 Pa, 10 s)": {
+   "eventos por día": 1.8,
+   "minutos en 5 días": 1.67
+  },
+  "O₂ bajo (< 1.2 %, 2 min)": {
+   "eventos por día": 0.8,
+   "minutos en 5 días": 28.42
+  },
+  "O₂ alto (> 3 %, 10 min)": {
+   "eventos por día": 0.4,
+   "minutos en 5 días": 8.08
+  },
+  "Vapor caliente (> 548 °C, 2 min)": {
+   "eventos por día": 0.8,
+   "minutos en 5 días": 7.5
+  },
+  "Vapor frío (< 526 °C, 5 min)": {
+   "eventos por día": 1.0,
+   "minutos en 5 días": 7.08
+  },
+  "Lecho alto (> 11,300 Pa, 5 min): descargar": {
+   "eventos por día": 0.2,
+   "minutos en 5 días": 20.58
+  },
+  "Corriente del tiro alta (> 26 A, 1 min)": {
+   "eventos por día": 0.8,
+   "minutos en 5 días": 13.08
+  }
+ },
+ "verificacion_episodios_dia": 2.0,
+ "verificacion_por_chequeo": {
+  "PT_8313A": 1,
+  "PT_8313B": 2,
+  "PT_8313D": 2,
+  "Retorno izq. − der.": 1
+ },
+ "monitor_episodios_dia": 1.4997396285367126,
+ "monitor_episodios": [
+  {
+   "estadístico": "SPE",
+   "inicio": "2022-03-30 05:59:00",
+   "minutos": "17",
+   "principales": "frac_primario (1), retorno_total (1), agua_atemp (1)"
+  },
+  {
+   "estadístico": "SPE",
+   "inicio": "2022-03-31 01:17:00",
+   "minutos": "15",
+   "principales": "agua_atemp (1), t_gases (0), aire_total (0)"
+  },
+  {
+   "estadístico": "SPE",
+   "inicio": "2022-03-31 09:16:00",
+   "minutos": "27",
+   "principales": "retorno_total (3), t_gases (1), t_vapor (1)"
+  },
+  {
+   "estadístico": "SPE",
+   "inicio": "2022-03-31 14:54:00",
+   "minutos": "16",
+   "principales": "t_gases (1), aire_total (1), frac_primario (1)"
+  },
+  {
+   "estadístico": "T²",
+   "inicio": "2022-03-31 16:34:00",
+   "minutos": "16",
+   "principales": "aire_total (4), corriente_tiro (3), t_gases (3)"
+  },
+  {
+   "estadístico": "SPE",
+   "inicio": "2022-04-01 00:05:00",
+   "minutos": "15",
+   "principales": "retorno_total (1), lecho (1), presion_hogar (0)"
+  }
+ ],
+ "sensibilidad": {
+  "PT_8313A": {
+   "desvío robusto": 15.225,
+   "umbral (desvíos)": 6.0,
+   "falla mínima detectable": 91.35,
+   "unidad": "Pa"
+  },
+  "PT_8313B": {
+   "desvío robusto": 7.816,
+   "umbral (desvíos)": 8.0,
+   "falla mínima detectable": 62.526,
+   "unidad": "Pa"
+  },
+  "PT_8313C": {
+   "desvío robusto": 12.684,
+   "umbral (desvíos)": 5.0,
+   "falla mínima detectable": 63.418,
+   "unidad": "Pa"
+  },
+  "PT_8313D": {
+   "desvío robusto": 5.031,
+   "umbral (desvíos)": 8.0,
+   "falla mínima detectable": 40.248,
+   "unidad": "Pa"
+  },
+  "PT_8313E": {
+   "desvío robusto": 9.038,
+   "umbral (desvíos)": 7.0,
+   "falla mínima detectable": 63.264,
+   "unidad": "Pa"
+  },
+  "PT_8313F": {
+   "desvío robusto": 13.45,
+   "umbral (desvíos)": 5.0,
+   "falla mínima detectable": 67.248,
+   "unidad": "Pa"
+  },
+  "O2 izq. − der.": {
+   "desvío robusto": 0.104,
+   "umbral (desvíos)": 5.0,
+   "falla mínima detectable": 0.519,
+   "unidad": "puntos de O₂"
+  },
+  "Lecho izq. − der.": {
+   "desvío robusto": 76.119,
+   "umbral (desvíos)": 5.0,
+   "falla mínima detectable": 380.596,
+   "unidad": "Pa"
+  },
+  "Gases izq. − der.": {
+   "desvío robusto": 5.374,
+   "umbral (desvíos)": 5.0,
+   "falla mínima detectable": 26.872,
+   "unidad": "°C"
+  },
+  "Retorno izq. − der.": {
+   "desvío robusto": 8.945,
+   "umbral (desvíos)": 5.0,
+   "falla mínima detectable": 44.725,
+   "unidad": "Nm³/h"
+  },
+  "Vapor medido − virtual": {
+   "desvío robusto": 0.265,
+   "umbral (desvíos)": 5.0,
+   "falla mínima detectable": 1.323,
+   "unidad": "t/h"
+  },
+  "Agua − f(válvula)": {
+   "desvío robusto": 0.117,
+   "umbral (desvíos)": 5.0,
+   "falla mínima detectable": 0.587,
+   "unidad": "t/h"
+  }
+ },
+ "inyecciones": [
+  {
+   "escenario": "Medidor de vapor con deriva",
+   "real": "sensor",
+   "chequeos que saltan": "Vapor medido − virtual",
+   "minutos hasta la alarma": "104.0",
+   "monitor de proceso": "no",
+   "min. hasta el monitor": NaN,
+   "reglas nuevas": "ninguna",
+   "min. hasta la regla": NaN,
+   "diagnóstico": "sensor: Vapor medido − virtual",
+   "acierta": "True"
+  },
+  {
+   "escenario": "Analizador de O₂ izquierdo con sesgo",
+   "real": "sensor",
+   "chequeos que saltan": "O2 izq. − der.",
+   "minutos hasta la alarma": "4.0",
+   "monitor de proceso": "no",
+   "min. hasta el monitor": NaN,
+   "reglas nuevas": "ninguna",
+   "min. hasta la regla": NaN,
+   "diagnóstico": "sensor: O2 izq. − der.",
+   "acierta": "True"
+  },
+  {
+   "escenario": "Presión de hogar C trabada",
+   "real": "sensor",
+   "chequeos que saltan": "PT_8313C, PT_8313C congelado",
+   "minutos hasta la alarma": "0.0",
+   "monitor de proceso": "no",
+   "min. hasta el monitor": NaN,
+   "reglas nuevas": "ninguna",
+   "min. hasta la regla": NaN,
+   "diagnóstico": "sensor: PT_8313C, PT_8313C congelado",
+   "acierta": "True"
+  },
+  {
+   "escenario": "Termopar de gases derecho con deriva",
+   "real": "sensor",
+   "chequeos que saltan": "Gases izq. − der.",
+   "minutos hasta la alarma": "247.0",
+   "monitor de proceso": "sí (lecho, t_gases)",
+   "min. hasta el monitor": "232.0",
+   "reglas nuevas": "ninguna",
+   "min. hasta la regla": NaN,
+   "diagnóstico": "sensor: Gases izq. − der.",
+   "acierta": "True"
+  },
+  {
+   "escenario": "Compuerta de aire secundario abierta de más",
+   "real": "proceso",
+   "chequeos que saltan": "ninguno",
+   "minutos hasta la alarma": "4.0",
+   "monitor de proceso": "sí (aire_total, corriente_tiro)",
+   "min. hasta el monitor": "4.0",
+   "reglas nuevas": "O₂ alto",
+   "min. hasta la regla": "9.0",
+   "diagnóstico": "proceso/equipo: aire_total, corriente_tiro; O₂ alto",
+   "acierta": "True"
+  }
+ ],
+ "parametros": {
+  "persistencia_min": 5,
+  "apagado_min": 15,
+  "ventana_monitor": "24h",
+  "q_monitor": 0.999
+ }
+}
