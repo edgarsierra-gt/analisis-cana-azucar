@@ -1,0 +1,223 @@
+{
+ "meses": 291,
+ "ac_promedios": 0.2798301199627494,
+ "ac_cierres": 0.084955808679227,
+ "metricas": {
+  "1": {
+   "Ingenuo: último cierre": {
+    "MAE (¢/lb)": 0.8438,
+    "MAPE (%)": 4.5581,
+    "RMSE (¢/lb)": 1.1972,
+    "sesgo (¢/lb)": 0.011,
+    "mejora vs último cierre (%)": 0.0
+   },
+   "Ingenuo: promedio del mes": {
+    "MAE (¢/lb)": 1.1106,
+    "MAPE (%)": 6.1103,
+    "RMSE (¢/lb)": 1.5526,
+    "sesgo (¢/lb)": -0.0405,
+    "mejora vs último cierre (%)": -31.6244
+   },
+   "ARIMA(1,1,0) sobre promedios": {
+    "MAE (¢/lb)": 1.0835,
+    "MAPE (%)": 6.0481,
+    "RMSE (¢/lb)": 1.4926,
+    "sesgo (¢/lb)": 0.0701,
+    "mejora vs último cierre (%)": -28.4152
+   },
+   "Regresión: momentum y reversión": {
+    "MAE (¢/lb)": 0.8604,
+    "MAPE (%)": 4.6483,
+    "RMSE (¢/lb)": 1.2111,
+    "sesgo (¢/lb)": 0.0718,
+    "mejora vs último cierre (%)": -1.9669
+   }
+  },
+  "3": {
+   "Ingenuo: último cierre": {
+    "MAE (¢/lb)": 2.1683,
+    "MAPE (%)": 11.7964,
+    "RMSE (¢/lb)": 3.011,
+    "sesgo (¢/lb)": -0.0816,
+    "mejora vs último cierre (%)": 0.0
+   },
+   "Ingenuo: promedio del mes": {
+    "MAE (¢/lb)": 2.2772,
+    "MAPE (%)": 12.4212,
+    "RMSE (¢/lb)": 3.1428,
+    "sesgo (¢/lb)": -0.1345,
+    "mejora vs último cierre (%)": -5.0219
+   },
+   "ARIMA(1,1,0) sobre promedios": {
+    "MAE (¢/lb)": 2.3444,
+    "MAPE (%)": 12.9335,
+    "RMSE (¢/lb)": 3.2597,
+    "sesgo (¢/lb)": 0.2062,
+    "mejora vs último cierre (%)": -8.1242
+   },
+   "Regresión: momentum y reversión": {
+    "MAE (¢/lb)": 2.3426,
+    "MAPE (%)": 12.9178,
+    "RMSE (¢/lb)": 3.1571,
+    "sesgo (¢/lb)": 0.4012,
+    "mejora vs último cierre (%)": -8.0401
+   }
+  }
+ },
+ "pruebas": [
+  {
+   "h": 1,
+   "modelo": "Ingenuo: promedio del mes",
+   "diferencia de MAE (¢/lb)": 0.2668,
+   "IC90 bootstrap": "+0.181 a +0.371",
+   "P(peor que el último cierre)": 1.0,
+   "DM": 4.9151,
+   "p (DM)": 0.0
+  },
+  {
+   "h": 1,
+   "modelo": "ARIMA(1,1,0) sobre promedios",
+   "diferencia de MAE (¢/lb)": 0.2398,
+   "IC90 bootstrap": "+0.163 a +0.319",
+   "P(peor que el último cierre)": 1.0,
+   "DM": 4.6381,
+   "p (DM)": 0.0
+  },
+  {
+   "h": 1,
+   "modelo": "Regresión: momentum y reversión",
+   "diferencia de MAE (¢/lb)": 0.0166,
+   "IC90 bootstrap": "-0.008 a +0.041",
+   "P(peor que el último cierre)": 0.8625,
+   "DM": 1.0306,
+   "p (DM)": 0.3041
+  },
+  {
+   "h": 3,
+   "modelo": "Ingenuo: promedio del mes",
+   "diferencia de MAE (¢/lb)": 0.1089,
+   "IC90 bootstrap": "+0.026 a +0.182",
+   "P(peor que el último cierre)": 0.9862,
+   "DM": 1.8552,
+   "p (DM)": 0.0652
+  },
+  {
+   "h": 3,
+   "modelo": "ARIMA(1,1,0) sobre promedios",
+   "diferencia de MAE (¢/lb)": 0.1762,
+   "IC90 bootstrap": "+0.089 a +0.263",
+   "P(peor que el último cierre)": 0.9995,
+   "DM": 2.7732,
+   "p (DM)": 0.0061
+  },
+  {
+   "h": 3,
+   "modelo": "Regresión: momentum y reversión",
+   "diferencia de MAE (¢/lb)": 0.1743,
+   "IC90 bootstrap": "+0.038 a +0.365",
+   "P(peor que el último cierre)": 0.9822,
+   "DM": 2.2124,
+   "p (DM)": 0.0282
+  }
+ ],
+ "regresion_full": {
+  "coef": {
+   "const": 0.0045,
+   "ret_1m": 0.0841,
+   "ret_12m": 0.0065,
+   "desv_60m": -0.0347,
+   "curva": -0.0902
+  },
+  "p": {
+   "const": 0.2708,
+   "ret_1m": 0.0583,
+   "ret_12m": 0.6864,
+   "desv_60m": 0.064,
+   "curva": 0.374
+  },
+  "r2": 0.029302306370584175
+ },
+ "bandas": {
+  "1|fija": {
+   "80 %": {
+    "cobertura (%)": 85.235,
+    "ancho medio (% del centro)": 14.538,
+    "Winkler (¢/lb)": 3.349,
+    "cobertura en calma (%)": 85.816,
+    "cobertura en turbulencia (%)": 75.0
+   },
+   "95 %": {
+    "cobertura (%)": 97.315,
+    "ancho medio (% del centro)": 25.172,
+    "Winkler (¢/lb)": 5.449,
+    "cobertura en calma (%)": 97.872,
+    "cobertura en turbulencia (%)": 87.5
+   }
+  },
+  "1|según volatilidad": {
+   "80 %": {
+    "cobertura (%)": 77.852,
+    "ancho medio (% del centro)": 12.898,
+    "Winkler (¢/lb)": 3.212,
+    "cobertura en calma (%)": 77.305,
+    "cobertura en turbulencia (%)": 87.5
+   },
+   "95 %": {
+    "cobertura (%)": 93.96,
+    "ancho medio (% del centro)": 21.194,
+    "Winkler (¢/lb)": 5.05,
+    "cobertura en calma (%)": 94.326,
+    "cobertura en turbulencia (%)": 87.5
+   }
+  },
+  "3|fija": {
+   "80 %": {
+    "cobertura (%)": 91.034,
+    "ancho medio (% del centro)": 42.578,
+    "Winkler (¢/lb)": 7.941,
+    "cobertura en calma (%)": 91.241,
+    "cobertura en turbulencia (%)": 87.5
+   },
+   "95 %": {
+    "cobertura (%)": 98.621,
+    "ancho medio (% del centro)": 69.237,
+    "Winkler (¢/lb)": 11.766,
+    "cobertura en calma (%)": 98.54,
+    "cobertura en turbulencia (%)": 100.0
+   }
+  },
+  "3|según volatilidad": {
+   "80 %": {
+    "cobertura (%)": 84.138,
+    "ancho medio (% del centro)": 32.862,
+    "Winkler (¢/lb)": 6.844,
+    "cobertura en calma (%)": 83.942,
+    "cobertura en turbulencia (%)": 87.5
+   },
+   "95 %": {
+    "cobertura (%)": 96.552,
+    "ancho medio (% del centro)": 48.319,
+    "Winkler (¢/lb)": 9.511,
+    "cobertura en calma (%)": 97.08,
+    "cobertura en turbulencia (%)": 87.5
+   }
+  }
+ },
+ "vigente": {
+  "junio 2024": {
+   "centro": 18.3,
+   "p2.5": 16.699,
+   "p10": 17.234,
+   "p90": 19.577,
+   "p97.5": 20.424
+  },
+  "agosto 2024": {
+   "centro": 18.3,
+   "p2.5": 14.524,
+   "p10": 15.734,
+   "p90": 21.323,
+   "p97.5": 22.639
+  }
+ },
+ "junio_real_parcial": 19.04733327229818
+}
