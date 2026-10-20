@@ -1,0 +1,73 @@
+{
+ "descripcion": "Serie II · modos de operación (k-means sobre promedios de 5 min)",
+ "ventana": "5min",
+ "variables": [
+  "vapor",
+  "aire_total",
+  "frac_primario",
+  "o2",
+  "t_hogar",
+  "lecho",
+  "agua_atemp",
+  "t_vapor",
+  "t_gases"
+ ],
+ "media": {
+  "vapor": 59.76237146678956,
+  "aire_total": 66067.53206047746,
+  "frac_primario": 0.7037229703873351,
+  "o2": 2.1598105338626405,
+  "t_hogar": 774.0635788143169,
+  "lecho": 10384.435473626547,
+  "agua_atemp": 2.778498756687631,
+  "t_vapor": 537.5213064814373,
+  "t_gases": 373.92217447015264
+ },
+ "desvio": {
+  "vapor": 2.320629451345181,
+  "aire_total": 2135.0121190833106,
+  "frac_primario": 0.022274459587996637,
+  "o2": 0.32885844974666295,
+  "t_hogar": 10.446119558928077,
+  "lecho": 493.5405782660015,
+  "agua_atemp": 0.3215870344139317,
+  "t_vapor": 4.2326139263713785,
+  "t_gases": 7.405950591402718
+ },
+ "centros_z": {
+  "Carga alta": {
+   "vapor": 0.9332701713315787,
+   "aire_total": 0.8811566904371038,
+   "frac_primario": -0.7234074603194824,
+   "o2": -0.12429803492557993,
+   "t_hogar": 0.8636200451998431,
+   "lecho": 0.32764195161153264,
+   "agua_atemp": 0.8271626680983374,
+   "t_vapor": -0.0047702029123998365,
+   "t_gases": 0.6887070082837053
+  },
+  "Carga baja": {
+   "vapor": -1.4965034457258368,
+   "aire_total": -1.104315979370312,
+   "frac_primario": 1.1974491563250405,
+   "o2": 0.30829490494408435,
+   "t_hogar": -1.48254862367766,
+   "lecho": -0.21455009036823805,
+   "agua_atemp": -0.9688692039905223,
+   "t_vapor": -0.40201601655163305,
+   "t_gases": -1.1445472231854137
+  },
+  "Carga media": {
+   "vapor": -0.17062935843230864,
+   "aire_total": -0.27246037409462504,
+   "frac_primario": 0.11874317184914059,
+   "o2": -0.0165981850585746,
+   "t_hogar": -0.12263203323636139,
+   "lecho": -0.17205613673480594,
+   "agua_atemp": -0.280221125816138,
+   "t_vapor": 0.14868942409568958,
+   "t_gases": -0.11141009367032528
+  }
+ },
+ "uso": "estandarizar una ventana de 5 min con media/desvío y asignar el centro más cercano"
+}
