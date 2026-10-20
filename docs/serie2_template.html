@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caldera, sensores y datos</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: bitácora de sala de control — columna de lectura de ~720px; figuras que se abren hasta ~1040px */
+:root {
+  --bg: #f3f5f7; --surface: #fcfdfe; --ink: #10161d; --ink-2: #44505c; --ink-3: #74808c; --rule: #dce2e8;
+  --acc: #2a78d6; --acc-soft: #e1ecfa; --hot: #c2551a; --hot-soft: #fbebe0; --metal: #5b6874;
+  --g1: #2a78d6; --g2: #eb6834; --g3: #1baf7a; --g4: #eda100; --g5: #9aa092;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141a; --surface: #151c24; --ink: #e6edf4; --ink-2: #aeb9c5; --ink-3: #84909c; --rule: #27313c;
+    --acc: #3987e5; --acc-soft: #1a2a3d; --hot: #e07a3f; --hot-soft: #34241a; --metal: #93a1ae;
+    --g1: #3987e5; --g2: #d95926; --g3: #199e70; --g4: #c98500; --g5: #7d8576;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141a; --surface: #151c24; --ink: #e6edf4; --ink-2: #aeb9c5; --ink-3: #84909c; --rule: #27313c;
+  --acc: #3987e5; --acc-soft: #1a2a3d; --hot: #e07a3f; --hot-soft: #34241a; --metal: #93a1ae;
+  --g1: #3987e5; --g2: #d95926; --g3: #199e70; --g4: #c98500; --g5: #7d8576;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.62;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 64px; }
+.wrap { max-width: 1040px; margin: 0 auto; }
+.read { max-width: 720px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; color: var(--ink); margin: 0; }
+h1 { font-size: clamp(2.4rem, 6vw, 4.1rem); line-height: 1.02; font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.7rem, 3.6vw, 2.35rem); line-height: 1.1; font-weight: 800; letter-spacing: -0.01em; }
+h3 { font-size: 1.28rem; line-height: 1.25; font-weight: 700; }
+p { margin: 0; }
+ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.stack { display: flex; flex-direction: column; gap: 18px; }
+.stack > *, .finding > * { min-width: 0; max-width: 100%; }
+.finding > .read { width: 100%; max-width: 720px; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--acc); font-weight: 500; }
+.lede { font-size: 1.2rem; color: var(--ink-2); max-width: 640px; }
+.muted { color: var(--ink-2); } .small { font-size: 0.88rem; }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+code { background: var(--acc-soft); padding: 1px 6px; border-radius: 4px; color: var(--ink); }
+strong { font-weight: 600; } a { color: var(--acc); }
+:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
+header.hero { padding-block: 56px 28px; }
+.hero .stack { gap: 20px; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.toc a { font-size: 0.9rem; text-decoration: none; color: var(--ink-2); border: 1px solid var(--rule); background: var(--surface); padding: 5px 12px; border-radius: 999px; }
+.toc a:hover { border-color: var(--acc); color: var(--ink); }
+section { padding-block: 64px 8px; }
+.figure { margin-block: 26px 6px; }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 18px 20px; }
+.callout { background: var(--hot-soft); border-radius: 12px; padding: 16px 20px; }
+.callout h3 { font-size: 1.05rem; margin-bottom: 6px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 0.78rem; color: var(--ink-2); background: var(--surface); border: 1px solid var(--rule); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.finding { padding-block: 26px; border-bottom: 1px solid var(--rule); display: flex; flex-direction: column; gap: 14px; }
+.finding h3 { font-size: 1.3rem; }
+.meaning { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .meaning { grid-template-columns: 1fr; } }
+.meaning > div { font-size: 0.95rem; color: var(--ink-2); line-height: 1.5; padding-left: 12px; border-left: 3px solid var(--rule); }
+.meaning > div.decide { border-left-color: var(--acc); }
+.meaning b.k { display: block; font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); font-family: var(--f-mono); font-weight: 500; margin-bottom: 2px; }
+.bigstat { display: flex; flex-wrap: wrap; gap: 14px 30px; }
+.bigstat div { display: flex; flex-direction: column; }
+.bigstat .n { font-family: var(--f-display); font-weight: 800; font-size: 2.2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.bigstat .l { font-size: 0.88rem; color: var(--ink-2); max-width: 220px; }
+.chart { width: 100%; overflow-x: auto; position: relative; }
+.chart svg { width: 100%; min-width: 600px; height: auto; display: block; }
+.grid-2 .chart svg, .grid-3 .chart svg { min-width: 440px; }
+.chart text.lab { fill: var(--ink-2); font-family: var(--f-body); font-size: 12px; }
+.chart text.val { fill: var(--ink); font-family: var(--f-body); font-size: 12.5px; font-weight: 600; }
+.chart .grid line { stroke: var(--rule); stroke-width: 1; }
+.chart .base { stroke: var(--ink-3); stroke-width: 1; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.85rem; color: var(--ink-2); margin-bottom: 6px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.legend i.line { height: 3px; width: 16px; border-radius: 2px; vertical-align: 3px; }
+.legend i.sq { border-radius: 3px; opacity: .35; }
+.chart-title { font-family: var(--f-display); font-weight: 700; font-size: 1.02rem; margin-bottom: 4px; }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 0.82rem; line-height: 1.35; padding: 7px 10px; border-radius: 8px; max-width: 280px; z-index: 50; opacity: 0; transition: opacity .12s; }
+#tip b { font-weight: 600; }
+.hit { cursor: default; } .hit:hover, .hit:focus { opacity: .85; }
+.glossary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+@media (max-width: 640px) { .glossary { grid-template-columns: 1fr; } }
+.glossary dt { font-family: var(--f-display); font-weight: 700; margin-top: 14px; }
+.glossary dd { margin: 2px 0 0; color: var(--ink-2); font-size: 0.95rem; line-height: 1.5; }
+footer { padding-top: 56px; color: var(--ink-3); font-size: 0.85rem; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.badge i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.badge.ok { background: var(--acc-soft); color: var(--ink); }
+.badge.mid { background: color-mix(in srgb, var(--g4) 22%, var(--surface)); color: var(--ink); }
+.badge.bad { background: color-mix(in srgb, var(--g2) 22%, var(--surface)); color: var(--ink); }
+.badge.off { border: 1px dashed var(--rule); color: var(--ink-3); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 0.86rem; margin: 0; }
+.kv dt { color: var(--ink-3); } .kv dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+.warn { font-size: 0.82rem; color: var(--ink); background: var(--hot-soft); border-radius: 8px; padding: 7px 10px; line-height: 1.4; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); }
+table.t { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.84rem; font-variant-numeric: tabular-nums; }
+table.t th { text-align: left; font-weight: 600; color: var(--ink-2); padding: 10px 9px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.t td { padding: 8px 9px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.t td.r, table.t th.r { text-align: right; }
+table.t tbody tr:last-child td { border-bottom: 0; }
+table.t tbody tr:hover { background: var(--acc-soft); }
+table.t tr.sel { background: color-mix(in srgb, var(--acc) 16%, var(--surface)); }
+.minibar { display: inline-block; height: 7px; background: var(--acc); border-radius: 999px; vertical-align: middle; margin-right: 8px; }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+.seg button { font: inherit; font-size: 0.85rem; border: 0; background: transparent; color: var(--ink-2); padding: 6px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--acc); color: #fff; }
+.ctrl { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; }
+.ctrl label { font-size: 0.88rem; color: var(--ink-2); display: flex; flex-direction: column; gap: 4px; }
+.ctrl label { min-width: 0; max-width: 100%; }
+.ctrl select { font: inherit; font-family: var(--f-mono); font-size: 0.88rem; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); width: 100%; max-width: 640px; }
+.calc { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 20px; display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 26px; }
+@media (max-width: 860px) { .calc { grid-template-columns: 1fr; } }
+.calc label { font-size: 0.9rem; color: var(--ink-2); display: block; margin-bottom: 10px; }
+.calc label b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.calc input[type=range] { width: 100%; accent-color: var(--acc); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.kpi { background: var(--bg); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.kpi .l { font-size: 0.76rem; color: var(--ink-3); line-height: 1.3; }
+.kpi .v { font-family: var(--f-display); font-weight: 800; font-size: 1.45rem; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.kpi .s { font-size: 0.76rem; color: var(--ink-2); line-height: 1.3; }
+.statrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.statrow .kpi { background: var(--surface); border: 1px solid var(--rule); padding: 12px 14px; }
+.statrow .kpi .v { font-size: 1.75rem; }
+.gcards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .gcards { grid-template-columns: 1fr; } }
+.gcards .card h3 { font-size: 1rem; margin-bottom: 6px; }
+.gcards .card p, .gcards .card li { font-size: 0.92rem; color: var(--ink-2); line-height: 1.5; }
+.gcards .card.wide { grid-column: 1 / -1; }
+.layers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 860px) { .layers { grid-template-columns: 1fr; } }
+.layers .card { display: flex; flex-direction: column; gap: 8px; }
+.layers .card .n { font-family: var(--f-display); font-weight: 800; font-size: 1.6rem; color: var(--acc); line-height: 1; }
+.layers .card p { font-size: 0.92rem; color: var(--ink-2); line-height: 1.5; }
+.eq { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 700; font-size: 1.1rem; }
+.eq .box { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 8px 12px; text-align: center; line-height: 1.15; }
+.eq .box small { display: block; font-family: var(--f-mono); font-weight: 400; font-size: 0.72rem; color: var(--ink-3); }
+.eq .box.res { background: var(--acc-soft); border-color: transparent; }
+.eq .op { color: var(--ink-3); }
+.big { font-family: var(--f-display); font-size: 2.3rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+.verdict { border-top: 1px solid var(--rule); padding-top: 12px; font-size: 0.95rem; color: var(--ink-2); }
+.diag { border-radius: 12px; padding: 14px 16px; background: var(--bg); display: flex; flex-direction: column; gap: 6px; }
+.diag .t { font-family: var(--f-display); font-weight: 800; font-size: 1.15rem; }
+.schematic { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 16px; margin-top: 30px; }
+.schematic svg { width: 100%; height: auto; display: block; }
+.schematic text { font-family: var(--f-body); }
+.sdot { cursor: pointer; }
+.sdot:hover, .sdot:focus { stroke-width: 3; }
+.next-list { counter-reset: n; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.next-list li { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px 14px 56px; position: relative; }
+.next-list li::before { counter-increment: n; content: counter(n); position: absolute; left: 18px; top: 12px; font-family: var(--f-display); font-weight: 800; font-size: 1.5rem; color: var(--acc); }
+#jsErr .warn { margin-top: 12px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div id="tip" role="tooltip"></div>
+<noscript><div class="wrap"><div class="warn" style="margin-top:12px">Este documento necesita JavaScript para dibujar las gráficas y las calculadoras. Abrilo en Chrome, Edge, Firefox o Safari.</div></div></noscript>
+<div id="jsErr" class="wrap" hidden><div class="warn">Una parte interactiva no se pudo dibujar en este visor: <span></span> Si lo abriste en una vista previa, probá descargarlo y abrirlo en el navegador.</div></div>
+
+<header class="hero wrap">
+  <div class="read stack">
+    <span class="eyebrow">Prueba técnica · Serie II · Fábrica</span>
+    <h1>La caldera, sus sensores y sus datos</h1>
+    <p class="lede">Cómo funciona una caldera de lecho fluidizado, qué tan confiables son sus 30 sensores, en qué modos opera, cómo estimar el vapor sin medidor, cómo distinguir una falla del sensor de una del equipo y dónde hay eficiencia por ganar.</p>
+    <nav class="toc" aria-label="Contenido">
+      <a href="#caldera">La caldera</a><a href="#datos">1 · Los datos</a><a href="#regimenes">2 · Regímenes</a><a href="#virtual">3 · Sensor virtual</a><a href="#anomalias">4 · Anomalías</a><a href="#eficiencia">5 · Eficiencia</a><a href="#cierre">Cierre</a><a href="#glosario">Glosario</a>
+    </nav>
+  </div>
+  <div class="schematic" id="schema">
+    <div class="chart-title">Dónde está cada sensor (pasá el cursor o tocá un punto)</div>
+    <div class="legend" id="schemaLegend"></div>
+    <div id="schemaSvg"></div>
+  </div>
+</header>
+
+<!-- ================================================================== -->
+<section id="caldera" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">La caldera en dos minutos</span>
+    <h2>Carbón, arena caliente y agua que se vuelve vapor</h2>
+    <p>Es una caldera de <strong>lecho fluidizado circulante</strong> (CFB, por sus siglas en inglés) de una planta química en China: unas 60 t/h de vapor a 9.8 MPa y 540 °C. El dataset es público (Cao et al., 2025). El recorrido, en el orden del dibujo:</p>
+    <ul>
+      <li><strong>Hogar y lecho.</strong> En el fondo hay un lecho de arena y ceniza caliente. El <strong>aire primario</strong> entra por abajo y lo hace "hervir" (fluidiza); el carbón se quema dentro. El <strong>aire secundario</strong> entra más arriba y termina la combustión.</li>
+      <li><strong>Ciclones y cámaras de retorno.</strong> Los gases arrastran partículas; los ciclones las separan y las cámaras de retorno las devuelven al hogar con un poco de aire.</li>
+      <li><strong>Sobrecalentadores y atemperador.</strong> El vapor sale del domo y se calienta más. El <strong>atemperador</strong> le inyecta agua para que no pase de la temperatura de diseño.</li>
+      <li><strong>Economizador y precalentadores.</strong> Los gases, ya más fríos, calientan el agua que entra a la caldera y el aire que va al hogar.</li>
+      <li><strong>Tiro inducido.</strong> Un ventilador saca los gases por la chimenea y mantiene el hogar en leve depresión (presión negativa).</li>
+    </ul>
+    <div class="callout">
+      <h3>¿Y las calderas de bagazo del ingenio?</h3>
+      <p class="small">Queman bagazo húmedo (~50 % de agua) sobre una parrilla, no en un lecho fluidizado. Comparten casi todo lo demás: aire primario y secundario, O₂ en gases, tiro inducido, atemperación, vapor principal, ensuciamiento de superficies. De esta caldera <strong>se traslada el método</strong>, no los valores.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="datos" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">1 · Calidad de los datos y de los sensores</span>
+    <h2>Antes de modelar, auditar cada archivo y cada sensor</h2>
+    <p>La prueba entrega dos archivos de operación y un diccionario: 30 sensores, una lectura cada 5 segundos, durante 5 días.</p>
+  </div>
+  <div class="figure statrow" id="p1Stats"></div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>El segundo archivo es el primero con 30 valores inventados</h3>
+      <p><code>data_AutoReg.csv</code> es idéntico a <code>data.csv</code>, salvo en el agua de atemperación: rellena dos huecos con un modelo autorregresivo. El relleno prolonga la tendencia previa y no ve el escalón que viene después.</p>
+      <div class="seg" id="gapSeg" role="group" aria-label="Hueco"></div>
+    </div>
+    <div class="chart" id="chGap"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>Rellenar huecos es una decisión del análisis, no del archivo. El relleno no agrega información y puede inventar un comportamiento que no ocurrió.</div><div class="decide"><b class="k">Qué decidimos</b>Trabajar con <code>data.csv</code> y dejar los 30 faltantes como faltantes (0.03 % de un sensor).</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>El diccionario no trae unidades y confunde una válvula con una temperatura</h3>
+      <ul>
+        <li>El encabezado anuncia tres columnas y cada fila trae dos.</li>
+        <li>No hay unidades: se infirieron de las magnitudes (Pa, MPa, °C, Nm³/h, t/h, % de O₂, A). La de vibración no se puede confirmar.</li>
+        <li>"Pot pressure" es la presión del <strong>domo</strong>; <code>TV_8329ZC</code> es la <strong>apertura de una válvula</strong> (%), no una temperatura.</li>
+        <li>El flujo de vapor es "después de compensación": ya es un cálculo, no una medición directa.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>El reloj es perfecto, y eso delata que el archivo fue remuestreado</h3>
+      <p>86,400 filas exactas cada 5 s, sin un solo hueco. Un historiador real casi nunca entrega eso. Cinco sensores en realidad cambian <strong>cada 10 s</strong>: la fila siguiente repite el valor. Uno de ellos es el flujo de vapor que pide estimar la pregunta 3.</p>
+    </div>
+    <div class="grid-2"><div class="chart" id="chStepV"></div><div class="chart" id="chStepA"></div></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>A 5 s, la mitad de las filas de esos sensores no es información nueva.</div><div class="decide"><b class="k">Qué decidimos</b>Modelar con promedios de 1 minuto, que es la escala útil para operar y elimina el escalonado.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Explorá cualquier sensor</h3>
+      <div class="ctrl"><label>Sensor <select id="selSensor"></select></label></div>
+    </div>
+    <div class="chart" id="chSensor"></div>
+    <div class="read" id="sensorInfo"></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Seis presiones de hogar permiten verificarse entre sí, y desenmascaran a un diferencial</h3>
+      <p>Las seis presiones del hogar forman dos familias (A-B-C y D-E-F) y casi coinciden. En cambio, el "diferencial de presión hogar superior-inferior" izquierdo (<code>SXLTCYZ</code>) <strong>copia la presión del hogar</strong>, mientras que su gemelo derecho no se le parece.</p>
+    </div>
+    <div class="grid-2"><div class="chart" id="chCorr"></div><div class="chart" id="chDisp"></div></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>Un diferencial entre la parte alta y la baja del hogar depende del lecho y del aire, no de la presión de arriba. Lo más probable es una toma inferior tapada (común con ceniza) o un tag mal asignado.</div><div class="decide"><b class="k">Qué decidimos</b>Sacar <code>SXLTCYZ</code> de los modelos y avisar a instrumentación. Para modelar, usar la mediana de las seis presiones; para detectar fallas, cada una por separado.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Los picos de la corriente del tiro inducido parecían errores, y no lo son</h3>
+      <p id="picosTxt"></p>
+    </div>
+    <div class="chart" id="chPicos"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>Es el control de tiro trabajando: si el hogar se presuriza, el ventilador jala más. Borrar esos picos habría borrado eventos reales.</div><div class="decide"><b class="k">Qué decidimos</b>Conservarlos. Los modelos usan promedios de 1 min, donde casi desaparecen; para las alertas son información.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Dos cosas que parecen fallas y son operación</h3>
+      <p><strong>La válvula del atemperador pasó <span id="vfH"></span> h fija</strong> en <span id="vfN"></span> tramos de 30 minutos o más. El agua que deja pasar tampoco se mueve, así que la válvula está quieta de verdad: lo más probable es que el lazo estuviera en manual.</p>
+      <p><strong>El 30/03 cerca de las 08:53 el aire de las cámaras de retorno se redistribuyó:</strong> la izquierda bajó, la derecha subió y el total casi no cambió. Dos sensores que fallan a la vez en sentidos opuestos no conservan la suma: fue el operador.</p>
+    </div>
+    <div class="chart" id="chRet"></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack"><h3>La decisión por sensor</h3></div>
+    <div class="tbl-wrap"><table class="t" id="tblSens"></table></div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="regimenes" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">2 · Regímenes de operación</span>
+    <h2>La caldera no salta entre estados: la carga manda</h2>
+    <p>Un agrupamiento siempre devuelve grupos, aunque no existan. Por eso primero se pregunta si <strong>hay</strong> modos separados. La prueba compara la separación de los grupos (silueta) contra la de una nube gaussiana con la misma correlación, que por construcción no tiene grupos.</p>
+  </div>
+  <div class="figure statrow" id="p2Stats"></div>
+  <div class="grid-2 figure"><div class="chart" id="chSil"></div><div class="chart" id="chAri"></div></div>
+  <div class="read meaning"><div><b class="k">Qué significa</b>Con dos grupos no hay más que una nube; con tres o más hay algo de estructura, pero poca. La caldera opera en un régimen normal cuya variable maestra es la carga.</div><div class="decide"><b class="k">Qué decidimos</b>Elegir el número de modos por reproducibilidad (remuestreando bloques de 2 h), con la misma regla de la Serie I: entre 3 y 6, el más estable. Sale k = 3.</div></div>
+
+  <div class="finding">
+    <div class="read stack"><h3>Tres zonas de carga</h3></div>
+    <div class="grid-3" id="modeCards"></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Cinco días de operación</h3>
+      <p>Arriba, el vapor coloreado por zona de carga. En el medio, el <strong>ciclo del lecho</strong>: sube mientras se acumula ceniza y cae cuando se descarga (sombreado). Abajo, la válvula del atemperador.</p>
+    </div>
+    <div class="chart" id="chLinea1"></div>
+    <div class="chart" id="chLinea2"></div>
+    <div class="chart" id="chLinea3"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b><span id="lechoTxt"></span></div><div class="decide"><b class="k">Qué decidimos</b>Usar la zona de carga y la fase del lecho como contexto de las alertas, y registrar en el ingenio los eventos de operación (descargas, compuertas, lazos en manual) que hoy hay que deducir de los datos.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>A igual carga: cómo se opera</h3>
+      <p>Si a cada variable se le quita lo que explica la carga, queda un eje propio. En un extremo está más O₂, más agua de atemperación y el vapor más frío; en el otro, el hogar y el vapor calientes. Es <strong>descriptivo</strong>: los ~7 °C entre extremos salen en parte por construcción.</p>
+    </div>
+    <div class="tbl-wrap"><table class="t" id="tblTer"></table></div>
+    <div class="chart figure" id="chCC"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>En cambios de 1 minuto, más agua de atemperación enfría el vapor unos 5 minutos después. Antes de ese momento la relación es positiva: cuando el vapor se calienta, el control abre el agua. El efecto propio del O₂ en niveles no se distingue de cero.</div><div class="decide"><b class="k">Qué decidimos</b>Tratarlo como hipótesis de eficiencia (pregunta 5) y confirmarlo con una prueba en planta: bajar el O₂ de consigna por tramos y medir.</div></div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="virtual" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">3 · Sensor virtual del flujo de vapor</span>
+    <h2>La caldera ya traía un segundo medidor de vapor</h2>
+    <p>El vapor pierde presión por roce al pasar del domo al colector, y esa pérdida crece con el flujo, igual que en una placa de orificio. Con esa sola idea física, más el agua de atemperación que se suma al vapor:</p>
+    <div class="eq" id="eqHid"></div>
+  </div>
+  <div class="grid-2 figure"><div class="chart" id="chHid"></div><div class="chart" id="chModelos"></div></div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Calculadora: el vapor a partir de dos presiones</h3>
+      <p class="small muted">Mové las variables; el resultado usa la fórmula ajustada en el notebook 08.</p>
+    </div>
+    <div class="calc">
+      <div>
+        <label>Presión del domo: <b id="lPd"></b><input type="range" id="sPd" min="9.4" max="10.1" step="0.01"></label>
+        <label>Presión del colector: <b id="lPc"></b><input type="range" id="sPc" min="9.0" max="9.8" step="0.01"></label>
+        <label>Temperatura del vapor: <b id="lTv"></b><input type="range" id="sTv" min="515" max="552" step="0.5"></label>
+        <label>Agua de atemperación: <b id="lAg"></b><input type="range" id="sAg" min="1.5" max="4.4" step="0.05"></label>
+      </div>
+      <div class="stack">
+        <div class="kpis" id="calcVap"></div>
+        <div class="verdict" id="calcVapTxt"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Medido contra estimado, en un día que el modelo no vio</h3>
+      <div class="seg" id="meSeg" role="group" aria-label="Modelo"></div>
+    </div>
+    <div class="chart" id="chME"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>Validado como se usaría: entrenando con los días anteriores y prediciendo el siguiente, con 30 min de separación. Con particiones al azar el error parecía entre 17 % y 51 % menor.</div><div class="decide"><b class="k">Qué decidimos</b>Poner en línea el Ridge completo. Usar el modelo de dos variables como verificación física y el de combustión como respaldo si fallan las presiones.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Qué explica el vapor y con qué rezago</h3>
+      <p>Sin las presiones de vapor, el vapor se explica por la combinación de aire y tiro, temperatura del hogar y atemperación. La caldera responde en 1-2 minutos.</p>
+    </div>
+    <div class="grid-2"><div class="chart" id="chMec"></div><div class="chart" id="chRezAb"></div></div>
+    <div class="grid-2 figure"><div class="chart" id="chAzar"></div><div class="chart" id="chLag"></div></div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="anomalias" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">4 · Anomalías y alertas tempranas</span>
+    <h2>¿Falló el sensor o falló la caldera?</h2>
+    <p>Un sensor que falla <strong>se separa de sus pares y de la física</strong>: su gemelo y los balances dicen otra cosa. Un equipo que falla <strong>mueve varias variables acopladas a la vez</strong>, y los sensores redundantes coinciden. Esa idea se traduce en tres capas.</p>
+  </div>
+  <div class="layers figure" id="layers"></div>
+  <div class="figure" id="flow"></div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Simulador: cinco fallas inyectadas en datos reales</h3>
+      <p class="small muted">Elegí una falla. Azul: el chequeo de verificación más alto; naranja: el monitor de proceso. Ambos en "veces su umbral": por encima de 1 hay alarma (si dura 5 min). Sombreado: cuándo se inyectó la falla. Fuera del sombreado, lo que pasa de 1 son eventos reales de esos días, como varias presiones de hogar a la vez el 30/03 a las 20:14.</p>
+      <div class="seg" id="escSeg" role="group" aria-label="Escenario"></div>
+    </div>
+    <div class="chart" id="chEsc"></div>
+    <div class="read" id="escDiag"></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Reglas para el jefe de calderas</h3>
+      <p class="small muted">Eventos por día en estos 5 días. Los umbrales se fijaron con estos mismos datos, así que las frecuencias salen en parte por construcción; con los límites de diseño se reemplazan.</p>
+    </div>
+    <div class="tbl-wrap"><table class="t" id="tblReglas"></table></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Qué tan fina es cada verificación</h3>
+      <p class="small muted">La falla más chica que dispara la alarma, según el ruido normal de cada chequeo.</p>
+    </div>
+    <div class="tbl-wrap"><table class="t" id="tblSensib"></table></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>La verificación es fina en el vapor y en el O₂, y gruesa en los gases (la diferencia izquierda-derecha varía mucho por sí sola). Con datos sin fallas conocidas dio ~2 alarmas por día, y casi todas eran varias presiones a la vez, es decir, eventos del hogar.</div><div class="decide"><b class="k">Qué decidimos</b>Que cada alarma de verificación pida confirmación. Si el operador confirma un cambio deliberado (como la redistribución del aire), el chequeo se recalibra en 2 h.</div></div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="eficiencia" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">5 · Eficiencia</span>
+    <h2>La oportunidad más clara está en los tubos, no en el aire</h2>
+    <p>Los datos no traen flujo de combustible, temperatura de chimenea ni CO. La eficiencia absoluta no se puede medir, pero sí los <strong>efectos relativos a igual carga</strong>, que se traducen a combustible con supuestos declarados.</p>
+  </div>
+  <div class="finding">
+    <div class="read stack">
+      <h3>Los gases suben entre limpiezas, caen de golpe y cada día terminan más arriba</h3>
+      <p id="serruchoTxt"></p>
+    </div>
+    <div class="chart" id="chSerrucho"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>Es compatible con superficies que se ensucian y se limpian con sopladores de hollín, pero no hay registro de soplados: es una hipótesis. La alternativa es que el ciclo del lecho mueva la temperatura de gases.</div><div class="decide"><b class="k">Qué decidimos</b>Cruzar el serrucho con el registro de soplados y disparar la limpieza por temperatura de gases, no por calendario.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Calculadora: cuánto vale recuperar temperatura de gases</h3>
+      <p class="small muted">Cada supuesto se puede mover. Los valores iniciales son los del notebook 09.</p>
+    </div>
+    <div class="calc">
+      <div>
+        <label>°C recuperados a la salida del economizador: <b id="lDT"></b><input type="range" id="sDT" min="0" max="20" step="0.5"></label>
+        <label>Fracción que llega a la chimenea: <b id="lFr"></b><input type="range" id="sFr" min="0.2" max="0.9" step="0.05"></label>
+        <label>Pérdida por K de chimenea: <b id="lPk"></b><input type="range" id="sPk" min="0.03" max="0.05" step="0.001"></label>
+        <label>Eficiencia de la caldera: <b id="lEf"></b><input type="range" id="sEf" min="0.80" max="0.92" step="0.005"></label>
+        <label>Poder calorífico del combustible: <b id="lPci"></b><input type="range" id="sPci" min="7" max="28" step="0.5"></label>
+        <label>Precio del combustible: <b id="lPr"></b><input type="range" id="sPr" min="10" max="200" step="5"></label>
+      </div>
+      <div class="stack">
+        <div class="kpis" id="calcEf"></div>
+        <div class="verdict small" id="calcEfTxt"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Exceso de aire: poco que ganar en esta caldera</h3>
+      <p id="o2Txt"></p>
+    </div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>La caldera ya opera con poco exceso de aire. Bajar más el O₂ sin un analizador de CO arriesga inquemados, que cuestan más de lo que se ahorra.</div><div class="decide"><b class="k">Qué decidimos</b>No priorizarlo aquí. En calderas de bagazo, que operan con mucho más exceso de aire, es la primera palanca, y con CO se puede bajar sin riesgo.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Qué datos harían falta para estimar con confianza</h3>
+      <div class="tbl-wrap"><table class="t" id="tblFalta"></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="cierre" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">Cierre</span>
+    <h2>Lo que la Serie II le dice a la Gerencia Industrial</h2>
+  </div>
+  <div class="gcards figure" id="cierreCards"></div>
+  <div class="read stack figure">
+    <h3>Próximos pasos</h3>
+    <ol class="next-list">
+      <li>Revisar con instrumentación el diferencial <code>SXLTCYZ</code> y la vibración B del tiro, y confirmar unidades.</li>
+      <li>Poner en línea el sensor virtual del vapor y su chequeo contra el medidor.</li>
+      <li>Activar las reglas físicas con los límites de diseño y la verificación de sensores con confirmación del operador.</li>
+      <li>Cruzar la temperatura de gases con el registro de soplado de hollín y medir combustible, chimenea y CO.</li>
+      <li>En las calderas de bagazo: aplicar la misma auditoría y agregar redundancia donde hoy hay un solo sensor crítico.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="glosario" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">Glosario</span>
+    <h2>Las palabras de la caldera y del análisis</h2>
+    <dl class="glossary" id="gloss"></dl>
+  </div>
+</section>
+
+<footer class="wrap"><div class="read">Todas las cifras de este documento salen de <code>notebooks/06_fabrica_datos.ipynb</code> a <code>notebooks/09_fabrica_anomalias_eficiencia.ipynb</code> y de <code>src/fabrica_*.py</code>. Datos: <em>A long-tailed distribution time-series dataset in boiler equipment</em> (Cao et al., 2025, Springer Nature / figshare).</div></footer>
+
+<script>
+window.addEventListener("error", e => { const b = document.getElementById("jsErr"); if (b) { b.hidden = false; b.querySelector("span").textContent += (e.message || "error") + ". "; } });
+// algunos visores integrados reemplazan console por un objeto incompleto: nunca depender de él
+const note = (lvl, ...a) => { try { const f = typeof console !== "undefined" && console[lvl]; if (typeof f === "function") f.apply(console, a); } catch (e) {} };
+const D = /*__DATA__*/null;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = (v, d = 0) => v == null || isNaN(v) ? "—" : Number(v).toLocaleString("es-GT", { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (v, d = 0) => fmt(v * 100, d) + " %";
+const usd = (v, d = 0) => (v < 0 ? "−" : "") + "US$" + fmt(Math.abs(v), d);
+const mil = v => "US$" + fmt(v / 1000) + " mil";
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs = {}, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function h(tag, attrs = {}, html = "") { const e = document.createElement(tag); for (const k in attrs) e.setAttribute(k, attrs[k]); e.innerHTML = html; return e; }
+const $ = id => document.getElementById(id);
+function safe(name, fn) { try { fn(); } catch (e) { note("warn", name, e); const b = $("jsErr"); if (b) { b.hidden = false; b.querySelector("span").textContent += `${name}: ${e.message}. `; } } }
+
+/* ---------- tooltip ---------- */
+const tip = $("tip");
+function showTip(html, x, y) {
+  tip.innerHTML = html; tip.style.opacity = 1;
+  const w = tip.offsetWidth, hh = tip.offsetHeight;
+  tip.style.left = Math.min(window.innerWidth - w - 8, Math.max(8, x - w / 2)) + "px";
+  tip.style.top = Math.max(8, y - hh - 14) + "px";
+}
+const hideTip = () => tip.style.opacity = 0;
+function bindTip(node, html) {
+  node.classList.add("hit"); node.setAttribute("tabindex", "0");
+  const show = ev => { const r = node.getBoundingClientRect(); showTip(typeof html === "function" ? html() : html, ev && ev.clientX != null ? ev.clientX : r.left + r.width / 2, ev && ev.clientY != null ? ev.clientY : r.top); };
+  node.addEventListener("mouseenter", show); node.addEventListener("mousemove", show); node.addEventListener("focus", () => show(null));
+  node.addEventListener("mouseleave", hideTip); node.addEventListener("blur", hideTip);
+}
+
+/* ---------- helpers de gráficas ---------- */
+function svgBox(c, w, hgt) { const s = el("svg", { viewBox: `0 0 ${w} ${hgt}`, role: "img" }); c.appendChild(s); return s; }
+function title(c, text, legend) {
+  c.appendChild(h("div", { class: "chart-title" }, text));
+  if (legend && legend.length) { const L = h("div", { class: "legend" }); legend.forEach(([lab, color, kind]) => L.appendChild(h("span", {}, `<i class="${kind || ""}" style="background:${color}"></i>${lab}`))); c.appendChild(L); }
+}
+function niceTicks(min, max, n = 5) {
+  const span = max - min || 1, step0 = span / n, mag = Math.pow(10, Math.floor(Math.log10(step0)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => span / s <= n) || 10 * mag;
+  const out = []; for (let v = Math.ceil(min / step) * step; v <= max + 1e-9; v += step) out.push(+v.toFixed(10)); return out;
+}
+function extent(arrs, pad = 0.06) {
+  const v = arrs.flat().filter(x => x != null && !isNaN(x)); let lo = Math.min(...v), hi = Math.max(...v); const p = (hi - lo) * pad || 1; return [lo - p, hi + p];
+}
+/* serie de tiempo con cruz de lectura */
+function ts(id, labels, series, o = {}) {
+  const c = $(id); c.innerHTML = "";
+  title(c, o.titleText, series.filter(s => !s.hideLegend).map(s => [s.name, s.color, s.dots ? "" : "line"]).concat(o.extraLegend || []));
+  const w = o.w || 980, hgt = o.hgt || 280, L = 62, R = 18, T = 12, B = 30, n = labels.length;
+  const [y0, y1] = o.yRange || extent(series.map(s => s.values));
+  const s = svgBox(c, w, hgt);
+  const sx = i => L + (i / (n - 1)) * (w - L - R), sy = v => hgt - B - ((v - y0) / (y1 - y0)) * (hgt - B - T);
+  (o.spans || []).forEach(sp => el("rect", { x: sx(sp[0]), y: T, width: Math.max(1, sx(sp[1]) - sx(sp[0])), height: hgt - B - T, fill: sp[2] || css("--g2"), opacity: sp[3] || 0.14 }, s));
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(y0, y1, 5).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = (o.yFmt || fmt)(t); });
+  const every = o.xEvery || Math.ceil(n / 8);
+  for (let i = 0; i < n; i += every) el("text", { x: sx(i), y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s).textContent = labels[i];
+  if (o.hline != null) el("line", { x1: L, x2: w - R, y1: sy(o.hline), y2: sy(o.hline), stroke: css("--ink-2"), "stroke-dasharray": "5 4", "stroke-width": 1.2 }, s);
+  series.forEach(sr => {
+    if (sr.dots) { sr.values.forEach((v, i) => { if (v != null) el("circle", { cx: sx(i), cy: sy(v), r: sr.r || 2.2, fill: sr.colorAt ? sr.colorAt(i) : sr.color }, s); }); return; }
+    let d = "", pen = false; sr.values.forEach((v, i) => { if (v == null || isNaN(v)) { pen = false; return; } d += `${pen ? "L" : "M"}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`; pen = true; });
+    el("path", { d, fill: "none", stroke: sr.color, "stroke-width": sr.width || 1.6, "stroke-linejoin": "round", "stroke-dasharray": sr.dash || "" }, s);
+  });
+  if (o.yLabel) el("text", { x: 14, y: (hgt - B) / 2, transform: `rotate(-90 14 ${(hgt - B) / 2})`, "text-anchor": "middle", class: "lab" }, s).textContent = o.yLabel;
+  const cross = el("line", { y1: T, y2: hgt - B, stroke: css("--ink-3"), "stroke-width": 1, opacity: 0 }, s);
+  const hit = el("rect", { x: L, y: T, width: w - L - R, height: hgt - B - T, fill: "transparent" }, s);
+  const move = ev => {
+    const r = s.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * w;
+    const i = Math.max(0, Math.min(n - 1, Math.round((px - L) / (w - L - R) * (n - 1))));
+    cross.setAttribute("x1", sx(i)); cross.setAttribute("x2", sx(i)); cross.setAttribute("opacity", 1);
+    const rows = series.filter(sr => !sr.noTip).map(sr => `<br>${sr.name}: <b>${sr.values[i] == null ? "—" : (o.tipFmt || o.yFmt || fmt)(sr.values[i])}</b>${sr.tipExtra ? sr.tipExtra(i) : ""}`).join("");
+    showTip(`<b>${labels[i]}</b>${rows}${o.tipExtra ? o.tipExtra(i) : ""}`, ev.clientX, ev.clientY);
+  };
+  hit.addEventListener("mousemove", move); hit.addEventListener("mouseleave", () => { hideTip(); cross.setAttribute("opacity", 0); });
+  hit.addEventListener("touchstart", ev => move(ev.touches[0]), { passive: true });
+}
+/* barras horizontales */
+function hbars(id, rows, o) {
+  const c = $(id); c.innerHTML = ""; title(c, o.titleText, o.legend);
+  const labelW = o.labelW || 210, barH = 20, gap = 12, w = o.w || 640, H = rows.length * (barH + gap) + 30, s = svgBox(c, w, H);
+  const lo = Math.min(0, ...rows.map(r => r.v)), hi = Math.max(0, ...rows.map(r => r.v)) || 1, x0 = labelW, x1 = w - 70;
+  const sx = v => x0 + ((v - lo) / (hi - lo)) * (x1 - x0);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(lo, hi, 4).forEach(t => { el("line", { x1: sx(t), x2: sx(t), y1: 0, y2: H - 22 }, g); el("text", { x: sx(t), y: H - 6, "text-anchor": "middle", class: "lab" }, s).textContent = o.valueFmt(t); });
+  rows.forEach((r, i) => {
+    const y = i * (barH + gap) + 4, a = sx(Math.min(0, r.v)), b = sx(Math.max(0, r.v));
+    el("text", { x: x0 - 10, y: y + barH / 2 + 4, "text-anchor": "end", class: "lab" }, s).textContent = r.label;
+    const rect = el("rect", { x: a, y, width: Math.max(2, b - a), height: barH, rx: 4, fill: r.color || o.color || css("--acc") }, s);
+    bindTip(rect, r.tip || `<b>${r.label}</b><br>${o.valueFmt(r.v)}`);
+    el("text", { x: b + 8, y: y + barH / 2 + 4, "text-anchor": "start", class: "val" }, s).textContent = o.valueFmt(r.v);
+  });
+  el("line", { x1: sx(0), x2: sx(0), y1: 0, y2: H - 22, class: "base" }, s);
+}
+/* dispersión */
+function scatter(id, groups, o) {
+  const c = $(id); c.innerHTML = ""; title(c, o.titleText, groups.map(g => [g.name, g.color, ""]));
+  const w = o.w || 520, hgt = o.hgt || 340, L = 60, R = 14, T = 12, B = 40, s = svgBox(c, w, hgt);
+  const [x0, x1] = o.xRange || extent(groups.map(g => g.x)), [y0, y1] = o.yRange || extent(groups.map(g => g.y));
+  const sx = v => L + (v - x0) / (x1 - x0) * (w - L - R), sy = v => hgt - B - (v - y0) / (y1 - y0) * (hgt - B - T);
+  const gg = el("g", { class: "grid" }, s);
+  niceTicks(y0, y1, 5).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, gg); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = (o.yFmt || fmt)(t); });
+  niceTicks(x0, x1, 5).forEach(t => el("text", { x: sx(t), y: hgt - B + 16, "text-anchor": "middle", class: "lab" }, s).textContent = (o.xFmt || fmt)(t));
+  groups.forEach(g => g.x.forEach((x, i) => el("circle", { cx: sx(x), cy: sy(g.y[i]), r: 2.4, fill: g.color, opacity: 0.45 }, s)));
+  if (o.line) el("line", { x1: sx(o.line[0]), y1: sy(o.line[1]), x2: sx(o.line[2]), y2: sy(o.line[3]), stroke: css("--ink"), "stroke-width": 1.6, "stroke-dasharray": "6 4" }, s);
+  el("text", { x: (L + w - R) / 2, y: hgt - 6, "text-anchor": "middle", class: "lab" }, s).textContent = o.xLabel || "";
+  el("text", { x: 14, y: (hgt - B) / 2, transform: `rotate(-90 14 ${(hgt - B) / 2})`, "text-anchor": "middle", class: "lab" }, s).textContent = o.yLabel || "";
+}
+/* líneas cortas por categoría (pocos puntos, con marcadores) */
+function cats(id, xs, series, o) {
+  const c = $(id); c.innerHTML = ""; title(c, o.titleText, series.map(s => [s.name, s.color, "line"]));
+  const w = o.w || 520, hgt = o.hgt || 280, L = 56, R = 16, T = 12, B = 36, s = svgBox(c, w, hgt);
+  const [y0, y1] = o.yRange || extent(series.map(s => s.values).concat(series.filter(s => s.lo).map(s => s.lo), series.filter(s => s.hi).map(s => s.hi)));
+  const sx = i => L + (xs.length === 1 ? 0.5 : i / (xs.length - 1)) * (w - L - R), sy = v => hgt - B - (v - y0) / (y1 - y0) * (hgt - B - T);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(y0, y1, 5).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = (o.yFmt || fmt)(t); });
+  xs.forEach((x, i) => { if (i % (o.xEvery || 1) === 0) el("text", { x: sx(i), y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s).textContent = x; });
+  if (o.hline != null) el("line", { x1: L, x2: w - R, y1: sy(o.hline), y2: sy(o.hline), stroke: css("--ink-3"), "stroke-dasharray": "4 4" }, s);
+  if (o.vline != null) el("line", { x1: sx(o.vline), x2: sx(o.vline), y1: T, y2: hgt - B, stroke: css("--ink-3"), "stroke-dasharray": "4 4" }, s);
+  series.forEach(sr => {
+    if (sr.lo) sr.values.forEach((v, i) => el("line", { x1: sx(i), x2: sx(i), y1: sy(sr.lo[i]), y2: sy(sr.hi[i]), stroke: sr.color, "stroke-width": 3, opacity: 0.35 }, s));
+    if (!sr.noLine) el("path", { d: sr.values.map((v, i) => `${i ? "L" : "M"}${sx(i)},${sy(v)}`).join(""), fill: "none", stroke: sr.color, "stroke-width": 2 }, s);
+    sr.values.forEach((v, i) => { const d = el("circle", { cx: sx(i), cy: sy(v), r: o.r || 4, fill: sr.colorAt ? sr.colorAt(i) : sr.color, stroke: css("--surface"), "stroke-width": 1.5 }, s); bindTip(d, `<b>${sr.name}</b><br>${o.xName || ""} ${xs[i]}: ${(o.yFmt || fmt)(v)}${sr.extra ? sr.extra(i) : ""}`); });
+  });
+  if (o.yLabel) el("text", { x: 13, y: (hgt - B) / 2, transform: `rotate(-90 13 ${(hgt - B) / 2})`, "text-anchor": "middle", class: "lab" }, s).textContent = o.yLabel;
+  if (o.xLabel) el("text", { x: (L + w - R) / 2, y: hgt - 4, "text-anchor": "middle", class: "lab" }, s).textContent = o.xLabel;
+}
+function segButtons(id, names, onPick, start = 0) {
+  const box = $(id); box.innerHTML = "";
+  names.forEach((nm, i) => { const b = h("button", { type: "button", "aria-pressed": i === start ? "true" : "false" }, nm);
+    b.addEventListener("click", () => { [...box.children].forEach(x => x.setAttribute("aria-pressed", "false")); b.setAttribute("aria-pressed", "true"); onPick(i, nm); });
+    box.appendChild(b); });
+  onPick(start, names[start]);
+}
+const stat = (n, l, s = "") => `<div class="kpi"><div class="v">${n}</div><div class="l">${l}</div>${s ? `<div class="s">${s}</div>` : ""}</div>`;
+const SENS = Object.fromEntries(D.tabla.map(r => [r.tag, r]));
+const estadoCls = e => e.startsWith("sospechoso") ? "bad" : (e.startsWith("confiable") && !e.includes(";") && !e.includes(",") ? "ok" : (e.startsWith("redundante") ? "ok" : "mid"));
+const estadoTxt = e => ({ ok: "confiable", mid: "con tratamiento", bad: "sospechoso" })[estadoCls(e)];
+const estadoCol = e => ({ ok: css("--g1"), mid: css("--g4"), bad: css("--g2") })[estadoCls(e)];
+
+/* =================== esquema de la caldera =================== */
+safe("esquema", () => {
+  const box = $("schemaSvg"), w = 980, hgt = 430, s = svgBox(box, w, hgt);
+  const ink2 = css("--ink-2"), rule = css("--rule"), metal = css("--metal"), hot = css("--hot"), acc = css("--acc");
+  const T = (x, y, t, a = "middle", sz = 12, col = ink2) => { const e = el("text", { x, y, "text-anchor": a, "font-size": sz, fill: col }, s); e.textContent = t; return e; };
+  // hogar
+  el("rect", { x: 70, y: 40, width: 150, height: 330, rx: 18, fill: "none", stroke: metal, "stroke-width": 2.5 }, s);
+  el("rect", { x: 76, y: 300, width: 138, height: 64, rx: 10, fill: hot, opacity: 0.18 }, s);
+  for (let i = 0; i < 14; i++) el("circle", { cx: 88 + (i % 7) * 19, cy: 322 + Math.floor(i / 7) * 20, r: 4, fill: hot, opacity: 0.55 }, s);
+  T(145, 30, "Hogar"); T(145, 292, "lecho fluidizado", "middle", 11);
+  // aire primario y secundario
+  el("path", { d: "M20,385 H145 V368", fill: "none", stroke: acc, "stroke-width": 2, "marker-end": "" }, s); T(28, 400, "aire primario", "start", 11, acc);
+  el("path", { d: "M20,250 H70", fill: "none", stroke: acc, "stroke-width": 2 }, s); T(22, 242, "aire secundario", "start", 11, acc);
+  // ciclón y retorno
+  el("path", { d: "M220,70 H275", fill: "none", stroke: metal, "stroke-width": 2 }, s);
+  el("path", { d: "M275,55 h50 v60 l-25,55 l-25,-55 z", fill: "none", stroke: metal, "stroke-width": 2 }, s); T(300, 46, "Ciclones");
+  el("path", { d: "M300,170 V300 H220", fill: "none", stroke: metal, "stroke-width": 2, "stroke-dasharray": "5 4" }, s); T(306, 250, "cámara de retorno", "start", 11);
+  // paso convectivo
+  el("path", { d: "M325,70 H420", fill: "none", stroke: metal, "stroke-width": 2 }, s);
+  el("rect", { x: 420, y: 40, width: 190, height: 330, rx: 14, fill: "none", stroke: metal, "stroke-width": 2.5 }, s);
+  const banks = [["Sobrecalentadores", 70], ["Economizador superior", 150], ["Economizador inferior", 215], ["Precalentadores de aire", 290]];
+  banks.forEach(([t, y]) => { el("rect", { x: 436, y, width: 158, height: 44, rx: 6, fill: rule, opacity: 0.55 }, s); T(515, y + 27, t, "middle", 11.5); });
+  // domo
+  el("ellipse", { cx: 515, cy: 18, rx: 46, ry: 13, fill: "none", stroke: metal, "stroke-width": 2 }, s); T(570, 22, "Domo", "start", 12);
+  // tiro y chimenea
+  el("path", { d: "M610,350 H700", fill: "none", stroke: metal, "stroke-width": 2 }, s);
+  el("circle", { cx: 720, cy: 350, r: 20, fill: "none", stroke: metal, "stroke-width": 2 }, s); T(720, 392, "Tiro inducido");
+  el("path", { d: "M740,350 H800 V150", fill: "none", stroke: metal, "stroke-width": 2 }, s);
+  el("path", { d: "M790,150 l10,-90 l10,90 z", fill: "none", stroke: metal, "stroke-width": 2 }, s); T(800, 50, "Chimenea");
+  // vapor y atemperador
+  el("path", { d: "M610,90 H690", fill: "none", stroke: css("--g2"), "stroke-width": 2 }, s);
+  el("rect", { x: 690, y: 76, width: 70, height: 28, rx: 6, fill: "none", stroke: css("--g2"), "stroke-width": 2 }, s); T(725, 70, "Atemperador");
+  el("path", { d: "M760,90 H960", fill: "none", stroke: css("--g2"), "stroke-width": 2.5 }, s); T(955, 80, "vapor a planta", "end", 11.5, css("--g2"));
+  // posiciones de los sensores
+  const pos = {
+    PT_8313A: [96, 70], PT_8313B: [116, 70], PT_8313C: [136, 70], PT_8313D: [156, 70], PT_8313E: [176, 70], PT_8313F: [196, 70],
+    TE_8313B: [196, 110], SXLTCYZ: [90, 200], SXLTCYY: [200, 200], ZCLCCY: [96, 285], YCLCCY: [194, 285],
+    FT_8301: [60, 385], FT_8302: [45, 250], FT_8306A: [240, 300], FT_8306B: [262, 300],
+    PTCA_8322A: [500, 18], PTCA_8324: [790, 90], TE_8332A: [815, 90], ZZQBCHLL: [840, 90], YJJWSLL: [700, 118], TV_8329ZC: [722, 118],
+    TE_8319A: [600, 190], TE_8319B: [620, 190], AIR_8301A: [600, 140], AIR_8301B: [620, 140], TE_8303: [600, 312], TE_8304: [620, 312],
+    YFJ3_AI: [700, 322], YFJ3_ZD1: [742, 322], YFJ3_ZD2: [742, 378]
+  };
+  Object.entries(pos).forEach(([tag, [x, y]]) => {
+    const r = SENS[tag]; if (!r) return;
+    const d = el("circle", { cx: x, cy: y, r: 7, fill: estadoCol(r.estado), stroke: css("--surface"), "stroke-width": 2, class: "sdot" }, s);
+    bindTip(d, `<b>${tag}</b><br>${r.desc} (${r.unidad})<br>${estadoTxt(r.estado)}: ${r.estado}`);
+    d.addEventListener("click", () => { $("selSensor").value = tag; renderSensor(); $("selSensor").scrollIntoView({ behavior: "smooth", block: "center" }); });
+  });
+  $("schemaLegend").innerHTML = [["confiable", css("--g1")], ["con tratamiento", css("--g4")], ["sospechoso", css("--g2")]].map(([t, c]) => `<span><i style="background:${c}"></i>${t}</span>`).join("");
+});
+
+/* =================== pregunta 1 =================== */
+safe("p1 stats", () => {
+  const n10 = D.tabla.filter(r => r.act === 10).length, sos = D.tabla.filter(r => estadoCls(r.estado) === "bad").length;
+  $("p1Stats").innerHTML = stat(fmt(D.n), "filas, una cada 5 s", `${D.inicio} → ${D.fin}`) + stat(D.sensores, "sensores") +
+    stat(D.p1.celdas_distintas_autoreg, "valores inventados en el segundo archivo") + stat(n10, "sensores que cambian cada 10 s") + stat(sos, "sensores sospechosos", "SXLTCYZ y YFJ3_ZD2");
+});
+safe("huecos", () => {
+  segButtons("gapSeg", D.huecos.map(g => `Hueco del ${g.inicio} (${g.n} muestras)`), i => {
+    const g = D.huecos[i];
+    ts("chGap", g.t, [{ name: "Medido (data.csv)", color: css("--g1"), values: g.medido, width: 2 },
+      { name: "Relleno AutoReg", color: css("--g2"), values: g.autoreg, dots: true, r: 3.5 },
+      { name: "Interpolación lineal", color: css("--g5"), values: g.lineal, dash: "5 4" }],
+      { titleText: "Agua de atemperación alrededor del hueco (t/h)", yFmt: v => fmt(v, 2), hgt: 260, xEvery: Math.ceil(g.t.length / 7) });
+  });
+});
+safe("paso 10 s", () => {
+  ts("chStepV", D.paso10.t, [{ name: "Flujo de vapor", color: css("--g1"), values: D.paso10.vapor, dots: true, r: 3 }], { titleText: "Flujo de vapor (t/h): cambia cada 10 s", yFmt: v => fmt(v, 2), w: 520, hgt: 230, xEvery: 6 });
+  ts("chStepA", D.paso10.t, [{ name: "Aire primario", color: css("--g2"), values: D.paso10.aire, dots: true, r: 3 }], { titleText: "Aire primario (Nm³/h): cambia cada 5 s", w: 520, hgt: 230, xEvery: 6 });
+});
+function renderSensor() {
+  const tag = $("selSensor").value, r = SENS[tag], v = D.serie10[tag];
+  ts("chSensor", D.serie10.t, [{ name: tag, color: estadoCol(r.estado), values: v, width: 1.5 }],
+    { titleText: `${r.desc} (${r.unidad}) · promedios de 10 min`, yFmt: x => fmt(x, Math.abs(r.med) < 20 ? 2 : 0), hgt: 260, xEvery: 144 });
+  $("sensorInfo").innerHTML = `<dl class="kv"><dt>Estado</dt><dd><span class="badge ${estadoCls(r.estado)}">${estadoTxt(r.estado)}</span> ${r.estado}</dd>
+    <dt>Tratamiento</dt><dd>${r.trat}</dd><dt>Se actualiza cada</dt><dd>${r.act} s</dd><dt>Rango típico (p1-p99)</dt><dd>${fmt(r.p01, 2)} a ${fmt(r.p99, 2)} ${r.unidad}</dd>
+    <dt>Faltantes</dt><dd>${r.falt}</dd><dt>Tramo más largo sin cambiar</dt><dd>${fmt(r.cong, 1)} min</dd></dl>`;
+}
+safe("explorador", () => {
+  const sel = $("selSensor"); D.tabla.forEach(r => sel.appendChild(h("option", { value: r.tag }, `${r.tag} · ${r.desc}`)));
+  sel.value = "ZZQBCHLL"; sel.addEventListener("change", renderSensor); renderSensor();
+});
+safe("correlacion", () => {
+  const c = $("chCorr"); title(c, "Correlación entre presiones (promedios de 1 min)");
+  const cols = D.corr.cols, n = cols.length, w = 520, cell = 46, L = 92, T = 8, s = svgBox(c, w, T + n * cell + 70);
+  D.corr.m.forEach((row, i) => row.forEach((v, j) => {
+    const r = el("rect", { x: L + j * cell, y: T + i * cell, width: cell - 2, height: cell - 2, rx: 4, fill: `color-mix(in srgb, ${css("--acc")} ${Math.round(Math.max(0, v) * 100)}%, ${css("--surface")})` }, s);
+    bindTip(r, `<b>${cols[i]} · ${cols[j]}</b><br>r = ${fmt(v, 2)}`);
+    el("text", { x: L + j * cell + cell / 2 - 1, y: T + i * cell + cell / 2 + 4, "text-anchor": "middle", class: "lab", style: `fill:${v > 0.6 ? "#fff" : css("--ink")}`, "font-size": 11 }, s).textContent = fmt(v, 2);
+  }));
+  cols.forEach((t, i) => { el("text", { x: L - 6, y: T + i * cell + cell / 2 + 4, "text-anchor": "end", class: "lab" }, s).textContent = t;
+    el("text", { x: L + i * cell + cell / 2, y: T + n * cell + 14, "text-anchor": "end", class: "lab", transform: `rotate(-40 ${L + i * cell + cell / 2} ${T + n * cell + 14})` }, s).textContent = t; });
+  scatter("chDisp", [{ name: "SXLTCYZ (izquierdo)", color: css("--g1"), x: D.disp.pa, y: D.disp.z }, { name: "SXLTCYY (derecho)", color: css("--g2"), x: D.disp.pa, y: D.disp.y }],
+    { titleText: "Diferencial contra presión de hogar A (Pa)", xLabel: "Presión de hogar A (Pa)", yLabel: "Diferencial (Pa)" });
+});
+safe("picos", () => {
+  const p = D.picos;
+  $("picosTxt").innerHTML = `Hay ${fmt(p.n)} picos de una muestra (~${fmt(p.n / 5)} por día) de ~${fmt(p.salto, 1)} A. La corriente <strong>sube cuando la presión del hogar está más alta</strong> (menos negativa) y baja cuando está más baja. Justo después del pico, la presión cambia ${fmt(p.vel_pico / p.vel_azar, 1)} veces más rápido que en un momento cualquiera.`;
+  cats("chPicos", p.s, [{ name: "pico hacia arriba", color: css("--g2"), values: p.arriba }, { name: "pico hacia abajo", color: css("--g1"), values: p.abajo }, { name: "momento al azar", color: css("--g5"), values: p.azar }],
+    { titleText: "Presión del hogar alrededor de los picos de corriente (Pa)", xLabel: "segundos respecto del pico", yFmt: v => fmt(v), w: 980, hgt: 280, r: 3, vline: 12 });
+});
+safe("retorno", () => {
+  $("vfH").textContent = fmt(D.p1.horas_valvula_fija, 0); $("vfN").textContent = D.p1.tramos_valvula_fija;
+  const i0 = D.retorno.evento;
+  ts("chRet", D.retorno.t, [{ name: "Izquierda (FT_8306A)", color: css("--g1"), values: D.retorno.a }, { name: "Derecha (FT_8306B)", color: css("--g2"), values: D.retorno.b }],
+    { titleText: "Aire a las cámaras de retorno (Nm³/h, promedios de 10 min): se redistribuye, no falla", hgt: 250, xEvery: 144, spans: [[i0, i0 + 1, css("--ink-3"), 0.5]],
+      tipExtra: i => `<br>Total: <b>${fmt(D.retorno.tot[i])}</b>` });
+});
+safe("tabla sensores", () => {
+  const t = $("tblSens");
+  t.innerHTML = `<thead><tr><th>Sensor</th><th>Qué mide</th><th>Unidad</th><th>Estado</th><th>Tratamiento</th></tr></thead><tbody>` +
+    D.tabla.map(r => `<tr><td class="mono">${r.tag}</td><td>${r.desc}</td><td>${r.unidad}</td><td><span class="badge ${estadoCls(r.estado)}">${estadoTxt(r.estado)}</span><div class="small muted">${r.estado}</div></td><td class="small">${r.trat}</td></tr>`).join("") + "</tbody>";
+});
+
+/* =================== pregunta 2 =================== */
+const MCOL = { "Carga alta": () => css("--g1"), "Carga media": () => css("--g3"), "Carga baja": () => css("--g2") };
+safe("p2 stats", () => {
+  const P = D.p2, cic = P.ciclos_lecho;
+  $("p2Stats").innerHTML = stat(pct(P.pca1), "de la variación la explica un solo eje: la carga") + stat(`k = ${P.k}`, "zonas de carga", `reproducibilidad ARI ${fmt(P.ari, 2)}`) +
+    stat(P.cambios_de_modo, "cambios de zona en 5 días", `tramo mediano ${fmt(P.tramo_mediano_min)} min`) + stat(cic.llenado.ciclos, "ciclos del lecho", `llena ~${fmt(cic.llenado.minutos_mediana / 60, 1)} h · descarga ~${fmt(cic.descarga.minutos_mediana / 60, 1)} h`);
+});
+safe("silueta", () => {
+  const ks = Object.keys(D.p2.nulo), N = D.p2.nulo;
+  cats("chSil", ks, [{ name: "Silueta de los datos", color: css("--g1"), values: ks.map(k => N[k].silueta) }, { name: "Nube sin grupos (p95)", color: css("--g5"), values: ks.map(k => N[k]["nulo p95"]) }],
+    { titleText: "¿Más separados que una nube sin grupos?", xName: "k =", xLabel: "número de grupos (k)", yFmt: v => fmt(v, 2), w: 500, hgt: 280 });
+  const E = D.p2.estabilidad, ke = Object.keys(E);
+  cats("chAri", ke, [{ name: "ARI (mediana y p10-p90)", color: css("--g1"), values: ke.map(k => E[k]["ARI mediana"]), lo: ke.map(k => E[k]["ARI p10"]), hi: ke.map(k => E[k]["ARI p90"]), noLine: true,
+      colorAt: i => +ke[i] === D.p2.k ? css("--g2") : css("--g1") }],
+    { titleText: "¿Se repite al remuestrear? (1 = igual)", xName: "k =", xLabel: "número de grupos (k)", yFmt: v => fmt(v, 2), yRange: [0, 1], w: 500, hgt: 280, r: 6 });
+});
+safe("modos", () => {
+  const P = D.p2.perfil;
+  $("modeCards").innerHTML = ["Carga alta", "Carga media", "Carga baja"].filter(m => P[m]).map(m => { const p = P[m];
+    return `<div class="card"><span class="badge ok"><i style="background:${MCOL[m]()}"></i>${fmt(p["% del tiempo"])} % del tiempo</span><h3 style="margin-top:8px">${m}</h3>
+      <dl class="kv" style="margin-top:8px"><dt>Vapor</dt><dd>${fmt(p.vapor, 1)} t/h</dd><dt>Aire total</dt><dd>${fmt(p.aire_total)} Nm³/h</dd><dt>Fracción primaria</dt><dd>${pct(p.frac_primario, 1)}</dd>
+      <dt>Temperatura del hogar</dt><dd>${fmt(p.t_hogar)} °C</dd><dt>Agua de atemperación</dt><dd>${fmt(p.agua_atemp, 2)} t/h</dd><dt>Gases</dt><dd>${fmt(p.t_gases)} °C</dd></dl></div>`; }).join("");
+});
+safe("linea", () => {
+  const L = D.linea;
+  const spans = D.descargas.map(([a, b]) => [a, b, css("--g2"), 0.16]);
+  ts("chLinea1", L.t, [{ name: "Vapor (t/h)", color: css("--g1"), values: L.vapor, dots: true, r: 1.8, colorAt: i => (MCOL[L.modo[i]] || (() => css("--g5")))(), hideLegend: true, tipExtra: i => ` · ${L.modo[i]}` }],
+    { titleText: "Vapor por zona de carga (t/h, promedios de 5 min)", extraLegend: ["Carga alta", "Carga media", "Carga baja"].map(m => [m, MCOL[m](), ""]), hgt: 230, xEvery: 288 });
+  ts("chLinea2", L.t, [{ name: "Diferencial del lecho (Pa)", color: css("--ink-2"), values: L.lecho }], { titleText: "Ciclo del lecho (Pa); sombreado: descarga de ceniza", hgt: 210, xEvery: 288, spans });
+  ts("chLinea3", L.t, [{ name: "Válvula del atemperador (%)", color: css("--g1"), values: L.valvula }], { titleText: "Apertura de la válvula del atemperador (%)", hgt: 190, xEvery: 288 });
+  const ll = D.p2.ciclos_lecho.llenado, dd = D.p2.ciclos_lecho.descarga, ef = D.p2.efectos_descarga;
+  $("lechoTxt").innerHTML = `El lecho se llena ~${fmt(ll.minutos_mediana / 60, 1)} h (de ${fmt(ll.minutos_min / 60, 1)} a ${fmt(ll.minutos_max / 60, 1)} h), sube ~${fmt(ll.cambio_mediano_pa / 1000, 1)} kPa y se descarga en ~${fmt(dd.minutos_mediana / 60, 1)} h. Durante la descarga, a igual carga, entra más aire primario (~${fmt(ef["Aire primario (Nm³/h)"]["efecto de estar descargando"])} Nm³/h) y la presión del hogar sube ~${fmt(ef["Presión de hogar (Pa)"]["efecto de estar descargando"])} Pa; el vapor no cambia. Es el único régimen discreto de estos cinco días.`;
+});
+safe("tercios", () => {
+  const T = D.p2.tercios, rows = Object.keys(T);
+  $("tblTer").innerHTML = `<thead><tr><th>Tercio del eje (a igual carga)</th><th class="r">Vapor (t/h)</th><th class="r">O₂ (%)</th><th class="r">Agua de atemperación (t/h)</th><th class="r">Vapor (°C)</th><th class="r">Hogar (°C)</th></tr></thead><tbody>` +
+    rows.map(r => `<tr><td>${r}</td><td class="r">${fmt(T[r].vapor, 1)}</td><td class="r">${fmt(T[r].o2, 2)}</td><td class="r">${fmt(T[r].agua_atemp, 2)}</td><td class="r">${fmt(T[r].t_vapor, 1)}</td><td class="r">${fmt(T[r].t_hogar)}</td></tr>`).join("") + "</tbody>";
+  const cc = D.p2.cc_cambios, lag = D.p2.cc_rezagos, cols = [css("--g1"), css("--g2"), css("--g3")];
+  cats("chCC", lag.map(String), Object.keys(cc).map((k, i) => ({ name: k, color: cols[i], values: cc[k] })),
+    { titleText: "Correlación de cambios de 1 min según el rezago (positivo = la primera adelanta)", xName: "rezago (min)", xLabel: "rezago (min)", yFmt: v => fmt(v, 2), w: 980, hgt: 280, r: 2.5, hline: 0, vline: lag.indexOf(0), xEvery: 5 });
+});
+
+/* =================== pregunta 3 =================== */
+safe("ecuacion", () => {
+  const dv = D.p3.dos_variables;
+  $("eqHid").innerHTML = `<div class="box res">Vapor<small>t/h</small></div><span class="op">≈</span><div class="box">${fmt(dv.a, 2)}<small>constante</small></div><span class="op">+</span><div class="box">${fmt(dv.b, 0)} · √(ΔP · ρ)<small>caída de presión del sobrecalentador</small></div><span class="op">+</span><div class="box">${fmt(dv.c, 2)} · agua<small>atemperación (balance de masa ≈ 1)</small></div>`;
+  const hd = D.p3.hidraulico, xs = D.hid.x, x0 = Math.min(...xs), x1 = Math.max(...xs);
+  scatter("chHid", [{ name: "minutos (muestra)", color: css("--g1"), x: D.hid.x, y: D.hid.y }],
+    { titleText: "Vapor medido contra √(ΔP·ρ)", xLabel: "√(ΔP·ρ) del sobrecalentador (relativo)", yLabel: "Vapor medido (t/h)", xFmt: v => fmt(v, 3), line: [x0, hd.a + hd.b * x0, x1, hd.a + hd.b * x1] });
+  const M = D.p3.metricas, orden = ["Media", "Hidráulico √(ΔP·ρ)", "Ridge de combustión", "Gradient boosting", "Ridge completo"];
+  hbars("chModelos", orden.map(k => ({ label: k, v: M[k].MAE_t_h, color: k === "Ridge completo" ? css("--g1") : css("--g5"), tip: `<b>${k}</b><br>error típico ${fmt(M[k].MAE_t_h, 2)} t/h (${fmt(M[k]["MAPE_%"], 2)} %)<br>R² ${fmt(M[k].R2, 3)}` })),
+    { titleText: "Error típico en días no vistos (MAE, t/h)", valueFmt: v => fmt(v, 2), labelW: 170, w: 500 });
+});
+safe("calculadora vapor", () => {
+  const dv = D.p3.dos_variables, hd = D.p3.hidraulico, R = D.rangos, sl = { Pd: $("sPd"), Pc: $("sPc"), Tv: $("sTv"), Ag: $("sAg") };
+  sl.Pd.value = R.p_domo[2]; sl.Pc.value = R.p_col[2]; sl.Tv.value = R.t_vapor[2]; sl.Ag.value = R.agua[2];
+  const go = () => {
+    const Pd = +sl.Pd.value, Pc = +sl.Pc.value, Tv = +sl.Tv.value, Ag = +sl.Ag.value;
+    $("lPd").textContent = fmt(Pd, 2) + " MPa"; $("lPc").textContent = fmt(Pc, 2) + " MPa"; $("lTv").textContent = fmt(Tv, 1) + " °C"; $("lAg").textContent = fmt(Ag, 2) + " t/h";
+    const dp = Pd - Pc, x = Math.sqrt(Math.max(0, dp * Pc / (Tv + 273.15)));
+    const q2 = dv.a + dv.b * x + dv.c * Ag, q1 = hd.a + hd.b * x;
+    const fuera = dp <= 0 ? "El colector no puede tener más presión que el domo: el vapor no fluiría." :
+      (q2 < R.vapor[0] - 2 || q2 > R.vapor[1] + 2 ? `Fuera del rango observado (${fmt(R.vapor[0], 0)}-${fmt(R.vapor[1], 0)} t/h): la recta no está probada ahí.` : "Dentro del rango observado en los cinco días.");
+    $("calcVap").innerHTML = stat(dp > 0 ? fmt(q2, 1) + " t/h" : "—", "vapor estimado (presión + agua)") + stat(dp > 0 ? fmt(q1, 1) + " t/h" : "—", "solo con la presión") + stat(fmt(dp, 2) + " MPa", "ΔP domo − colector");
+    $("calcVapTxt").innerHTML = `${fuera} El error típico del modelo de dos variables en días no vistos es ~${fmt(D.p3.anidados["√(ΔP·ρ) + agua de atemperación"], 2)} t/h.`;
+  };
+  Object.values(sl).forEach(s => s.addEventListener("input", go)); go();
+});
+safe("medido vs estimado", () => {
+  const E = D.medest, mods = ["Ridge completo", "Ridge de combustión", "Hidráulico √(ΔP·ρ)"], cols = [css("--g1"), css("--g2"), css("--g3")];
+  segButtons("meSeg", mods, i => ts("chME", E.t, [{ name: "Medido", color: css("--ink-2"), values: E.medido, width: 1.6 }, { name: mods[i], color: cols[i], values: E[mods[i]], width: 1.4 }],
+    { titleText: `Seis horas del ${E.dia}: vapor medido contra estimado (t/h)`, yFmt: v => fmt(v, 1), hgt: 270, xEvery: 60, tipExtra: j => `<br>Error: <b>${fmt(E[mods[i]][j] - E.medido[j], 2)}</b> t/h` }));
+});
+safe("mecanismos", () => {
+  const M = D.p3.mecanismos;
+  hbars("chMec", Object.keys(M).map(k => ({ label: k, v: M[k]["aumento del MAE al quitarlo"], color: M[k]["aumento del MAE al quitarlo"] < 0 ? css("--g2") : css("--g1"),
+    tip: `<b>${k}</b><br>quitarlo sube el error ${fmt(M[k]["aumento del MAE al quitarlo"], 3)} t/h<br>solo con este grupo: ${fmt(M[k]["MAE solo con este grupo"], 2)} t/h` })),
+    { titleText: "Sin presiones de vapor: cuánto sube el error al quitar cada mecanismo (t/h)", valueFmt: v => fmt(v, 2), labelW: 160, w: 500 });
+  const A = D.p3.rezagos_ablacion;
+  hbars("chRezAb", Object.keys(A).map(k => ({ label: k.replace(" (el modelo)", ""), v: A[k] })), { titleText: "Error del modelo de combustión según los rezagos (t/h)", valueFmt: v => fmt(v, 2), labelW: 230, w: 500 });
+});
+safe("azar", () => {
+  const Z = D.p3.al_azar, ks = Object.keys(Z), c = $("chAzar"); title(c, "Validación al azar contra hacia adelante (MAE, t/h)", [["al azar (engaña)", css("--g5"), ""], ["hacia adelante (real)", css("--g1"), ""]]);
+  const w = 500, hgt = 250, L = 56, B = 34, T = 10, s = svgBox(c, w, hgt), mx = Math.max(...ks.map(k => Z[k]["MAE hacia adelante"])) * 1.18;
+  const sy = v => hgt - B - v / mx * (hgt - B - T), band = (w - L - 10) / ks.length, g = el("g", { class: "grid" }, s);
+  niceTicks(0, mx, 4).forEach(t => { el("line", { x1: L, x2: w - 10, y1: sy(t), y2: sy(t) }, g); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = fmt(t, 1); });
+  ks.forEach((k, i) => { const cx = L + band * i + band / 2;
+    [["MAE al azar", css("--g5"), -14], ["MAE hacia adelante", css("--g1"), 14]].forEach(([f, col, dx]) => { const v = Z[k][f], r = el("rect", { x: cx + dx - 12, y: sy(v), width: 24, height: hgt - B - sy(v), rx: 4, fill: col }, s);
+      bindTip(r, `<b>${k}</b><br>${f}: ${fmt(v, 3)} t/h<br>optimismo: ${fmt(Z[k]["optimismo (%)"])} %`); el("text", { x: cx + dx, y: sy(v) - 5, "text-anchor": "middle", class: "val" }, s).textContent = fmt(v, 2); });
+    el("text", { x: cx, y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s).textContent = k; });
+});
+safe("rezagos", () => {
+  const cc = D.p3.cc, lag = D.p3.cc_rezagos.map(String);
+  const pick = ["Presión de vapor a la salida del colector", "Presión del domo (izq.)", "Temperatura del hogar, parte superior (der.)", "Corriente del motor del ventilador de tiro inducido", "Temperatura de gases (promedio)"];
+  const nm = { [pick[0]]: "Presión del colector", [pick[1]]: "Presión del domo", [pick[2]]: "Temperatura del hogar", [pick[3]]: "Corriente del tiro", [pick[4]]: "Temperatura de gases" };
+  const cols = [css("--g1"), css("--g3"), css("--g2"), css("--g4"), css("--g5")];
+  cats("chLag", lag, pick.filter(k => cc[k]).map((k, i) => ({ name: nm[k], color: cols[i], values: cc[k] })),
+    { titleText: "Quién adelanta al vapor (cambios de 1 min; positivo = antes)", xName: "rezago (min)", xLabel: "rezago (min)", yFmt: v => fmt(v, 2), w: 500, hgt: 280, r: 2, hline: 0, vline: lag.indexOf("0"), xEvery: 5 });
+});
+
+/* =================== pregunta 4 =================== */
+safe("capas", () => {
+  const P = D.p4, nreg = Object.values(P.reglas).reduce((a, r) => a + r["eventos por día"], 0);
+  $("layers").innerHTML = [
+    ["1", "Reglas físicas", `Umbrales con persistencia cada 5 s: hogar presurizado, O₂ bajo o alto, vapor caliente o frío, lecho alto, tiro al límite. ~${fmt(nreg, 1)} eventos por día en total.`, "¿Hay que actuar ya?"],
+    ["2", "Verificación de sensores", `Cada sensor contra sus pares o un modelo físico: seis presiones de hogar, pares izquierda-derecha, vapor medido contra virtual, agua contra válvula, sensores congelados. ~${fmt(P.verificacion_episodios_dia, 1)} alarmas por día.`, "¿Falló un sensor?"],
+    ["3", "Monitor de proceso", `PCA reentrenada cada hora con las últimas 24 h; T² (operación inusual) y SPE (variables que dejan de moverse juntas). ~${fmt(P.monitor_episodios_dia, 1)} alarmas por día.`, "¿La caldera opera fuera de lo normal?"]
+  ].map(([n, t, p, q]) => `<div class="card"><span class="n">${n}</span><h3>${t}</h3><p>${p}</p><span class="badge ok">${q}</span></div>`).join("");
+});
+safe("flujo", () => {
+  const c = $("flow"); title(c, "Cómo se diagnostica una alarma");
+  const w = 980, hgt = 210, s = svgBox(c, w, hgt), ink = css("--ink"), rule = css("--rule"), surf = css("--surface");
+  const box = (x, y, bw, bh, t1, t2, fill) => { el("rect", { x, y, width: bw, height: bh, rx: 10, fill: fill || surf, stroke: rule }, s);
+    el("text", { x: x + bw / 2, y: y + bh / 2 - (t2 ? 3 : -4), "text-anchor": "middle", "font-size": 13, "font-weight": 600, fill: ink, "font-family": "var(--f-body)" }, s).textContent = t1;
+    if (t2) el("text", { x: x + bw / 2, y: y + bh / 2 + 15, "text-anchor": "middle", "font-size": 11.5, fill: css("--ink-2") }, s).textContent = t2; };
+  const arr = (x1, y1, x2, y2, t) => { el("path", { d: `M${x1},${y1} L${x2},${y2}`, stroke: css("--ink-3"), "stroke-width": 1.5, fill: "none" }, s);
+    el("path", { d: `M${x2},${y2} l-7,-4 v8 z`, fill: css("--ink-3"), transform: `rotate(${Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI} ${x2} ${y2})` }, s);
+    if (t) el("text", { x: (x1 + x2) / 2, y: (y1 + y2) / 2 - 6, "text-anchor": "middle", "font-size": 11.5, fill: css("--ink-2") }, s).textContent = t; };
+  box(10, 80, 150, 50, "Alarma");
+  box(220, 80, 230, 50, "¿Saltó la verificación de", "un solo sensor o un congelado?");
+  box(530, 14, 210, 56, "Falla de sensor", "llamar a instrumentación", `color-mix(in srgb, ${css("--g2")} 18%, ${surf})`);
+  box(530, 140, 210, 56, "¿Varias presiones a la vez,", "monitor o regla?");
+  box(800, 140, 170, 56, "Proceso o equipo", "revisar la operación", `color-mix(in srgb, ${css("--g1")} 18%, ${surf})`);
+  arr(160, 105, 218, 105); arr(450, 95, 528, 45, "sí"); arr(450, 115, 528, 165, "no"); arr(740, 168, 798, 168, "sí");
+});
+safe("simulador", () => {
+  const P = D.p4, names = Object.keys(D.esc), inj = Object.fromEntries(P.inyecciones.map(r => [r.escenario, r]));
+  segButtons("escSeg", names, i => {
+    const nm = names[i], E = D.esc[nm], r = inj[nm];
+    const a = E.falla.indexOf(true), b = E.falla.lastIndexOf(true);
+    ts("chEsc", E.t, [{ name: "Verificación de sensores (máximo)", color: css("--g1"), values: E.ver, tipExtra: j => ` · ${E.che[j]}` }, { name: "Monitor de proceso (T² o SPE)", color: css("--g2"), values: E.mon }],
+      { titleText: `${nm}: veces el umbral (1 = alarma)`, yFmt: v => fmt(v, 1), yRange: [0, Math.max(3, ...E.ver.filter(x => x != null), ...E.mon.filter(x => x != null)) * 1.05], hgt: 290, hline: 1, xEvery: 120, spans: [[a, b, css("--ink-3"), 0.12]] });
+    const ok = String(r.acierta) === "True", sensor = r.diagnóstico.startsWith("sensor");
+    $("escDiag").innerHTML = `<div class="diag"><span class="badge ${sensor ? "bad" : "ok"}">${r.real === "sensor" ? "Falla real: de sensor" : "Falla real: de equipo"}</span>
+      <div class="t">Diagnóstico: ${r.diagnóstico}</div><div class="small muted">Chequeos que saltan: ${r["chequeos que saltan"]} · monitor de proceso: ${r["monitor de proceso"]} · reglas: ${r["reglas nuevas"]} · primera alarma a los ${fmt(+r["minutos hasta la alarma"])} min · ${ok ? "diagnóstico correcto" : "diagnóstico incorrecto"}</div></div>`;
+  });
+});
+safe("tablas p4", () => {
+  const R = D.p4.reglas, mx = Math.max(...Object.values(R).map(r => r["eventos por día"]));
+  $("tblReglas").innerHTML = `<thead><tr><th>Regla</th><th>Eventos por día</th><th class="r">Minutos en 5 días</th></tr></thead><tbody>` +
+    Object.entries(R).map(([k, r]) => `<tr><td>${k}</td><td><span class="minibar" style="width:${Math.round(r["eventos por día"] / mx * 120)}px"></span>${fmt(r["eventos por día"], 1)}</td><td class="r">${fmt(r["minutos en 5 días"], 1)}</td></tr>`).join("") + "</tbody>";
+  const S = D.p4.sensibilidad;
+  $("tblSensib").innerHTML = `<thead><tr><th>Chequeo</th><th class="r">Ruido normal (1 desvío)</th><th class="r">Umbral (desvíos)</th><th class="r">Falla mínima detectable</th><th>Unidad</th></tr></thead><tbody>` +
+    Object.entries(S).map(([k, r]) => `<tr><td class="mono">${k}</td><td class="r">${fmt(r["desvío robusto"], 2)}</td><td class="r">${fmt(r["umbral (desvíos)"])}</td><td class="r"><b>${fmt(r["falla mínima detectable"], 2)}</b></td><td>${r.unidad}</td></tr>`).join("") + "</tbody>";
+});
+
+/* =================== pregunta 5 =================== */
+safe("serrucho", () => {
+  const S = D.p5.serrucho, G = D.p5.gases_hora, n = G.v.length, m = G.v.reduce((a, b) => a + (b || 0), 0) / n;
+  $("serruchoTxt").innerHTML = `A igual carga y O₂, la temperatura de gases sube durante ~${fmt(S.periodo_h, 0)} h y cae de golpe ~${fmt(-S.caida_c, 0)} °C (${S.picos} ciclos en 5 días). Además, su base sube ~${fmt(S.pendiente_c_dia, 1)} °C por día. Los picos ocurren ~${fmt(S.desfase_descarga_h, 1)} h después de iniciar una descarga del lecho, antes de lo que daría el azar (~${fmt(S.desfase_azar_h, 1)} h; p ≈ ${fmt(S.p_desfase, 2)}).`;
+  const trend = G.v.map((_, i) => m + S.pendiente_c_dia * (i - (n - 1) / 2) / 24);
+  ts("chSerrucho", G.t, [{ name: "Gases a igual carga y O₂ (promedio por hora)", color: css("--g1"), values: G.v }, { name: `Tendencia: +${fmt(S.pendiente_c_dia, 1)} °C por día`, color: css("--g2"), values: trend, width: 2.4 }],
+    { titleText: "Temperatura de gases sobre lo esperado (°C)", yFmt: v => fmt(v, 0), hgt: 270, xEvery: 24, hline: 0 });
+});
+safe("calculadora eficiencia", () => {
+  const S0 = D.p5.supuestos, Q = D.p5.calor_util_gj_h, sl = { DT: $("sDT"), Fr: $("sFr"), Pk: $("sPk"), Ef: $("sEf"), Pci: $("sPci"), Pr: $("sPr") };
+  sl.DT.value = 10; sl.Fr.value = S0.fraccion_a_chimenea; sl.Pk.value = S0.perdida_por_k; sl.Ef.value = S0.eficiencia; sl.Pci.value = S0.pci_mj_kg; sl.Pr.value = S0.precio_combustible_t;
+  const go = () => {
+    const dT = +sl.DT.value, fr = +sl.Fr.value, pk = +sl.Pk.value, ef = +sl.Ef.value, pci = +sl.Pci.value, pr = +sl.Pr.value;
+    $("lDT").textContent = fmt(dT, 1) + " °C"; $("lFr").textContent = pct(fr); $("lPk").textContent = fmt(pk, 3) + " puntos/K"; $("lEf").textContent = pct(ef, 1); $("lPci").textContent = fmt(pci, 1) + " MJ/kg"; $("lPr").textContent = usd(pr) + "/t";
+    const pts = pk * dT * fr, c0 = Q / ef / pci, c1 = Q / (ef + pts / 100) / pci, th = c0 - c1;
+    $("calcEf").innerHTML = stat(fmt(pts, 2), "puntos de eficiencia") + stat(fmt(100 * th / c0, 2) + " %", "menos combustible") + stat(fmt(24 * th, 2) + " t", "por día") + stat(usd(th * S0.horas_ano * pr), "por año", `${fmt(S0.horas_ano)} h de operación`);
+    $("calcEfTxt").innerHTML = `Calor útil típico: ${fmt(Q, 1)} GJ/h (≈${fmt(c0, 2)} t/h de combustible). Con los valores iniciales sale el rango del notebook: recuperar 10 °C vale ${usd(D.p5.ensuciamiento_10C["0.3"].us_ano)} a ${usd(D.p5.ensuciamiento_10C["0.7"].us_ano)} al año según la fracción que llegue a la chimenea. Para bagazo, bajá el poder calorífico (~7-8 MJ/kg húmedo) y el precio al costo de oportunidad del bagazo.`;
+  };
+  Object.values(sl).forEach(s => s.addEventListener("input", go)); go();
+});
+safe("o2", () => {
+  const P = D.p5, E = P.efectos_o2, k = Object.keys(E), tot = P.exceso_aire["total combustible"];
+  $("o2Txt").innerHTML = `A igual carga, cada punto de O₂ calienta los gases ~${fmt(E[k[0]].efecto, 1)} °C y sube ~${fmt(E[k[1]].efecto, 2)} A la corriente del tiro: más aire es más gas que calentar y que mover. Pero la mediana del O₂ ya es ${fmt(P.o2_objetivo, 2)} %. Bajarlo a la mediana cada vez que la supera ahorra ${fmt(tot.puntos_eficiencia, 2)} puntos de eficiencia (${usd(tot.us_ano)} al año) más ~${fmt(P.kw_tiro, 1)} kW en el tiro. El vapor pasa el ${pct(P.vapor.bajo535)} del tiempo bajo 535 °C; su valor está en la turbina y no se puede cuantificar con estos datos.`;
+  const F = [["Flujo y poder calorífico del combustible", "eficiencia absoluta"], ["Temperatura de chimenea", "pérdida real por gases (hoy se supone)"], ["CO en gases", "cuánto se puede bajar el O₂ sin inquemados"],
+    ["Registro de soplado de hollín y de descargas", "separar ensuciamiento del ciclo de limpieza"], ["Corriente de ventiladores primario y secundario", "costo eléctrico del aire y del lecho"], ["Temperatura ambiente", "descartar que la deriva sea clima"],
+    ["Flujo y temperatura del agua de alimentación", "balance de energía completo (hoy se supone 215 °C)"], ["Modo de los lazos (automático o manual)", "separar decisiones del operador de respuestas del control"]];
+  $("tblFalta").innerHTML = `<thead><tr><th>Dato</th><th>Para qué</th></tr></thead><tbody>` + F.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("") + "</tbody>";
+});
+
+/* =================== cierre y glosario =================== */
+safe("cierre", () => {
+  const P3 = D.p3.metricas["Ridge completo"], inj = D.p4.inyecciones.filter(r => String(r.acierta) === "True").length;
+  const C = [
+    ["1 · Datos", `Se usan 28 de 30 sensores. Uno no mide lo que dice (un diferencial que copia la presión del hogar) y otro es ruido. El segundo archivo inventa 30 valores y el diccionario no trae unidades.`],
+    ["2 · Regímenes", `No hay estados separados: la carga manda (${pct(D.p2.pca1)} de la variación). Tres zonas de carga y un ciclo del lecho cada ~7 h que no afecta la producción.`],
+    ["3 · Sensor virtual", `La caída de presión del sobrecalentador ya mide el vapor. El Ridge completo se equivoca ~${fmt(P3.MAE_t_h, 2)} t/h (${fmt(P3["MAPE_%"], 2)} %) en días no vistos; el boosting es peor.`],
+    ["4 · Anomalías", `Tres capas y un criterio físico para separar sensor de equipo: ${inj} de 5 fallas inyectadas bien diagnosticadas.`],
+    ["5 · Eficiencia", `La oportunidad medible está en la limpieza de superficies (si la deriva es ensuciamiento, unos ${mil(D.p5.ensuciamiento_10C["0.3"].us_ano)} a ${mil(D.p5.ensuciamiento_10C["0.7"].us_ano)} al año). El exceso de aire ya está bajo.`],
+    ["Para el ingenio", "Lo que se traslada es el método: auditar archivos y sensores, aprovechar la redundancia, validar hacia adelante y declarar cada supuesto. Con bagazo, el exceso de aire con medición de CO sí sería la primera palanca."]
+  ];
+  $("cierreCards").innerHTML = C.map(([t, p]) => `<div class="card"><h3>${t}</h3><p>${p}</p></div>`).join("");
+  const G = [["Lecho fluidizado circulante (CFB)", "Caldera donde el combustible se quema dentro de un lecho de arena caliente que el aire mantiene en suspensión; los sólidos que escapan vuelven por ciclones."],
+    ["Hogar", "La cámara donde ocurre la combustión."], ["Domo", "El tambor donde se separan el agua y el vapor."], ["Colector", "El tubo de salida que reúne el vapor sobrecalentado."],
+    ["Sobrecalentador", "Haz de tubos que calienta el vapor por encima de su temperatura de saturación."], ["Atemperador", "Inyecta agua al vapor para controlar su temperatura."],
+    ["Economizador", "Recupera calor de los gases para calentar el agua que entra a la caldera."], ["Precalentador de aire", "Recupera calor de los gases para calentar el aire de combustión."],
+    ["Tiro inducido", "Ventilador que extrae los gases y mantiene el hogar en depresión."], ["Exceso de aire / O₂", "Aire por encima del necesario para quemar; se mide con el O₂ que queda en los gases."],
+    ["Soplado de hollín", "Limpieza de los tubos con vapor o aire a presión."], ["T² de Hotelling", "Qué tan lejos está un punto de lo normal dentro del patrón de correlaciones."],
+    ["SPE", "Error de reconstrucción: cuánto se sale un punto del patrón de correlaciones."], ["ARI", "Coincidencia entre dos agrupamientos (1 = idénticos, 0 = azar)."],
+    ["Silueta", "Qué tan separados están los grupos (1 = muy separados, 0 = superpuestos)."], ["Validación hacia adelante", "Entrenar con el pasado y probar en días posteriores, como se usaría en la planta."],
+    ["MAE", "Error absoluto medio: el error típico, en las unidades de la variable."], ["IAPWS-97", "Estándar internacional de tablas de vapor (entalpía, densidad)."]];
+  $("gloss").innerHTML = G.map(([t, d]) => `<dt>${t}</dt><dd>${d}</dd>`).join("");
+});
+</script>
+</body>
+</html>
