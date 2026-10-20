@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Azúcar, países y precio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: bitácora de sala de control — columna de lectura de ~720px; figuras que se abren hasta ~1040px */
+:root {
+  --bg: #f3f5f7; --surface: #fcfdfe; --ink: #10161d; --ink-2: #44505c; --ink-3: #74808c; --rule: #dce2e8;
+  --acc: #2a78d6; --acc-soft: #e1ecfa; --hot: #c2551a; --hot-soft: #fbebe0; --metal: #5b6874;
+  --g1: #2a78d6; --g2: #eb6834; --g3: #1baf7a; --g4: #eda100; --g5: #9aa092;
+  --f-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f141a; --surface: #151c24; --ink: #e6edf4; --ink-2: #aeb9c5; --ink-3: #84909c; --rule: #27313c;
+    --acc: #3987e5; --acc-soft: #1a2a3d; --hot: #e07a3f; --hot-soft: #34241a; --metal: #93a1ae;
+    --g1: #3987e5; --g2: #d95926; --g3: #199e70; --g4: #c98500; --g5: #7d8576;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f141a; --surface: #151c24; --ink: #e6edf4; --ink-2: #aeb9c5; --ink-3: #84909c; --rule: #27313c;
+  --acc: #3987e5; --acc-soft: #1a2a3d; --hot: #e07a3f; --hot-soft: #34241a; --metal: #93a1ae;
+  --g1: #3987e5; --g2: #d95926; --g3: #199e70; --g4: #c98500; --g5: #7d8576;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--f-body); font-size: 17px; line-height: 1.62;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 64px; }
+.wrap { max-width: 1040px; margin: 0 auto; }
+.read { max-width: 720px; margin: 0 auto; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; color: var(--ink); margin: 0; }
+h1 { font-size: clamp(2.4rem, 6vw, 4.1rem); line-height: 1.02; font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.7rem, 3.6vw, 2.35rem); line-height: 1.1; font-weight: 800; letter-spacing: -0.01em; }
+h3 { font-size: 1.28rem; line-height: 1.25; font-weight: 700; }
+p { margin: 0; }
+ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.stack { display: flex; flex-direction: column; gap: 18px; }
+.stack > *, .finding > * { min-width: 0; max-width: 100%; }
+.finding > .read { width: 100%; max-width: 720px; }
+.eyebrow { font-family: var(--f-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--acc); font-weight: 500; }
+.lede { font-size: 1.2rem; color: var(--ink-2); max-width: 640px; }
+.muted { color: var(--ink-2); } .small { font-size: 0.88rem; }
+code, .mono { font-family: var(--f-mono); font-size: 0.86em; }
+code { background: var(--acc-soft); padding: 1px 6px; border-radius: 4px; color: var(--ink); }
+strong { font-weight: 600; } a { color: var(--acc); }
+:focus-visible { outline: 2px solid var(--acc); outline-offset: 3px; }
+header.hero { padding-block: 56px 28px; }
+.hero .stack { gap: 20px; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.toc a { font-size: 0.9rem; text-decoration: none; color: var(--ink-2); border: 1px solid var(--rule); background: var(--surface); padding: 5px 12px; border-radius: 999px; }
+.toc a:hover { border-color: var(--acc); color: var(--ink); }
+section { padding-block: 64px 8px; }
+.figure { margin-block: 26px 6px; }
+.card { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 18px 20px; }
+.callout { background: var(--hot-soft); border-radius: 12px; padding: 16px 20px; }
+.callout h3 { font-size: 1.05rem; margin-bottom: 6px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 0.78rem; color: var(--ink-2); background: var(--surface); border: 1px solid var(--rule); border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+.finding { padding-block: 26px; border-bottom: 1px solid var(--rule); display: flex; flex-direction: column; gap: 14px; }
+.finding h3 { font-size: 1.3rem; }
+.meaning { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .meaning { grid-template-columns: 1fr; } }
+.meaning > div { font-size: 0.95rem; color: var(--ink-2); line-height: 1.5; padding-left: 12px; border-left: 3px solid var(--rule); }
+.meaning > div.decide { border-left-color: var(--acc); }
+.meaning b.k { display: block; font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); font-family: var(--f-mono); font-weight: 500; margin-bottom: 2px; }
+.bigstat { display: flex; flex-wrap: wrap; gap: 14px 30px; }
+.bigstat div { display: flex; flex-direction: column; }
+.bigstat .n { font-family: var(--f-display); font-weight: 800; font-size: 2.2rem; line-height: 1; font-variant-numeric: tabular-nums; }
+.bigstat .l { font-size: 0.88rem; color: var(--ink-2); max-width: 220px; }
+.chart { width: 100%; overflow-x: auto; position: relative; }
+.chart svg { width: 100%; min-width: 600px; height: auto; display: block; }
+.grid-2 .chart svg, .grid-3 .chart svg { min-width: 440px; }
+.chart text.lab { fill: var(--ink-2); font-family: var(--f-body); font-size: 12px; }
+.chart text.val { fill: var(--ink); font-family: var(--f-body); font-size: 12.5px; font-weight: 600; }
+.chart .grid line { stroke: var(--rule); stroke-width: 1; }
+.chart .base { stroke: var(--ink-3); stroke-width: 1; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.85rem; color: var(--ink-2); margin-bottom: 6px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; }
+.legend i.line { height: 3px; width: 16px; border-radius: 2px; vertical-align: 3px; }
+.legend i.sq { border-radius: 3px; opacity: .35; }
+.chart-title { font-family: var(--f-display); font-weight: 700; font-size: 1.02rem; margin-bottom: 4px; }
+#tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 0.82rem; line-height: 1.35; padding: 7px 10px; border-radius: 8px; max-width: 280px; z-index: 50; opacity: 0; transition: opacity .12s; }
+#tip b { font-weight: 600; }
+.hit { cursor: default; } .hit:hover, .hit:focus { opacity: .85; }
+.glossary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 28px; }
+@media (max-width: 640px) { .glossary { grid-template-columns: 1fr; } }
+.glossary dt { font-family: var(--f-display); font-weight: 700; margin-top: 14px; }
+.glossary dd { margin: 2px 0 0; color: var(--ink-2); font-size: 0.95rem; line-height: 1.5; }
+footer { padding-top: 56px; color: var(--ink-3); font-size: 0.85rem; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.badge i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.badge.ok { background: var(--acc-soft); color: var(--ink); }
+.badge.mid { background: color-mix(in srgb, var(--g4) 22%, var(--surface)); color: var(--ink); }
+.badge.bad { background: color-mix(in srgb, var(--g2) 22%, var(--surface)); color: var(--ink); }
+.badge.off { border: 1px dashed var(--rule); color: var(--ink-3); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 0.86rem; margin: 0; }
+.kv dt { color: var(--ink-3); } .kv dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+.warn { font-size: 0.82rem; color: var(--ink); background: var(--hot-soft); border-radius: 8px; padding: 7px 10px; line-height: 1.4; }
+.tbl-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); }
+table.t { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 0.84rem; font-variant-numeric: tabular-nums; }
+table.t th { text-align: left; font-weight: 600; color: var(--ink-2); padding: 10px 9px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.t td { padding: 8px 9px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+table.t td.r, table.t th.r { text-align: right; }
+table.t tbody tr:last-child td { border-bottom: 0; }
+table.t tbody tr:hover { background: var(--acc-soft); }
+table.t tr.sel { background: color-mix(in srgb, var(--acc) 16%, var(--surface)); }
+.minibar { display: inline-block; height: 7px; background: var(--acc); border-radius: 999px; vertical-align: middle; margin-right: 8px; }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--rule); border-radius: 14px; overflow: hidden; }
+.seg button { font: inherit; font-size: 0.85rem; border: 0; background: transparent; color: var(--ink-2); padding: 6px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--acc); color: #fff; }
+.ctrl { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: flex-end; }
+.ctrl label { font-size: 0.88rem; color: var(--ink-2); display: flex; flex-direction: column; gap: 4px; }
+.ctrl label { min-width: 0; max-width: 100%; }
+.ctrl select { font: inherit; font-family: var(--f-mono); font-size: 0.88rem; padding: 6px 8px; border-radius: 8px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); width: 100%; max-width: 640px; }
+.calc { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 20px; display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 26px; }
+@media (max-width: 860px) { .calc { grid-template-columns: 1fr; } }
+.calc label { font-size: 0.9rem; color: var(--ink-2); display: block; margin-bottom: 10px; }
+.calc label b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.calc input[type=range] { width: 100%; accent-color: var(--acc); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.kpi { background: var(--bg); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.kpi .l { font-size: 0.76rem; color: var(--ink-3); line-height: 1.3; }
+.kpi .v { font-family: var(--f-display); font-weight: 800; font-size: 1.45rem; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.kpi .s { font-size: 0.76rem; color: var(--ink-2); line-height: 1.3; }
+.statrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.statrow .kpi { background: var(--surface); border: 1px solid var(--rule); padding: 12px 14px; }
+.statrow .kpi .v { font-size: 1.75rem; }
+.gcards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 760px) { .gcards { grid-template-columns: 1fr; } }
+.gcards .card h3 { font-size: 1rem; margin-bottom: 6px; }
+.gcards .card p, .gcards .card li { font-size: 0.92rem; color: var(--ink-2); line-height: 1.5; }
+.gcards .card.wide { grid-column: 1 / -1; }
+.layers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 860px) { .layers { grid-template-columns: 1fr; } }
+.layers .card { display: flex; flex-direction: column; gap: 8px; }
+.layers .card .n { font-family: var(--f-display); font-weight: 800; font-size: 1.6rem; color: var(--acc); line-height: 1; }
+.layers .card p { font-size: 0.92rem; color: var(--ink-2); line-height: 1.5; }
+.eq { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-family: var(--f-display); font-weight: 700; font-size: 1.1rem; }
+.eq .box { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 8px 12px; text-align: center; line-height: 1.15; }
+.eq .box small { display: block; font-family: var(--f-mono); font-weight: 400; font-size: 0.72rem; color: var(--ink-3); }
+.eq .box.res { background: var(--acc-soft); border-color: transparent; }
+.eq .op { color: var(--ink-3); }
+.big { font-family: var(--f-display); font-size: 2.3rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+.verdict { border-top: 1px solid var(--rule); padding-top: 12px; font-size: 0.95rem; color: var(--ink-2); }
+.diag { border-radius: 12px; padding: 14px 16px; background: var(--bg); display: flex; flex-direction: column; gap: 6px; }
+.diag .t { font-family: var(--f-display); font-weight: 800; font-size: 1.15rem; }
+.schematic { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 16px; margin-top: 30px; }
+.schematic svg { width: 100%; height: auto; display: block; }
+.schematic text { font-family: var(--f-body); }
+.sdot { cursor: pointer; }
+.sdot:hover, .sdot:focus { stroke-width: 3; }
+.next-list { counter-reset: n; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.next-list li { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px 14px 56px; position: relative; }
+.next-list li::before { counter-increment: n; content: counter(n); position: absolute; left: 18px; top: 12px; font-family: var(--f-display); font-weight: 800; font-size: 1.5rem; color: var(--acc); }
+#jsErr .warn { margin-top: 12px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div id="tip" role="tooltip"></div>
+<noscript><div class="wrap"><div class="warn" style="margin-top:12px">Este documento necesita JavaScript para dibujar las gráficas y las calculadoras. Abrilo en Chrome, Edge, Firefox o Safari.</div></div></noscript>
+<div id="jsErr" class="wrap" hidden><div class="warn">Una parte interactiva no se pudo dibujar en este visor: <span></span> Si lo abriste en una vista previa, probá descargarlo y abrirlo en el navegador.</div></div>
+
+<header class="hero wrap">
+  <div class="read stack">
+    <span class="eyebrow">Prueba técnica · Serie III · Mercado</span>
+    <h1>El azúcar en el mundo: quién produce y cómo se mueve el precio</h1>
+    <p class="lede">Qué países se parecen a Guatemala y qué tan confiables son sus datos, cómo se comporta el precio del azúcar No. 11, cuánto se puede anticipar y si la oferta mundial reacciona al precio.</p>
+    <nav class="toc" aria-label="Contenido">
+      <a href="#mercado">El mercado</a><a href="#paises">1 · Países</a><a href="#precio">2 · Precio</a><a href="#pronostico">3 · Pronóstico</a><a href="#oferta">4 · Oferta</a><a href="#cierre">Cierre</a><a href="#glosario">Glosario</a>
+    </nav>
+  </div>
+  <div class="schematic"><div class="chart" id="chHero"></div></div>
+</header>
+
+<!-- ================================================================== -->
+<section id="mercado" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">El mercado en dos minutos</span>
+    <h2>Un precio mundial, fijado en Nueva York, que Brasil mueve más que nadie</h2>
+    <ul>
+      <li><strong>El azúcar No. 11</strong> es el contrato de futuros de azúcar crudo de la bolsa ICE, en centavos de dólar por libra (¢/lb). Es la referencia de las exportaciones de azúcar crudo, incluidas las de Centroamérica. Cada centavo por libra equivale a <strong>US$22 por tonelada</strong>.</li>
+      <li><strong>Se negocia por vencimientos:</strong> marzo, mayo, julio y octubre. Cada contrato deja de negociarse el último día hábil del mes anterior. Eso importa más adelante.</li>
+      <li><strong>Brasil exporta cerca de la mitad del azúcar del mundo</strong> (44-53 % según el año, USDA). Su cosecha, su moneda y su decisión de hacer azúcar o etanol mueven el precio de todos.</li>
+      <li><strong>FAOSTAT</strong> publica, para cada país y año desde 1961, el área cosechada de caña, la producción y el rendimiento. Cada dato trae una bandera que dice si es oficial, estimado o imputado.</li>
+    </ul>
+    <div class="callout">
+      <h3>Qué datos usa este análisis</h3>
+      <p class="small">Solo los de la prueba: FAOSTAT (caña de azúcar, 1961-2023) y la serie diaria del No. 11 (2000-2024). Las fuentes públicas que se citan (ICE, Banco Mundial, FMI, USDA, prensa financiera) sirven <strong>solo para verificar</strong>; no entran a ningún cálculo.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="paises" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">1 · Segmentación de países productores</span>
+    <h2>Guatemala creció como pocos, pero sus datos recientes no son medición</h2>
+    <p>La pregunta pide agrupar a los países por la <strong>evolución</strong> de su rendimiento, área y producción de 1961 a 2023, ubicar a Guatemala y señalar los datos poco confiables. Primero va la auditoría, porque una trayectoria imputada tiene la forma que le dio quien la imputó.</p>
+  </div>
+  <div class="figure statrow" id="p1Stats"></div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Una de cada tres cifras de producción no es oficial, y en los últimos años es la mitad</h3>
+      <p>FAO marca cada dato: <strong>oficial</strong>, <strong>estimado</strong> por FAO, <strong>imputado</strong> o de otro organismo. Hasta 2009, unas tres de cada cuatro cifras del panel son oficiales. Desde 2010 la imputación crece, y en 2023 menos de la mitad de los datos son oficiales.</p>
+    </div>
+    <div class="chart" id="chCal"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>Los años más recientes, que son los que más interesan, son los menos confiables. Un "cambio de tendencia" en 2019-2023 puede ser solo el método del imputador.</div><div class="decide"><b class="k">Qué decidimos</b>Resumir cada trayectoria con pendientes robustas (Theil-Sen), que no dependen de un año suelto, y repetir todo sin los países dudosos.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Series que no se están midiendo</h3>
+      <p>Liberia reporta <strong>el mismo rendimiento 33 años seguidos</strong>; Ghana repite el suyo 11 años. La caña cambia de rendimiento todos los años por lluvia, variedad y edad de la plantación: diez años idénticos no es agronomía, es un supuesto repetido.</p>
+    </div>
+    <div class="grid-2"><div class="chart" id="chMalas"></div><div class="tbl-wrap"><table class="t" id="tblDud"></table></div></div>
+    <div class="read stack">
+      <p><strong>Otros problemas del archivo:</strong></p>
+      <ul>
+        <li>La fila "China" es la suma de China continental y Taiwán: usada junto a sus partes, cuenta doble.</li>
+        <li>Etiopía y Sudán cambian de nombre al partirse; se encadenaron.</li>
+        <li>Reunión, Guadalupe, Martinica y Guayana Francesa dejan de aparecer en 2006, pero su industria sigue: es un hueco de reporte, no un cierre. Puerto Rico (2002), San Cristóbal y Nieves (2005) y Trinidad y Tobago (2007) sí cerraron.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Los datos de Guatemala: tres tramos dudosos</h3>
+      <div class="seg" id="gtSeg" role="group" aria-label="Variable"></div>
+    </div>
+    <div class="chart" id="chGt"></div>
+    <div class="read stack">
+      <ul>
+        <li><strong>1977-1985:</strong> producción estimada por FAO, en cifras redondas (6.6, 6.3 y 6.58 millones de t).</li>
+        <li><strong>2014-2016:</strong> producción de ~33.5 millones de t, con bandera oficial, que en 2017 vuelve a 26 millones. El USDA da unos 28 millones para 2016/17 (270 mil ha × 104 t/ha), y su producción de azúcar de esos años no muestra el salto.</li>
+        <li><strong>2017-2023:</strong> área estimada y luego imputada. FAOSTAT dice 224 mil ha en 2021-2022; el USDA reporta 251-258 mil ha en 2020/21-2022/23. La "caída" del área es un artefacto.</li>
+      </ul>
+    </div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>FAOSTAT no sirve para evaluar a Guatemala en 2014-2023 sin contraste. Una conclusión de "Guatemala está perdiendo área" saldría de una imputación.</div><div class="decide"><b class="k">Qué decidimos</b>Señalarlo como dato poco confiable y recomendar reemplazar esos tramos con las estadísticas de la gremial y de su centro de investigación.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>No hay "tipos" de países bien separados</h3>
+      <p>Cada país se describe con seis números de su trayectoria: cuánto creció el área, cuánto creció el rendimiento, dónde terminó el rendimiento, si aceleró o frenó después de 1991 en área y en rendimiento, y qué tan estable es. Un agrupamiento siempre devuelve grupos, así que se compara contra datos simulados con la misma correlación pero <strong>sin</strong> grupos.</p>
+    </div>
+    <div class="grid-2"><div class="chart" id="chSil"></div><div class="chart" id="chAri"></div></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>Las trayectorias forman un continuo: los grupos apenas superan al azar (p de 0.015 a 0.09) y se reproducen solo a medias al remuestrear países (ARI ~0.5).</div><div class="decide"><b class="k">Qué decidimos</b>Usar tres grupos (la regla de siempre: el más reproducible entre 3 y 6) como <strong>tipología</strong> para resumir: expansión, madurez o estancamiento, y rendimiento muy bajo o datos dudosos.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>El mapa de las trayectorias</h3>
+      <p>Pasá el cursor por un punto para ver el país. Guatemala está arriba a la derecha: creció mucho en área <strong>y</strong> tiene uno de los rendimientos más altos. Solo 4 de 71 países están en el cuartil superior de las dos cosas.</p>
+    </div>
+    <div class="chart" id="chMapa"></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Los pares de Guatemala se buscan por trayectoria, no por tamaño</h3>
+      <p>Dos métodos independientes: cercanía en los seis descriptores y distancia entre las curvas completas de área y rendimiento por bloques de 5 años. <strong>Un par es real si queda entre los 10 más cercanos en los dos.</strong></p>
+    </div>
+    <div class="grid-2"><div class="tbl-wrap"><table class="t" id="tblVec"></table></div><div class="stack" id="paresBox"></div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Compará cualquier país con Guatemala</h3>
+      <div class="ctrl"><label>País <select id="selPais"></select></label></div>
+    </div>
+    <div class="grid-2"><div class="chart" id="chTrA"></div><div class="chart" id="chTrR"></div></div>
+    <div class="read" id="paisInfo"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>Colombia, México y Perú se parecen en tamaño o en rendimiento, pero no en trayectoria. Colombia y Perú ya tenían su área en los 60, y México no tiene el rendimiento. El Salvador y Nicaragua hicieron el mismo camino que Guatemala.</div><div class="decide"><b class="k">Qué decidimos</b>Proponer a El Salvador, Nicaragua y Eswatini como referencia para comparar rendimiento y costos. Brasil y Egipto quedan como referencias parciales (ritmo y riego). Los pares se mantienen al quitar los 21 países con datos dudosos.</div></div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="precio" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">2 · Comportamiento del precio</span>
+    <h2>La serie es real, pero pega contratos distintos</h2>
+    <p>La pregunta pide analizar volatilidad, regímenes y extremos, y <strong>verificar</strong> que la serie represente movimientos reales del mercado. La verificación va primero, porque cambia todo lo demás.</p>
+  </div>
+  <div class="figure statrow" id="p2Stats"></div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>El día después de cada vencimiento, el precio "salta" sin que el mercado se mueva</h3>
+      <p>La serie muestra siempre el contrato más próximo. Cuando vence (fines de febrero, abril, junio y septiembre), al día siguiente muestra el contrato que sigue, que casi nunca vale lo mismo. Ese salto no lo vivió nadie: quien tenía el contrato viejo lo cerró al precio viejo.</p>
+    </div>
+    <div class="grid-2"><div class="chart" id="chTipos"></div><div class="chart" id="chCurva"></div></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>Esos 97 días son el 1.6 % de la serie, pero aportan 11 de los 25 movimientos más grandes y la mitad de las "colas pesadas". Las 11 filas con datos imposibles (cierre fuera del rango del día) caen todas en días de vencimiento.</div><div class="decide"><b class="k">Qué decidimos</b>Construir una serie ajustada: el día del cambio se usa solo el movimiento del contrato nuevo dentro del día. El nivel crudo sigue siendo la referencia de precio; la serie ajustada se usa para medir riesgo. El signo del salto (gráfica derecha) es además un indicador de mercado apretado.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Al centavo y al día con las fuentes públicas</h3>
+      <p>El máximo de 2011 en la serie es <strong>36.08 ¢/lb el 2 de febrero</strong>, el mínimo del COVID es <strong>9.05 ¢/lb el 28 de abril de 2020</strong> y el máximo de 2023 es <strong>28.14 ¢/lb el 7 de noviembre</strong>. Son exactamente las cifras que reportaron AFP y Barchart. Los promedios anuales difieren del FMI y del Banco Mundial entre −1 % y +3 %.</p>
+    </div>
+    <div class="tbl-wrap"><table class="t" id="tblVer"></table></div>
+    <div class="read stack small muted"><p>La bolsa cerró la semana del 11 de septiembre de 2001 y reabrió el 17: el hueco está en la serie. En 2008 y en el COVID el azúcar cayó junto con el café, el cacao o el algodón. Fuentes: ICE (especificaciones), Banco Mundial (<em>Pink Sheet</em>), FMI vía FRED, AFP, Barchart/Nasdaq y NYBOT.</p></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Dos regímenes de volatilidad: calma y turbulencia</h3>
+      <p>Un modelo de Markov sobre retornos semanales prefiere claramente dos estados a uno o tres (por BIC). Las franjas naranjas son las semanas en turbulencia. Se mide con la serie ajustada, sin los saltos de contrato ni los dos vencimientos sin volumen de 2000.</p>
+    </div>
+    <div class="chart" id="chReg"></div>
+    <div class="figure kpis" id="regKpis"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>El tamaño del movimiento se puede anticipar un poco (la volatilidad se agrupa); la dirección, no. En turbulencia, una semana de ±10 % pasa una vez cada ~11 semanas; en calma, una vez cada ~260.</div><div class="decide"><b class="k">Qué decidimos</b>Usar el régimen como semáforo de riesgo comercial y como base de las bandas de la pregunta 3.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Los ciclos de precio no se distinguen del azar</h3>
+      <p>Una fase alcista o bajista se cuenta cuando el precio se aleja 20 % de su último extremo. La serie tiene <strong>34</strong> giros así en 24 años. ¿Es mucho o poco? Un precio que se mueve al azar con la misma volatilidad produce entre 31 y 47.</p>
+    </div>
+    <div class="chart" id="chRw"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>No hay un ciclo regular que se pueda explotar para elegir cuándo vender. Hay fases históricas con nombre (2006 por etanol, 2009-2011 el gran auge, 2011-2020 el descenso de −74 %, 2020-2023 la recuperación), pero su forma es la de un paseo aleatorio.</div><div class="decide"><b class="k">Qué decidimos</b>No buscar un modelo de "ciclos". La pregunta 3 lo confirma con pronósticos.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Los extremos son mucho más frecuentes de lo que supone una normal</h3>
+      <p id="colasTxt"></p>
+    </div>
+    <div class="tbl-wrap"><table class="t" id="tblExt"></table></div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="pronostico" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">3 · Pronóstico a 1 y 3 meses</span>
+    <h2>Nada le gana al precio de hoy; el valor está en la banda</h2>
+    <p>Se pronostica el <strong>promedio del mes</strong> (lo que usa la planificación comercial) para el mes siguiente y para el tercer mes, con datos hasta el cierre del mes anterior. La validación es hacia adelante: en cada mes desde 2009 se entrena con el pasado, se pronostica y se compara con lo que pasó.</p>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>La trampa del ingenuo equivocado</h3>
+      <p>Hay dos ingenuos: "el próximo mes valdrá el <strong>último cierre</strong>" y "valdrá el <strong>promedio de este mes</strong>". El segundo llega medio mes atrasado. Además, promediar crea un patrón artificial: los cambios entre promedios se autocorrelacionan 0.28, contra 0.08 en los cierres. Un ARIMA sobre promedios aprende ese patrón y le gana al ingenuo del promedio… pero pierde contra el último cierre.</p>
+      <div class="seg" id="hSeg" role="group" aria-label="Horizonte"></div>
+    </div>
+    <div class="chart" id="chErr"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>A 1 mes, el último cierre se equivoca ~5 % (0.84 ¢/lb); a 3 meses, ~12 % (2.2 ¢/lb). Ni el ARIMA ni la regresión con momentum, reversión y forma de la curva le ganan con una diferencia que no sea suerte (bootstrap por bloques y Diebold-Mariano).</div><div class="decide"><b class="k">Qué decidimos</b>Usar el último cierre como centro. El mercado de futuros ya incorpora lo que se sabe; ninguno de los modelos probados, solo con el historial del precio, le ganó.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Una banda que se ensancha cuando el mercado se agita</h3>
+      <p>La banda se construye con los errores pasados ya conocidos, medidos en unidades de la volatilidad de los últimos 3 meses. Promete 80 % y cubre <span id="cob1"></span> a 1 mes; la banda fija cubre de más porque arrastra la turbulencia de 2009-2011 a todos los meses.</p>
+      <div class="seg" id="bSeg" role="group" aria-label="Horizonte de la banda"></div>
+    </div>
+    <div class="chart" id="chBand"></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>Para planificar: de la banda de precio al rango de ingreso</h3>
+      <p class="small muted">Con los datos al 31/05/2024. Precio No. 11 sin primas de calidad, flete ni tipo de cambio: es una ilustración del orden de magnitud del riesgo, no un presupuesto.</p>
+    </div>
+    <div class="calc">
+      <div>
+        <label>Toneladas de azúcar sin fijar: <b id="vTon"></b><input type="range" id="inTon" min="5000" max="200000" step="5000" value="50000"></label>
+        <label>Horizonte <span class="seg" id="calcH" role="group"></span></label>
+        <label>Confianza <span class="seg" id="calcC" role="group"></span></label>
+      </div>
+      <div class="stack"><div class="kpis" id="calcOut"></div><div class="small muted" id="calcTxt"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="oferta" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">4 · Respuesta de la oferta</span>
+    <h2>El área se asocia con el precio de dos o tres años antes, poco y sin prueba causal firme</h2>
+    <p>¿Cuando el azúcar sube, los países siembran más caña? Es una pregunta de causalidad con tres trampas:</p>
+    <ul>
+      <li>El precio es el mismo para todos, así que solo hay ~20 años de variación aunque haya 71 países.</li>
+      <li>Cuando se produce más, el precio baja: la flecha también va al revés.</li>
+      <li>El precio que ve cada país no es el No. 11 en dólares: hay monedas, cuotas y etanol de por medio.</li>
+    </ul>
+  </div>
+
+  <div class="finding">
+    <div class="read stack"><h3>Primera mirada: el área mundial sigue al precio de dos años antes</h3></div>
+    <div class="chart" id="chAgg"></div>
+    <div class="read stack small muted"><p>Correlación 0.72, pero con 20 puntos. Es sugerente, todavía no es evidencia.</p></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>¿Con qué rezago?</h3>
+      <p>Panel de 71 países, 2000-2023, en cambios anuales, con efectos fijos por país. Cada barra es una elasticidad: 0.04 significa que un precio 10 % más alto se asocia con 0.4 % más área. Las barras grises son los placebos: precios que todavía no existían cuando se decidió el área. Si se asocian, es que la flecha también va al revés.</p>
+      <div class="seg" id="lagSeg" role="group" aria-label="Variable"></div>
+    </div>
+    <div class="chart" id="chLag"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b><ul><li>El área no se asocia con el precio del mismo año, pero sí, <strong>negativamente</strong>, con el del año siguiente: más área hoy anticipa un precio más bajo. <strong>El placebo falla</strong>: la oferta también mueve el precio.</li><li>La asociación positiva aparece a los <strong>2-3 años</strong>, lo que tiene sentido para un cultivo perenne.</li><li>La producción del mismo año se asocia negativamente con el precio.</li></ul></div><div class="decide"><b class="k">Qué decidimos</b>Medir solo con precios pasados y controlar la inercia del propio crecimiento del área (modelo ARDL). Con ese control, la asociación a 2-3 años se mantiene, pero el placebo sigue fallando en algunas muestras.</div></div>
+  </div>
+
+  <div class="finding">
+    <div class="read stack">
+      <h3>La prueba honesta: barajar los años del precio</h3>
+      <p>Con los errores habituales, la elasticidad acumulada del área (rezagos de 1 a 3 años) da 0.08 y parece muy significativa (t = 3.1). Pero con solo 20 años de precio esos errores prometen de más. La prueba de permutación baraja el orden de los años del precio 2,000 veces y cuenta qué tan seguido sale un efecto así por azar.</p>
+    </div>
+    <div class="chart" id="chPerm"></div>
+    <div class="figure kpis" id="permKpis"></div>
+    <div class="read meaning"><div><b class="k">Qué significa</b>En el panel completo la evidencia está en el borde: p de 0.05 a 0.08 a una cola, según se controle o no la inercia, y 0.11 con 4 rezagos. Ponderando por tamaño el efecto es mayor (~0.17) y pasa la prueba, pero es exploratorio: Brasil e India pesan más de la mitad.</div><div class="decide"><b class="k">Qué decidimos</b>Reportarlo como <strong>asociación rezagada robusta, con evidencia causal débil</strong>. El placebo falla en algunas muestras y las causas comunes (petróleo, tipo de cambio, políticas) no se pueden separar con estos datos. Se intentó usar la cosecha de Brasil como experimento natural, pero el instrumento es débil (F = 0.2).</div></div>
+  </div>
+</section>
+
+<!-- ================================================================== -->
+<section id="cierre" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">Cierre</span>
+    <h2>Lo que la Serie III le dice a la Gerencia General y Comercial</h2>
+  </div>
+  <div class="gcards figure" id="cierreCards"></div>
+  <div class="read stack figure">
+    <h3>Próximos pasos</h3>
+    <ol class="next-list">
+      <li>Reemplazar FAOSTAT 2014-2023 de Guatemala por las cifras de la gremial y compararse contra El Salvador, Nicaragua y Eswatini.</li>
+      <li>Usar el régimen de volatilidad y la banda según volatilidad para presupuestar en rangos y decidir cuánto fijar.</li>
+      <li>Seguir la forma de la curva (contrato próximo contra el siguiente) y la zafra de Brasil como indicadores adelantados.</li>
+      <li>Para mejorar el pronóstico: la curva completa de futuros y fundamentos (zafra brasileña, política de la India, real, petróleo), no un modelo más complejo.</li>
+      <li>Extender la respuesta de la oferta con el precio anual desde 1960 (Banco Mundial) y precios en moneda local.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="glosario" class="wrap">
+  <div class="read stack">
+    <span class="eyebrow">Glosario</span>
+    <h2>Las palabras del mercado y del análisis</h2>
+    <dl class="glossary" id="gloss"></dl>
+  </div>
+</section>
+
+<footer class="wrap"><div class="read">Todas las cifras de este documento salen de <code>notebooks/10_mercado_paises.ipynb</code> a <code>notebooks/13_mercado_oferta.ipynb</code> y de <code>src/mercado_*.py</code>. Datos: FAOSTAT, <em>Production: Crops and livestock products</em> (caña de azúcar), y <em>Agricultural Commodities Futures</em> (azúcar No. 11, Yahoo Finance <code>SB=F</code>).</div></footer>
+
+<script>
+window.addEventListener("error", e => { const b = document.getElementById("jsErr"); if (b) { b.hidden = false; b.querySelector("span").textContent += (e.message || "error") + ". "; } });
+// algunos visores integrados reemplazan console por un objeto incompleto: nunca depender de él
+const note = (lvl, ...a) => { try { const f = typeof console !== "undefined" && console[lvl]; if (typeof f === "function") f.apply(console, a); } catch (e) {} };
+const D = /*__DATA__*/null;
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = (v, d = 0) => v == null || isNaN(v) ? "—" : Number(v).toLocaleString("es-GT", { minimumFractionDigits: d, maximumFractionDigits: d });
+const pct = (v, d = 0) => fmt(v * 100, d) + " %";
+const usd = (v, d = 0) => (v < 0 ? "−" : "") + "US$" + fmt(Math.abs(v), d);
+const mil = v => "US$" + fmt(v / 1000) + " mil";
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs = {}, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function h(tag, attrs = {}, html = "") { const e = document.createElement(tag); for (const k in attrs) e.setAttribute(k, attrs[k]); e.innerHTML = html; return e; }
+const $ = id => document.getElementById(id);
+function safe(name, fn) { try { fn(); } catch (e) { note("warn", name, e); const b = $("jsErr"); if (b) { b.hidden = false; b.querySelector("span").textContent += `${name}: ${e.message}. `; } } }
+
+/* ---------- tooltip ---------- */
+const tip = $("tip");
+function showTip(html, x, y) {
+  tip.innerHTML = html; tip.style.opacity = 1;
+  const w = tip.offsetWidth, hh = tip.offsetHeight;
+  tip.style.left = Math.min(window.innerWidth - w - 8, Math.max(8, x - w / 2)) + "px";
+  tip.style.top = Math.max(8, y - hh - 14) + "px";
+}
+const hideTip = () => tip.style.opacity = 0;
+function bindTip(node, html) {
+  node.classList.add("hit"); node.setAttribute("tabindex", "0");
+  const show = ev => { const r = node.getBoundingClientRect(); showTip(typeof html === "function" ? html() : html, ev && ev.clientX != null ? ev.clientX : r.left + r.width / 2, ev && ev.clientY != null ? ev.clientY : r.top); };
+  node.addEventListener("mouseenter", show); node.addEventListener("mousemove", show); node.addEventListener("focus", () => show(null));
+  node.addEventListener("mouseleave", hideTip); node.addEventListener("blur", hideTip);
+}
+
+/* ---------- helpers de gráficas ---------- */
+function svgBox(c, w, hgt) { const s = el("svg", { viewBox: `0 0 ${w} ${hgt}`, role: "img" }); c.appendChild(s); return s; }
+function title(c, text, legend) {
+  c.appendChild(h("div", { class: "chart-title" }, text));
+  if (legend && legend.length) { const L = h("div", { class: "legend" }); legend.forEach(([lab, color, kind]) => L.appendChild(h("span", {}, `<i class="${kind || ""}" style="background:${color}"></i>${lab}`))); c.appendChild(L); }
+}
+function niceTicks(min, max, n = 5) {
+  const span = max - min || 1, step0 = span / n, mag = Math.pow(10, Math.floor(Math.log10(step0)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(s => span / s <= n) || 10 * mag;
+  const out = []; for (let v = Math.ceil(min / step) * step; v <= max + 1e-9; v += step) out.push(+v.toFixed(10)); return out;
+}
+function extent(arrs, pad = 0.06) {
+  const v = arrs.flat().filter(x => x != null && !isNaN(x)); let lo = Math.min(...v), hi = Math.max(...v); const p = (hi - lo) * pad || 1; return [lo - p, hi + p];
+}
+/* serie de tiempo con cruz de lectura */
+function ts(id, labels, series, o = {}) {
+  const c = $(id); c.innerHTML = "";
+  title(c, o.titleText, series.filter(s => !s.hideLegend).map(s => [s.name, s.color, s.dots ? "" : "line"]).concat(o.extraLegend || []));
+  const w = o.w || 980, hgt = o.hgt || 280, L = 62, R = 18, T = 12, B = 30, n = labels.length;
+  const [y0, y1] = o.yRange || extent(series.map(s => s.values));
+  const s = svgBox(c, w, hgt);
+  const sx = i => L + (i / (n - 1)) * (w - L - R), sy = v => hgt - B - ((v - y0) / (y1 - y0)) * (hgt - B - T);
+  (o.spans || []).forEach(sp => el("rect", { x: sx(sp[0]), y: T, width: Math.max(1, sx(sp[1]) - sx(sp[0])), height: hgt - B - T, fill: sp[2] || css("--g2"), opacity: sp[3] || 0.14 }, s));
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(y0, y1, 5).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = (o.yFmt || fmt)(t); });
+  const every = o.xEvery || Math.ceil(n / 8);
+  for (let i = 0; i < n; i += every) el("text", { x: sx(i), y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s).textContent = labels[i];
+  if (o.hline != null) el("line", { x1: L, x2: w - R, y1: sy(o.hline), y2: sy(o.hline), stroke: css("--ink-2"), "stroke-dasharray": "5 4", "stroke-width": 1.2 }, s);
+  series.forEach(sr => {
+    if (sr.dots) { sr.values.forEach((v, i) => { if (v != null) el("circle", { cx: sx(i), cy: sy(v), r: sr.r || 2.2, fill: sr.colorAt ? sr.colorAt(i) : sr.color }, s); }); return; }
+    let d = "", pen = false; sr.values.forEach((v, i) => { if (v == null || isNaN(v)) { pen = false; return; } d += `${pen ? "L" : "M"}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`; pen = true; });
+    el("path", { d, fill: "none", stroke: sr.color, "stroke-width": sr.width || 1.6, "stroke-linejoin": "round", "stroke-dasharray": sr.dash || "" }, s);
+  });
+  if (o.yLabel) el("text", { x: 14, y: (hgt - B) / 2, transform: `rotate(-90 14 ${(hgt - B) / 2})`, "text-anchor": "middle", class: "lab" }, s).textContent = o.yLabel;
+  const cross = el("line", { y1: T, y2: hgt - B, stroke: css("--ink-3"), "stroke-width": 1, opacity: 0 }, s);
+  const hit = el("rect", { x: L, y: T, width: w - L - R, height: hgt - B - T, fill: "transparent" }, s);
+  const move = ev => {
+    const r = s.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * w;
+    const i = Math.max(0, Math.min(n - 1, Math.round((px - L) / (w - L - R) * (n - 1))));
+    cross.setAttribute("x1", sx(i)); cross.setAttribute("x2", sx(i)); cross.setAttribute("opacity", 1);
+    const rows = series.filter(sr => !sr.noTip).map(sr => `<br>${sr.name}: <b>${sr.values[i] == null ? "—" : (o.tipFmt || o.yFmt || fmt)(sr.values[i])}</b>${sr.tipExtra ? sr.tipExtra(i) : ""}`).join("");
+    showTip(`<b>${labels[i]}</b>${rows}${o.tipExtra ? o.tipExtra(i) : ""}`, ev.clientX, ev.clientY);
+  };
+  hit.addEventListener("mousemove", move); hit.addEventListener("mouseleave", () => { hideTip(); cross.setAttribute("opacity", 0); });
+  hit.addEventListener("touchstart", ev => move(ev.touches[0]), { passive: true });
+}
+/* barras horizontales */
+function hbars(id, rows, o) {
+  const c = $(id); c.innerHTML = ""; title(c, o.titleText, o.legend);
+  const labelW = o.labelW || 210, barH = 20, gap = 12, w = o.w || 640, H = rows.length * (barH + gap) + 30, s = svgBox(c, w, H);
+  const lo = Math.min(0, ...rows.map(r => r.v)), hi = Math.max(0, ...rows.map(r => r.v)) || 1, x0 = labelW, x1 = w - 70;
+  const sx = v => x0 + ((v - lo) / (hi - lo)) * (x1 - x0);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(lo, hi, 4).forEach(t => { el("line", { x1: sx(t), x2: sx(t), y1: 0, y2: H - 22 }, g); el("text", { x: sx(t), y: H - 6, "text-anchor": "middle", class: "lab" }, s).textContent = o.valueFmt(t); });
+  rows.forEach((r, i) => {
+    const y = i * (barH + gap) + 4, a = sx(Math.min(0, r.v)), b = sx(Math.max(0, r.v));
+    el("text", { x: x0 - 10, y: y + barH / 2 + 4, "text-anchor": "end", class: "lab" }, s).textContent = r.label;
+    const rect = el("rect", { x: a, y, width: Math.max(2, b - a), height: barH, rx: 4, fill: r.color || o.color || css("--acc") }, s);
+    bindTip(rect, r.tip || `<b>${r.label}</b><br>${o.valueFmt(r.v)}`);
+    el("text", { x: b + 8, y: y + barH / 2 + 4, "text-anchor": "start", class: "val" }, s).textContent = o.valueFmt(r.v);
+  });
+  el("line", { x1: sx(0), x2: sx(0), y1: 0, y2: H - 22, class: "base" }, s);
+}
+/* dispersión */
+function scatter(id, groups, o) {
+  const c = $(id); c.innerHTML = ""; title(c, o.titleText, groups.map(g => [g.name, g.color, ""]));
+  const w = o.w || 520, hgt = o.hgt || 340, L = 60, R = 14, T = 12, B = 40, s = svgBox(c, w, hgt);
+  const [x0, x1] = o.xRange || extent(groups.map(g => g.x)), [y0, y1] = o.yRange || extent(groups.map(g => g.y));
+  const sx = v => L + (v - x0) / (x1 - x0) * (w - L - R), sy = v => hgt - B - (v - y0) / (y1 - y0) * (hgt - B - T);
+  const gg = el("g", { class: "grid" }, s);
+  niceTicks(y0, y1, 5).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, gg); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = (o.yFmt || fmt)(t); });
+  niceTicks(x0, x1, 5).forEach(t => el("text", { x: sx(t), y: hgt - B + 16, "text-anchor": "middle", class: "lab" }, s).textContent = (o.xFmt || fmt)(t));
+  groups.forEach(g => g.x.forEach((x, i) => el("circle", { cx: sx(x), cy: sy(g.y[i]), r: 2.4, fill: g.color, opacity: 0.45 }, s)));
+  if (o.line) el("line", { x1: sx(o.line[0]), y1: sy(o.line[1]), x2: sx(o.line[2]), y2: sy(o.line[3]), stroke: css("--ink"), "stroke-width": 1.6, "stroke-dasharray": "6 4" }, s);
+  el("text", { x: (L + w - R) / 2, y: hgt - 6, "text-anchor": "middle", class: "lab" }, s).textContent = o.xLabel || "";
+  el("text", { x: 14, y: (hgt - B) / 2, transform: `rotate(-90 14 ${(hgt - B) / 2})`, "text-anchor": "middle", class: "lab" }, s).textContent = o.yLabel || "";
+}
+/* líneas cortas por categoría (pocos puntos, con marcadores) */
+function cats(id, xs, series, o) {
+  const c = $(id); c.innerHTML = ""; title(c, o.titleText, series.map(s => [s.name, s.color, "line"]));
+  const w = o.w || 520, hgt = o.hgt || 280, L = 56, R = 16, T = 12, B = 36, s = svgBox(c, w, hgt);
+  const [y0, y1] = o.yRange || extent(series.map(s => s.values).concat(series.filter(s => s.lo).map(s => s.lo), series.filter(s => s.hi).map(s => s.hi)));
+  const sx = i => L + (xs.length === 1 ? 0.5 : i / (xs.length - 1)) * (w - L - R), sy = v => hgt - B - (v - y0) / (y1 - y0) * (hgt - B - T);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(y0, y1, 5).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = (o.yFmt || fmt)(t); });
+  xs.forEach((x, i) => { if (i % (o.xEvery || 1) === 0) el("text", { x: sx(i), y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s).textContent = x; });
+  if (o.hline != null) el("line", { x1: L, x2: w - R, y1: sy(o.hline), y2: sy(o.hline), stroke: css("--ink-3"), "stroke-dasharray": "4 4" }, s);
+  if (o.vline != null) el("line", { x1: sx(o.vline), x2: sx(o.vline), y1: T, y2: hgt - B, stroke: css("--ink-3"), "stroke-dasharray": "4 4" }, s);
+  series.forEach(sr => {
+    if (sr.lo) sr.values.forEach((v, i) => el("line", { x1: sx(i), x2: sx(i), y1: sy(sr.lo[i]), y2: sy(sr.hi[i]), stroke: sr.color, "stroke-width": 3, opacity: 0.35 }, s));
+    if (!sr.noLine) el("path", { d: sr.values.map((v, i) => `${i ? "L" : "M"}${sx(i)},${sy(v)}`).join(""), fill: "none", stroke: sr.color, "stroke-width": 2 }, s);
+    sr.values.forEach((v, i) => { const d = el("circle", { cx: sx(i), cy: sy(v), r: o.r || 4, fill: sr.colorAt ? sr.colorAt(i) : sr.color, stroke: css("--surface"), "stroke-width": 1.5 }, s); bindTip(d, `<b>${sr.name}</b><br>${o.xName || ""} ${xs[i]}: ${(o.yFmt || fmt)(v)}${sr.extra ? sr.extra(i) : ""}`); });
+  });
+  if (o.yLabel) el("text", { x: 13, y: (hgt - B) / 2, transform: `rotate(-90 13 ${(hgt - B) / 2})`, "text-anchor": "middle", class: "lab" }, s).textContent = o.yLabel;
+  if (o.xLabel) el("text", { x: (L + w - R) / 2, y: hgt - 4, "text-anchor": "middle", class: "lab" }, s).textContent = o.xLabel;
+}
+function segButtons(id, names, onPick, start = 0) {
+  const box = $(id); box.innerHTML = "";
+  names.forEach((nm, i) => { const b = h("button", { type: "button", "aria-pressed": i === start ? "true" : "false" }, nm);
+    b.addEventListener("click", () => { [...box.children].forEach(x => x.setAttribute("aria-pressed", "false")); b.setAttribute("aria-pressed", "true"); onPick(i, nm); });
+    box.appendChild(b); });
+  onPick(start, names[start]);
+}
+const stat = (n, l, s = "") => `<div class="kpi"><div class="v">${n}</div><div class="l">${l}</div>${s ? `<div class="s">${s}</div>` : ""}</div>`;
+/* ===================== Serie III ===================== */
+const G_COL = g => ({ "Expansión": css("--g1"), "Madurez o estancamiento": css("--g5"), "Rendimiento muy bajo o datos dudosos": css("--g2") })[g] || css("--g5");
+const FLAG_COL = f => ({ A: css("--g1"), E: css("--g4"), I: css("--g2"), X: css("--g5") })[f] || css("--ink-3");
+const FLAG_TXT = { A: "oficial", E: "estimado", I: "imputado", X: "otro organismo", "": "sin bandera" };
+const PAIS = Object.fromEntries(D.paises.map(p => [p.en, p]));
+const esp = en => (PAIS[en] ? PAIS[en].p : en);
+const PARES = D.p1.guatemala.pares;
+const LBTON = 22.0462;   // US$ por tonelada por cada ¢/lb
+
+/* barras verticales simples */
+function vbars(id, labels, values, o) {
+  const c = $(id); c.innerHTML = ""; title(c, o.titleText, o.legend);
+  const w = o.w || 520, hgt = o.hgt || 280, L = 54, R = 12, T = 12, B = 32, n = labels.length, s = svgBox(c, w, hgt);
+  const [y0, y1] = o.yRange || extent([values, [0]]);
+  const bw = (w - L - R) / n, sy = v => hgt - B - (v - y0) / (y1 - y0) * (hgt - B - T);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(y0, y1, 5).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = (o.yFmt || fmt)(t); });
+  values.forEach((v, i) => {
+    if (v == null) return;
+    const r = el("rect", { x: L + i * bw + 1, y: Math.min(sy(v), sy(0)), width: Math.max(1, bw - 2), height: Math.max(1, Math.abs(sy(v) - sy(0))), rx: 2, fill: o.colorAt ? o.colorAt(i, v) : css("--acc") }, s);
+    bindTip(r, o.tip ? o.tip(i) : `<b>${labels[i]}</b><br>${(o.yFmt || fmt)(v)}`);
+    if (i % (o.xEvery || 1) === 0) el("text", { x: L + i * bw + bw / 2, y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s).textContent = labels[i];
+  });
+  el("line", { x1: L, x2: w - R, y1: sy(0), y2: sy(0), class: "base" }, s);
+  if (o.yLabel) el("text", { x: 13, y: (hgt - B) / 2, transform: `rotate(-90 13 ${(hgt - B) / 2})`, "text-anchor": "middle", class: "lab" }, s).textContent = o.yLabel;
+}
+/* histograma con líneas de referencia */
+function histo(id, bordes, cnt, lines, o) {
+  const c = $(id); c.innerHTML = ""; title(c, o.titleText, lines.map(l => [l.name, l.color, "line"]).concat(o.legend || []));
+  const w = o.w || 760, hgt = o.hgt || 250, L = 46, R = 14, T = 12, B = 38, s = svgBox(c, w, hgt);
+  const x0 = Math.min(bordes[0], ...lines.map(l => l.x)), x1 = Math.max(bordes[bordes.length - 1], ...lines.map(l => l.x));
+  const pad = (x1 - x0) * 0.04, X0 = x0 - pad, X1 = x1 + pad, ymax = Math.max(...cnt) * 1.1;
+  const sx = v => L + (v - X0) / (X1 - X0) * (w - L - R), sy = v => hgt - B - v / ymax * (hgt - B - T);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(0, ymax, 4).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = fmt(t); });
+  cnt.forEach((k, i) => { const r = el("rect", { x: sx(bordes[i]) + 0.5, y: sy(k), width: Math.max(1, sx(bordes[i + 1]) - sx(bordes[i]) - 1), height: sy(0) - sy(k), fill: css("--g5"), opacity: 0.75 }, s);
+    bindTip(r, `${(o.xFmt || fmt)(bordes[i])} a ${(o.xFmt || fmt)(bordes[i + 1])}<br><b>${k}</b> ${o.unidad || "casos"}`); });
+  niceTicks(X0, X1, 6).forEach(t => el("text", { x: sx(t), y: hgt - B + 16, "text-anchor": "middle", class: "lab" }, s).textContent = (o.xFmt || fmt)(t));
+  lines.forEach(l => { el("line", { x1: sx(l.x), x2: sx(l.x), y1: T, y2: hgt - B, stroke: l.color, "stroke-width": l.width || 2.5, "stroke-dasharray": l.dash || "" }, s); });
+  el("text", { x: (L + w - R) / 2, y: hgt - 4, "text-anchor": "middle", class: "lab" }, s).textContent = o.xLabel || "";
+}
+/* banda de pronóstico */
+function bandChart(id, B, o) {
+  const c = $(id); c.innerHTML = "";
+  title(c, o.titleText, [["Banda 95 %", css("--g1"), "sq"], ["Banda 80 %", css("--g1"), "sq"], ["Promedio real del mes", css("--ink"), "line"], ["Fuera de la banda 80 %", css("--g2"), ""]]);
+  const w = 980, hgt = 300, L = 54, R = 14, T = 12, B0 = 30, n = B.t.length, s = svgBox(c, w, hgt);
+  const [y0, y1] = extent([B.lo95, B.hi95, B.real]);
+  const sx = i => L + i / (n - 1) * (w - L - R), sy = v => hgt - B0 - (v - y0) / (y1 - y0) * (hgt - B0 - T);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(y0, y1, 5).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = fmt(t); });
+  const area = (lo, hi) => B.t.map((_, i) => `${i ? "L" : "M"}${sx(i).toFixed(1)},${sy(hi[i]).toFixed(1)}`).join("") + B.t.map((_, j) => { const i = n - 1 - j; return `L${sx(i).toFixed(1)},${sy(lo[i]).toFixed(1)}`; }).join("") + "Z";
+  el("path", { d: area(B.lo95, B.hi95), fill: css("--g1"), opacity: 0.13 }, s);
+  el("path", { d: area(B.lo80, B.hi80), fill: css("--g1"), opacity: 0.28 }, s);
+  el("path", { d: B.real.map((v, i) => `${i ? "L" : "M"}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(""), fill: "none", stroke: css("--ink"), "stroke-width": 1.6 }, s);
+  B.real.forEach((v, i) => { if (v < B.lo80[i] || v > B.hi80[i]) el("circle", { cx: sx(i), cy: sy(v), r: 2.8, fill: css("--g2") }, s); });
+  for (let i = 0; i < n; i += 24) el("text", { x: sx(i), y: hgt - B0 + 18, "text-anchor": "middle", class: "lab" }, s).textContent = B.t[i];
+  const cross = el("line", { y1: T, y2: hgt - B0, stroke: css("--ink-3"), opacity: 0 }, s);
+  const hit = el("rect", { x: L, y: T, width: w - L - R, height: hgt - B0 - T, fill: "transparent" }, s);
+  const mv = ev => { const r = s.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * w, i = Math.max(0, Math.min(n - 1, Math.round((px - L) / (w - L - R) * (n - 1))));
+    cross.setAttribute("x1", sx(i)); cross.setAttribute("x2", sx(i)); cross.setAttribute("opacity", 1);
+    showTip(`<b>${B.t[i]}</b><br>Pronóstico (último cierre): <b>${fmt(B.centro[i], 2)}</b><br>Banda 80 %: ${fmt(B.lo80[i], 2)} a ${fmt(B.hi80[i], 2)}<br>Real: <b>${fmt(B.real[i], 2)}</b> ¢/lb`, ev.clientX, ev.clientY); };
+  hit.addEventListener("mousemove", mv); hit.addEventListener("mouseleave", () => { hideTip(); cross.setAttribute("opacity", 0); });
+  hit.addEventListener("touchstart", ev => mv(ev.touches[0]), { passive: true });
+  el("text", { x: 13, y: (hgt - B0) / 2, transform: `rotate(-90 13 ${(hgt - B0) / 2})`, "text-anchor": "middle", class: "lab" }, s).textContent = "¢/lb";
+}
+function spansFrom(flags, color, op = 0.14) {
+  const out = []; let st = null;
+  flags.forEach((v, i) => { if (v && st === null) st = i; if (st !== null && (!v || i === flags.length - 1)) { out.push([st, v ? i : i - 1, color, op]); st = null; } });
+  return out;
+}
+
+/* =================== portada =================== */
+safe("portada", () => {
+  const P = D.precio_m;
+  ts("chHero", P.t, [{ name: "Precio promedio del mes", color: css("--g1"), values: P.prom, width: 2 }],
+    { titleText: "Azúcar No. 11, promedio mensual 2000-2024 (¢/lb)", yFmt: v => fmt(v, 0), tipFmt: v => fmt(v, 2) + " ¢/lb", spans: spansFrom(P.turb, css("--g2")), hgt: 290, xEvery: 24,
+      extraLegend: [["Meses en régimen turbulento", css("--g2"), "sq"]] });
+});
+
+/* =================== pregunta 1 =================== */
+safe("p1 stats", () => {
+  const i23 = D.cal.anios.indexOf(2023), gt = D.gt;
+  const m = (arr, a, b) => { const v = gt.anios.map((y, i) => (y >= a && y <= b ? arr[i] : null)).filter(x => x != null); return v.reduce((s, x) => s + x, 0) / v.length; };
+  const q = (arr, p) => { const v = [...arr].sort((a, b) => a - b), k = (v.length - 1) * p, f = Math.floor(k); return v[f] + (v[Math.min(f + 1, v.length - 1)] - v[f]) * (k - f); };
+  const qa = q(D.paises.map(p => p.ca), 0.75), qr = q(D.paises.map(p => p.rd), 0.75);
+  const top = D.paises.filter(p => p.ca > qa && p.rd > qr).length;
+  $("p1Stats").innerHTML = stat(D.p1.paises_panel, "países productores en el panel", "desde 1976 o antes y ≥ 5,000 ha") +
+    stat(fmt(D.cal.A[i23]) + " %", "de los datos de producción de 2023 son oficiales", "73 % en 1961-2009") +
+    stat("×" + fmt(m(gt.area, 2019, 2023) / m(gt.area, 1961, 1965), 1), "creció el área de Guatemala", "1961-1965 → 2019-2023") +
+    stat(`${top} de ${D.paises.length}`, "países en el cuartil superior de crecimiento de área y de rendimiento", "Guatemala es uno");
+});
+safe("banderas", () => {
+  const c = $("chCal"); c.innerHTML = "";
+  const ser = [["Oficial", "A", css("--g1")], ["Otro organismo", "X", css("--g5")], ["Estimado", "E", css("--g4")], ["Imputado", "I", css("--g2")]];
+  title(c, "Origen de cada dato de producción, por año (% de los países del panel)", ser.map(([n, , col]) => [n, col, ""]));
+  const w = 980, hgt = 260, L = 50, R = 12, T = 10, B = 28, n = D.cal.anios.length, s = svgBox(c, w, hgt), bw = (w - L - R) / n;
+  const sy = v => hgt - B - v / 100 * (hgt - B - T);
+  const g = el("g", { class: "grid" }, s);
+  [0, 25, 50, 75, 100].forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = t + " %"; });
+  D.cal.anios.forEach((a, i) => {
+    let acc = 0;
+    ser.forEach(([nm, k, col]) => { const v = D.cal[k][i] || 0; el("rect", { x: L + i * bw + 0.5, y: sy(acc + v), width: Math.max(1, bw - 1), height: sy(acc) - sy(acc + v), fill: col, opacity: 0.9 }, s); acc += v; });
+    const hit = el("rect", { x: L + i * bw, y: T, width: bw, height: hgt - B - T, fill: "transparent" }, s);
+    bindTip(hit, `<b>${a}</b>` + ser.map(([nm, k]) => `<br>${nm}: ${fmt(D.cal[k][i], 0)} %`).join(""));
+    if (a % 10 === 1 || a === 2023) el("text", { x: L + i * bw + bw / 2, y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s).textContent = a;
+  });
+});
+safe("malas", () => {
+  const M = D.malas;
+  ts("chMalas", M.anios, [{ name: "Guatemala", color: css("--g1"), values: M.Guatemala }, { name: "Ghana", color: css("--g5"), values: M.Ghana }, { name: "Liberia", color: css("--g2"), values: M.Liberia, width: 2.4 }],
+    { titleText: "Rendimiento (t/ha)", yFmt: v => fmt(v, 0), w: 520, hgt: 270, xEvery: 10 });
+  const T = $("tblDud");
+  T.innerHTML = `<thead><tr><th>País</th><th class="r">% no oficial</th><th class="r">Años con el mismo rendimiento</th><th class="r">Variación anual (%)</th><th class="r">t/ha</th></tr></thead><tbody>` +
+    D.dudosos.map(d => `<tr><td>${d.p}</td><td class="r">${fmt(d.no_of)}</td><td class="r">${d.racha}</td><td class="r">${fmt(d.var, 1)}</td><td class="r">${fmt(d.rend)}</td></tr>`).join("") + "</tbody>";
+});
+safe("guatemala", () => {
+  const G = D.gt, vars = [["Área (miles de ha)", "area", "f_area", 0], ["Producción (millones de t)", "prod", "f_prod", 1], ["Rendimiento (t/ha)", "rend", "f_prod", 0]];
+  segButtons("gtSeg", vars.map(v => v[0].split(" (")[0]), i => {
+    const [nm, k, f, d] = vars[i];
+    ts("chGt", G.anios, [{ name: nm, color: css("--ink-3"), values: G[k], width: 1.4, noTip: true },
+      { name: "Dato (color = bandera)", color: css("--g1"), values: G[k], dots: true, r: 3.6, colorAt: j => FLAG_COL(G[f][j]), hideLegend: true, noTip: true }],
+      { titleText: `Guatemala · ${nm}`, yFmt: v => fmt(v, d), hgt: 280, xEvery: 6,
+        extraLegend: [["oficial", FLAG_COL("A"), ""], ["estimado", FLAG_COL("E"), ""], ["imputado", FLAG_COL("I"), ""], ["otro organismo", FLAG_COL("X"), ""]],
+        tipExtra: j => `<br>${nm}: <b>${fmt(G[k][j], d + 1)}</b><br>Bandera: ${FLAG_TXT[G[f][j]] || G[f][j]}` });
+  });
+});
+safe("grupos", () => {
+  const ks = ["2", "3", "4", "5", "6"], Sx = D.p1.silueta, Ex = D.p1.estabilidad;
+  cats("chSil", ks, [{ name: "Países", color: css("--g1"), values: ks.map(k => Sx[k].silueta), extra: i => `<br>p = ${fmt(Sx[ks[i]].p, 3)}` },
+    { name: "Datos sin grupos (media y p95)", color: css("--g5"), values: ks.map(k => Sx[k]["nulo (media)"]), lo: ks.map(k => Sx[k]["nulo (media)"]), hi: ks.map(k => Sx[k]["nulo p95"]) }],
+    { titleText: "Separación (silueta) contra datos sin grupos", yFmt: v => fmt(v, 2), xName: "k =", xLabel: "número de grupos (k)" });
+  cats("chAri", ks, [{ name: "ARI al remuestrear países (mediana, p10-p90)", color: css("--g2"), values: ks.map(k => Ex[k]["ARI mediana"]), lo: ks.map(k => Ex[k]["ARI p10"]), hi: ks.map(k => Ex[k]["ARI p90"]) }],
+    { titleText: "Estabilidad de los grupos", yFmt: v => fmt(v, 2), yRange: [0, 1], xName: "k =", xLabel: "número de grupos (k)", vline: ks.indexOf(String(D.p1.k)) });
+});
+safe("mapa", () => {
+  const c = $("chMapa"); c.innerHTML = "";
+  const grupos = ["Expansión", "Madurez o estancamiento", "Rendimiento muy bajo o datos dudosos"];
+  title(c, "Crecimiento del área 1961-2023 contra rendimiento 2014-2023 (tamaño = producción reciente)", grupos.map(g => [g, G_COL(g), ""]));
+  const w = 980, hgt = 440, L = 58, R = 18, T = 14, B = 44, s = svgBox(c, w, hgt);
+  const [x0, x1] = extent([D.paises.map(p => p.ca)]), [y0, y1] = extent([D.paises.map(p => p.rd)]);
+  const sx = v => L + (v - x0) / (x1 - x0) * (w - L - R), sy = v => hgt - B - (v - y0) / (y1 - y0) * (hgt - B - T);
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(y0, y1, 6).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = fmt(t); });
+  niceTicks(x0, x1, 7).forEach(t => { el("line", { x1: sx(t), x2: sx(t), y1: T, y2: hgt - B }, g); el("text", { x: sx(t), y: hgt - B + 16, "text-anchor": "middle", class: "lab" }, s).textContent = fmt(t, 0) + " %"; });
+  const pmax = Math.max(...D.paises.map(p => p.pr));
+  [...D.paises].sort((a, b) => b.pr - a.pr).forEach(p => {
+    const d = el("circle", { cx: sx(p.ca), cy: sy(p.rd), r: 4 + 14 * Math.sqrt(p.pr / pmax), fill: G_COL(p.g), opacity: p.en === "Guatemala" ? 1 : 0.72, stroke: p.en === "Guatemala" ? css("--ink") : css("--surface"), "stroke-width": p.en === "Guatemala" ? 2.5 : 1 }, s);
+    bindTip(d, `<b>${p.p}</b> · ${p.g}<br>Área: ${fmt(p.ca, 2)} % anual<br>Rendimiento: ${fmt(p.rd, 1)} t/ha<br>Producción: ${fmt(p.pr, 1)} millones de t<br>Datos no oficiales: ${fmt(p.no_of)} %`);
+  });
+  ["Guatemala", ...PARES, "Peru", "Colombia", "Mexico", "India", "Thailand", "Liberia", "Cuba"].forEach(en => {
+    const p = PAIS[en]; if (!p) return;
+    const off = { "El Salvador": [9, 15], "India": [12, 14], "Colombia": [-64, -8], "Mexico": [9, 14] }[en] || [9, -7];
+    el("text", { x: sx(p.ca) + off[0], y: sy(p.rd) + off[1], class: en === "Guatemala" ? "val" : "lab" }, s).textContent = p.p;
+  });
+  el("text", { x: (L + w - R) / 2, y: hgt - 6, "text-anchor": "middle", class: "lab" }, s).textContent = "Crecimiento del área cosechada 1961-2023 (% anual, pendiente robusta)";
+  el("text", { x: 14, y: (hgt - B) / 2, transform: `rotate(-90 14 ${(hgt - B) / 2})`, "text-anchor": "middle", class: "lab" }, s).textContent = "Rendimiento 2014-2023 (t/ha)";
+});
+safe("vecinos", () => {
+  const v1 = Object.entries(D.p1.guatemala.vecinos_descriptores), v2 = Object.entries(D.p1.guatemala.vecinos_trayectoria);
+  const cell = ([en, d]) => `<td class="${PARES.includes(en) ? "" : "muted"}">${PARES.includes(en) ? "<strong>" + esp(en) + "</strong>" : esp(en)} <span class="small muted">${fmt(d, 2)}</span></td>`;
+  $("tblVec").innerHTML = `<thead><tr><th>#</th><th>Por descriptores</th><th>Por forma de trayectoria</th></tr></thead><tbody>` +
+    v1.map((x, i) => `<tr><td>${i + 1}</td>${cell(x)}${cell(v2[i])}</tr>`).join("") + "</tbody>";
+  $("paresBox").innerHTML = `<div class="card"><h3>Pares en los dos métodos</h3><p class="small muted">En negrita en la tabla. Se mantienen al quitar los 21 países con datos dudosos.</p></div>` +
+    PARES.map(en => { const p = PAIS[en]; return `<div class="card"><div class="chips" style="justify-content:space-between"><strong>${p.p}</strong><span class="chip">${p.g}</span></div><dl class="kv" style="margin-top:8px"><dt>Área</dt><dd>${fmt(p.ca, 2)} % anual</dd><dt>Rendimiento</dt><dd>${fmt(p.rd, 1)} t/ha (Guatemala ${fmt(PAIS.Guatemala.rd, 1)})</dd><dt>Datos no oficiales</dt><dd>${fmt(p.no_of)} %</dd></dl></div>`; }).join("");
+});
+function renderPais() {
+  const en = $("selPais").value, p = PAIS[en], gt = PAIS.Guatemala, B = D.tray.bloques;
+  cats("chTrA", B, [{ name: "Guatemala", color: css("--g1"), values: D.tray.area.Guatemala }, { name: p.p, color: css("--g2"), values: D.tray.area[en] }],
+    { titleText: "Área relativa a 2021-2023 (cuándo creció)", yFmt: v => fmt(v, 2), xEvery: 3, r: 3 });
+  cats("chTrR", B, [{ name: "Guatemala", color: css("--g1"), values: D.tray.rend.Guatemala }, { name: p.p, color: css("--g2"), values: D.tray.rend[en] }],
+    { titleText: "Rendimiento (t/ha) por bloque de 5 años", yFmt: v => fmt(v, 0), xEvery: 3, r: 3 });
+  const par = PARES.includes(en) ? `<span class="badge ok"><i style="background:${css("--g1")}"></i>par de Guatemala</span>` : "";
+  $("paisInfo").innerHTML = `<div class="card stack" style="gap:8px"><div class="chips" style="align-items:center"><strong>${p.p}</strong><span class="chip">${p.g}</span>${par}</div>
+    <dl class="kv"><dt>Crecimiento del área</dt><dd>${fmt(p.ca, 2)} % anual (Guatemala ${fmt(gt.ca, 2)})</dd><dt>Crecimiento del rendimiento</dt><dd>${fmt(p.cr, 2)} % anual (Guatemala ${fmt(gt.cr, 2)})</dd>
+    <dt>Rendimiento 2014-2023</dt><dd>${fmt(p.rd, 1)} t/ha (Guatemala ${fmt(gt.rd, 1)})</dd><dt>Producción 2014-2023</dt><dd>${fmt(p.pr, 1)} millones de t (Guatemala ${fmt(gt.pr, 1)})</dd>
+    <dt>Datos de producción no oficiales</dt><dd>${fmt(p.no_of)} %</dd></dl></div>`;
+}
+safe("selector país", () => {
+  const sel = $("selPais");
+  [...D.paises].filter(p => p.en !== "Guatemala").sort((a, b) => a.p.localeCompare(b.p, "es")).forEach(p => sel.appendChild(h("option", { value: p.en }, p.p)));
+  sel.value = "El Salvador"; sel.addEventListener("change", () => safe("país", renderPais)); renderPais();
+});
+
+/* =================== pregunta 2 =================== */
+const P2 = D.p2;
+safe("p2 stats", () => {
+  $("p2Stats").innerHTML = stat(P2.dias_cambio, "días de cambio de contrato", "saltos que no son mercado") + stat(`${P2.top25_por_tipo["cambio de contrato"]} de 25`, "movimientos más grandes son cambios de contrato") +
+    stat(`${fmt(P2.crudo.curtosis, 1)} → ${fmt(P2.ajustado.curtosis, 1)}`, "curtosis antes y después de ajustar") + stat(fmt(P2.ajustado.vol * 100, 0) + " %", "volatilidad anual (serie ajustada)");
+});
+safe("tipos de día", () => {
+  const T = P2.por_tipo_de_dia, ord = [["cambio de contrato", "Cambio de contrato"], ["vencimiento", "Vencimiento"], ["fin de mes sin vencimiento", "Fin de mes"], ["normal", "Día normal"]];
+  hbars("chTipos", ord.map(([k, lab]) => ({ label: lab, v: T[k].crudo, color: k === "cambio de contrato" ? css("--g2") : css("--g5"),
+    tip: `<b>${lab}</b> (${fmt(T[k]["días"])} días)<br>Movimiento cierre a cierre: ${fmt(T[k].crudo, 2)} %<br>Brecha nocturna: ${fmt(T[k].brecha, 2)} %<br>Dentro del día: ${fmt(T[k].intradia, 2)} %` })),
+    { titleText: "Movimiento absoluto medio por tipo de día (%)", valueFmt: v => fmt(v, 1) + " %", labelW: 150, w: 520 });
+  const ys = Object.keys(P2.brecha_por_anio), vs = ys.map(y => P2.brecha_por_anio[y] * 100);
+  vbars("chCurva", ys.map(y => "'" + y.slice(2)), vs, { titleText: "Salto medio el día del cambio, por año (%)", legend: [["Siguiente más caro", css("--g1"), ""], ["Próximo más caro (mercado apretado)", css("--g2"), ""]],
+    colorAt: (i, v) => v < 0 ? css("--g2") : css("--g1"), yFmt: v => fmt(v, 0) + " %", xEvery: 3, tip: i => `<b>${ys[i]}</b><br>${fmt(vs[i], 1)} %` });
+});
+safe("verificación", () => {
+  $("tblVer").innerHTML = `<thead><tr><th>Año</th><th class="r">Serie de la prueba</th><th class="r">FMI</th><th class="r">Banco Mundial</th><th class="r">Diferencia contra el FMI</th></tr></thead><tbody>` +
+    D.verif.map(v => `<tr><td>${v.a}</td><td class="r">${fmt(v.serie, 2)}</td><td class="r">${fmt(v.fmi, 2)}</td><td class="r">${v.bm == null ? "—" : fmt(v.bm, 2)}</td><td class="r">${(v.serie / v.fmi - 1 >= 0 ? "+" : "") + fmt(100 * (v.serie / v.fmi - 1), 1)} %</td></tr>`).join("") + "</tbody>";
+});
+safe("regímenes", () => {
+  const S = D.sem;
+  ts("chReg", S.t, [{ name: "Cierre semanal (crudo)", color: css("--ink-2"), values: S.p, width: 1.4 }],
+    { titleText: "Precio semanal y régimen de volatilidad", yFmt: v => fmt(v, 0), spans: spansFrom(S.turb, css("--g2"), 0.16), hgt: 300, xEvery: 104,
+      extraLegend: [["Turbulencia", css("--g2"), "sq"]], tipFmt: v => fmt(v, 2) + " ¢/lb", tipExtra: i => `<br>Volatilidad 3 meses: ${fmt(S.vol[i], 0)} % anual<br>Régimen: ${S.turb[i] ? "turbulencia" : "calma"}` });
+  const R = P2.regimenes, pr = P2.prob_semana_10;
+  $("regKpis").innerHTML = ["Calma", "Turbulencia"].map(k => stat(fmt(R[k]["volatilidad semanal (%)"], 1) + " %", `semanal en ${k.toLowerCase()} (${fmt(R[k]["volatilidad anual equivalente (%)"], 0)} % anual)`, `${fmt(R[k]["% de las semanas"], 0)} % de las semanas · dura ~${fmt(R[k]["duración esperada (semanas)"], 0)} semanas`)).join("") +
+    ["Calma", "Turbulencia"].map(k => stat("1 de " + fmt(1 / pr[k], 0), `semanas con ±10 % o más en ${k.toLowerCase()}`)).join("");
+});
+safe("paseo aleatorio", () => {
+  const sim = D.rw.sim, lo = Math.min(...sim), hi = Math.max(...sim), b = []; for (let v = lo; v <= hi + 1; v++) b.push(v - 0.5);
+  const cnt = b.slice(0, -1).map((x, i) => sim.filter(s => s >= x && s < b[i + 1]).length);
+  histo("chRw", b, cnt, [{ name: `Serie real: ${D.rw.obs} giros`, x: D.rw.obs, color: css("--g2") }],
+    { titleText: "Giros de 20 % en 500 paseos aleatorios con la misma volatilidad", xLabel: "número de giros de 20 % en 24 años", xFmt: v => fmt(v, 0), unidad: "simulaciones", legend: [["Paseo aleatorio", css("--g5"), "sq"]] });
+});
+safe("extremos", () => {
+  const C = P2.colas["|z| > 4"];
+  $("colasTxt").innerHTML = `Hay <strong>${fmt(C["días (desviación estándar)"])} días</strong> con movimientos de más de 4 desviaciones estándar; una distribución normal esperaría <strong>${fmt(C["esperados si fuera normal"], 1)}</strong>, unas ${fmt(C["veces más (desviación estándar)"])} veces menos. Un modelo que supone normalidad subestima el riesgo de un día extremo. Los más grandes son caídas: el azúcar sube por escaleras y baja por ascensor.`;
+  $("tblExt").innerHTML = `<thead><tr><th>Fecha</th><th class="r">Movimiento</th><th class="r">Desviaciones</th><th>Qué pasó</th></tr></thead><tbody>` +
+    D.ext.map(e => `<tr><td>${e.f}</td><td class="r">${(e.ret > 0 ? "+" : "") + fmt(e.ret, 1)} %</td><td class="r">${fmt(e.z, 1)}</td><td>${e.ctx}</td></tr>`).join("") + "</tbody>";
+});
+
+/* =================== pregunta 3 =================== */
+const P3 = D.p3;
+safe("errores", () => {
+  const nom = { "Ingenuo: último cierre": "Último cierre", "Ingenuo: promedio del mes": "Promedio del mes", "ARIMA(1,1,0) sobre promedios": "ARIMA(1,1,0)", "Regresión: momentum y reversión": "Regresión" };
+  segButtons("hSeg", ["A 1 mes", "A 3 meses"], i => {
+    const h = i ? "3" : "1", M = P3.metricas[h];
+    hbars("chErr", Object.keys(M).map(k => ({ label: nom[k], v: M[k]["MAE (¢/lb)"], color: k.startsWith("Ingenuo: último") ? css("--g1") : css("--g5"),
+      tip: `<b>${nom[k]}</b><br>Error medio: ${fmt(M[k]["MAE (¢/lb)"], 2)} ¢/lb (${fmt(M[k]["MAPE (%)"], 1)} %)<br>Contra el último cierre: ${fmt(-M[k]["mejora vs último cierre (%)"], 0)} % peor` })),
+      { titleText: `Error medio a ${h} mes${h === "3" ? "es" : ""}, validado hacia adelante (¢/lb)`, valueFmt: v => fmt(v, 2), labelW: 150, w: 640 });
+  });
+});
+safe("bandas", () => {
+  $("cob1").textContent = fmt(P3.bandas["1|según volatilidad"]["80 %"]["cobertura (%)"], 0) + " %";
+  segButtons("bSeg", ["A 1 mes", "A 3 meses"], i => { const h = i ? 3 : 1; bandChart("chBand", D.band[h], { titleText: `Pronóstico a ${h} mes${h === 3 ? "es" : ""}: último cierre y banda según volatilidad` }); });
+});
+safe("calculadora", () => {
+  const MP = D.modelo_pron; let H = 1, C = 80;
+  const run = () => {
+    const ton = +$("inTon").value; $("vTon").textContent = fmt(ton) + " t";
+    const q = MP.cuantiles_z[String(H)], esc = MP.vol_3m_mensual * Math.sqrt(H), c0 = MP.ultimo_cierre;
+    const lo = c0 * Math.exp((C === 80 ? q.p10 : q["p2.5"]) * esc), hi = c0 * Math.exp((C === 80 ? q.p90 : q["p97.5"]) * esc);
+    const ing = p => ton * p * LBTON;
+    $("calcOut").innerHTML = stat(fmt(c0, 2), "¢/lb, centro (último cierre)") + stat(`${fmt(lo, 1)} a ${fmt(hi, 1)}`, `¢/lb, banda ${C} %`) +
+      stat(usd(ing(c0) / 1e6, 1) + " M", "ingreso al precio central") + stat(usd((ing(c0) - ing(lo)) / 1e6, 1) + " M", "pérdida posible a la baja (extremo de la banda)");
+    $("calcTxt").textContent = `Con ${C} % de confianza, el promedio de ${H === 1 ? "junio" : "agosto"} de 2024 queda entre ${fmt(lo, 1)} y ${fmt(hi, 1)} ¢/lb. Para ${fmt(ton)} t sin fijar, el ingreso varía entre ${usd(ing(lo) / 1e6, 1)} y ${usd(ing(hi) / 1e6, 1)} millones. Fijar precio reduce ese rango.`;
+  };
+  segButtons("calcH", ["1 mes", "3 meses"], i => { H = i ? 3 : 1; run(); });
+  segButtons("calcC", ["80 %", "95 %"], i => { C = i ? 95 : 80; run(); });
+  $("inTon").addEventListener("input", run); run();
+});
+
+/* =================== pregunta 4 =================== */
+safe("oferta agregada", () => {
+  const A = D.agg, c = $("chAgg"); c.innerHTML = "";
+  title(c, "Crecimiento del área mundial (línea) y cambio del precio dos años antes (barras)", [["Precio, 2 años antes (%)", css("--g5"), "sq"], ["Área mundial (%)", css("--g1"), "line"]]);
+  const w = 980, hgt = 300, L = 54, R = 54, T = 12, B = 30, n = A.anios.length, s = svgBox(c, w, hgt), bw = (w - L - R) / n;
+  const m1 = 1.1 * Math.max(...A.precio2.map(Math.abs)), m2 = 1.1 * Math.max(...A.area.map(Math.abs));
+  const sy1 = v => T + (1 - (v + m1) / (2 * m1)) * (hgt - B - T), sy2 = v => T + (1 - (v + m2) / (2 * m2)) * (hgt - B - T), sx = i => L + i * bw + bw / 2;
+  const g = el("g", { class: "grid" }, s);
+  niceTicks(-m1, m1, 4).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy1(t), y2: sy1(t) }, g); el("text", { x: L - 8, y: sy1(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = fmt(t) + " %"; });
+  niceTicks(-m2, m2, 4).forEach(t => el("text", { x: w - R + 8, y: sy2(t) + 4, "text-anchor": "start", class: "lab", fill: css("--g1") }, s).textContent = fmt(t) + " %");
+  A.precio2.forEach((v, i) => { const r = el("rect", { x: sx(i) - bw * 0.35, y: Math.min(sy1(v), sy1(0)), width: bw * 0.7, height: Math.abs(sy1(v) - sy1(0)), fill: css("--g5"), opacity: 0.55 }, s);
+    bindTip(r, `<b>${A.anios[i]}</b><br>Área mundial: ${fmt(A.area[i], 1)} %<br>Precio en ${A.anios[i] - 2}: ${fmt(v, 0)} %`); });
+  el("line", { x1: L, x2: w - R, y1: sy1(0), y2: sy1(0), class: "base" }, s);
+  el("path", { d: A.area.map((v, i) => `${i ? "L" : "M"}${sx(i)},${sy2(v)}`).join(""), fill: "none", stroke: css("--g1"), "stroke-width": 2.2 }, s);
+  A.area.forEach((v, i) => { const d = el("circle", { cx: sx(i), cy: sy2(v), r: 4, fill: css("--g1"), stroke: css("--surface"), "stroke-width": 1.5 }, s); bindTip(d, `<b>${A.anios[i]}</b><br>Área mundial: ${fmt(v, 1)} %<br>Precio en ${A.anios[i] - 2}: ${fmt(A.precio2[i], 0)} %`); });
+  A.anios.forEach((a, i) => { if (a % 3 === 2) el("text", { x: sx(i), y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s).textContent = a; });
+});
+safe("rezagos", () => {
+  const et = ["año siguiente", "mismo año", "1 año antes", "2 años antes", "3 años antes", "4 años antes"];
+  segButtons("lagSeg", ["Área", "Producción"], i => {
+    const k = i ? "dlq" : "dla", P = D.perfil[k], lo = P.coef.map((v, j) => v - 1.645 * P.se[j]), hi = P.coef.map((v, j) => v + 1.645 * P.se[j]);
+    const all = lo.concat(hi, [0]), y0 = Math.min(...all) * 1.15, y1 = Math.max(...all) * 1.15;
+    const c = $("chLag"); c.innerHTML = ""; title(c, `${i ? "Producción" : "Área cosechada"}: elasticidad por rezago del precio (intervalo de 90 %)`, [["Placebo (precio aún no conocido)", css("--g5"), "sq"], ["Precio pasado", css("--g1"), "sq"]]);
+    const w = 760, hgt = 300, L = 60, R = 14, T = 12, B = 36, s = svgBox(c, w, hgt), bw = (w - L - R) / et.length;
+    const sy = v => hgt - B - (v - y0) / (y1 - y0) * (hgt - B - T);
+    const g = el("g", { class: "grid" }, s);
+    niceTicks(y0, y1, 5).forEach(t => { el("line", { x1: L, x2: w - R, y1: sy(t), y2: sy(t) }, g); el("text", { x: L - 8, y: sy(t) + 4, "text-anchor": "end", class: "lab" }, s).textContent = fmt(t, 3); });
+    P.coef.forEach((v, j) => {
+      const x = L + j * bw + bw / 2, col = j < 2 ? css("--g5") : css("--g1");
+      const r = el("rect", { x: x - bw * 0.28, y: Math.min(sy(v), sy(0)), width: bw * 0.56, height: Math.max(1, Math.abs(sy(v) - sy(0))), rx: 3, fill: col, opacity: j < 2 ? 0.8 : 1 }, s);
+      el("line", { x1: x, x2: x, y1: sy(lo[j]), y2: sy(hi[j]), stroke: css("--ink-2"), "stroke-width": 1.4 }, s);
+      [lo[j], hi[j]].forEach(yv => el("line", { x1: x - 6, x2: x + 6, y1: sy(yv), y2: sy(yv), stroke: css("--ink-2"), "stroke-width": 1.4 }, s));
+      bindTip(r, `<b>${et[j]}</b><br>Elasticidad: ${fmt(v, 3)}<br>Intervalo 90 %: ${fmt(lo[j], 3)} a ${fmt(hi[j], 3)}`);
+      el("text", { x, y: hgt - B + 18, "text-anchor": "middle", class: "lab" }, s).textContent = et[j];
+    });
+    el("line", { x1: L, x2: w - R, y1: sy(0), y2: sy(0), class: "base" }, s);
+  });
+});
+safe("permutación", () => {
+  const N = D.nulo, PM = D.p4.permutacion;
+  histo("chPerm", N.bordes, N.cnt, [{ name: `Observado: ${fmt(N.obs, 3)}`, x: N.obs, color: css("--g1") }, { name: "95 % del azar", x: N.p95, color: css("--g2"), dash: "6 4", width: 1.8 }],
+    { titleText: "Elasticidad acumulada del área con los años del precio barajados (2,000 veces)", xLabel: "elasticidad acumulada (1-3 años)", xFmt: v => fmt(v, 2), unidad: "permutaciones", legend: [["Azar", css("--g5"), "sq"]] });
+  const a = PM["Área, 1-3 años"], b = PM["Área, 1-3 años, con inercia"], c = PM["Área ponderada por tamaño, con inercia (exploratorio)"];
+  $("permKpis").innerHTML = stat(fmt(a.suma, 3), "elasticidad acumulada del área (71 países)", `p = ${fmt(a.p_una_cola, 2)} sin inercia · ${fmt(b.p_una_cola, 2)} con inercia (una cola)`) +
+    stat(fmt(c.suma, 2), "ponderada por tamaño (exploratorio)", `p = ${fmt(c.p_una_cola, 2)} (una cola) · Brasil e India pesan 55 %`) +
+    stat(`${fmt(D.p4.jackknife[0], 2)} a ${fmt(D.p4.jackknife[1], 2)}`, "rango al quitar un año a la vez") + stat(fmt(D.p4.primera_etapa_F, 1), "F de la cosecha de Brasil como instrumento", "se necesita F > 10");
+});
+
+/* =================== cierre y glosario =================== */
+safe("cierre", () => {
+  const cards = [
+    ["1 · Países", "Guatemala es de los 4 países (de 71) que crecieron en área y además llegaron a rendimientos de punta. Sus pares por trayectoria son El Salvador, Eswatini, Brasil, Nicaragua y Egipto. FAOSTAT no es confiable para Guatemala en 2014-2023: producción inflada y área imputada.", "Certeza alta en los problemas de datos; media en los pares."],
+    ["2 · Precio", "La serie pega contratos: 97 saltos que no son mercado. Hay dos regímenes de volatilidad (calma y turbulencia), colas pesadas y ciclos que no se distinguen del azar. Los extremos coinciden al centavo con fuentes públicas.", "Certeza alta."],
+    ["3 · Pronóstico", "A 1 y 3 meses nada le gana al último cierre (~5 % y ~12 % de error). La utilidad está en la banda según volatilidad, que queda calibrada: sirve para presupuestar en rangos y decidir cuánto fijar.", "Certeza alta en el resultado; media en la banda a 3 meses."],
+    ["4 · Oferta", "El área se asocia con el precio de 2-3 años antes, poco: ~0.8 % por cada 10 % de precio. La relación va en los dos sentidos (el placebo falla) y la evidencia causal está en el borde. No conviene expandir área por un precio alto de hoy: la expansión de los competidores llega con rezago.", "Certeza media en el rezago; media-baja en la causalidad y la magnitud."],
+  ];
+  $("cierreCards").innerHTML = cards.map(([t, p, c]) => `<div class="card"><h3>${t}</h3><p>${p}</p><p class="small" style="margin-top:8px"><strong>${c}</strong></p></div>`).join("") +
+    `<div class="card wide"><h3>La idea de fondo</h3><p>En el mercado del azúcar, lo que se puede medir bien es el <strong>riesgo</strong> (cuánto se puede mover el precio y cuándo se agita), no la <strong>dirección</strong>. Las decisiones que más valor protegen son las de gestión de riesgo (cuánto fijar y cuándo ampliar márgenes) y las de inversión con escenarios conservadores, no las de adivinar el momento.</p></div>`;
+});
+safe("glosario", () => {
+  const G = [
+    ["Azúcar No. 11", "Contrato de futuros de azúcar crudo de la bolsa ICE, en centavos de dólar por libra. Referencia mundial de exportación."],
+    ["Contrato más próximo", "El que vence primero. Una serie \"continua\" muestra siempre ese y salta al siguiente cuando vence."],
+    ["Cambio de contrato (roll)", "El día en que la serie continua pasa de un contrato al siguiente. El salto de precio de ese día no es un movimiento del mercado."],
+    ["Bandera FAOSTAT", "Marca de origen de cada dato: oficial, estimado por FAO, imputado o de otro organismo."],
+    ["Theil-Sen", "Pendiente robusta: la mediana de las pendientes entre todos los pares de años. Un año raro no la mueve."],
+    ["Nulo gaussiano", "Datos simulados con la misma correlación que los reales pero sin grupos. Sirve para saber si los grupos encontrados son reales."],
+    ["ARI", "Número de 0 a 1 que mide cuánto se parecen dos agrupaciones."],
+    ["Volatilidad", "Cuánto se mueve el precio. Se mide como desviación típica de los retornos, anualizada."],
+    ["Régimen (Markov)", "Estado del mercado (calma o turbulencia) con su propia volatilidad. El modelo estima en cuál está cada semana."],
+    ["Paseo aleatorio", "Un precio cuyo próximo movimiento no se puede anticipar con su historia. El mejor pronóstico es el último precio."],
+    ["Validación hacia adelante", "Entrenar con el pasado y probar en el futuro, mes por mes, como se usaría en la realidad."],
+    ["Diebold-Mariano", "Prueba de si dos pronósticos tienen errores distintos de verdad o por azar."],
+    ["Banda según volatilidad", "Rango de pronóstico que se ensancha cuando el mercado está agitado y se angosta en calma."],
+    ["Elasticidad", "Cambio porcentual de una variable cuando otra cambia 1 %. Elasticidad de 0.08: un precio 10 % más alto, 0.8 % más área."],
+    ["Efectos fijos por país", "Cada país se compara contra sí mismo: se quita su ritmo propio de crecimiento."],
+    ["Causalidad inversa", "Cuando la flecha va al revés: más producción hace bajar el precio, no al contrario."],
+    ["Prueba de permutación", "Barajar el orden de los años del precio muchas veces para ver qué tan seguido sale el efecto por azar."],
+    ["Instrumento", "Una variable que mueve el precio sin afectar directamente la oferta de otros países. Permitiría medir causalidad; aquí resultó débil."],
+  ];
+  $("gloss").innerHTML = G.map(([t, d]) => `<dt>${t}</dt><dd>${d}</dd>`).join("");
+});
+</script>
+</body>
+</html>
