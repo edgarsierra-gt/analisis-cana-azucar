@@ -1,0 +1,202 @@
+{
+ "paises": 71,
+ "anios_precio": [
+  2000,
+  2023
+ ],
+ "perfil": {
+  "dla": {
+   "coef": {
+    "dlpm1": -0.0224,
+    "dlp0": -0.0019,
+    "dlp1": 0.0133,
+    "dlp2": 0.035,
+    "dlp3": 0.0384,
+    "dlp4": 0.0168
+   },
+   "p": {
+    "dlpm1": 0.0113,
+    "dlp0": 0.8509,
+    "dlp1": 0.1784,
+    "dlp2": 0.0,
+    "dlp3": 0.0001,
+    "dlp4": 0.0179
+   }
+  },
+  "dlq": {
+   "coef": {
+    "dlpm1": -0.0519,
+    "dlp0": -0.0315,
+    "dlp1": 0.0258,
+    "dlp2": 0.0235,
+    "dlp3": 0.0296,
+    "dlp4": 0.0331
+   },
+   "p": {
+    "dlpm1": 0.0016,
+    "dlp0": 0.0276,
+    "dlp1": 0.0615,
+    "dlp2": 0.0596,
+    "dlp3": 0.0351,
+    "dlp4": 0.0299
+   }
+  }
+ },
+ "base": {
+  "dla": {
+   "suma": 0.08116667363860261,
+   "se": 0.025839352432340153,
+   "n": 1420
+  },
+  "dlq": {
+   "suma": 0.08544441260581684,
+   "se": 0.03421180188660009,
+   "n": 1420
+  }
+ },
+ "permutacion": {
+  "Área, 1-3 años": {
+   "suma": 0.08116667363860261,
+   "p_una_cola": 0.054,
+   "p_dos_colas": 0.1,
+   "nulo_p95": 0.0824752321974218
+  },
+  "Área, 1-3 años, con inercia": {
+   "suma": 0.08101874992168237,
+   "p_una_cola": 0.08,
+   "p_dos_colas": 0.1535,
+   "nulo_p95": 0.09201587435154038
+  },
+  "Área, 1-4 años": {
+   "suma": 0.08765413822930629,
+   "p_una_cola": 0.11,
+   "p_dos_colas": 0.215,
+   "nulo_p95": 0.10772785833403448
+  },
+  "Producción, 1-3 años, con inercia": {
+   "suma": 0.06951408889454326,
+   "p_una_cola": 0.1235,
+   "p_dos_colas": 0.26,
+   "nulo_p95": 0.10006451188029182
+  },
+  "Área ponderada por tamaño, con inercia (exploratorio)": {
+   "suma": 0.16993532945498158,
+   "p_una_cola": 0.0135,
+   "p_dos_colas": 0.0265,
+   "nulo_p95": 0.12880584025837521
+  }
+ },
+ "jackknife": [
+  0.06596519520437023,
+  0.0964987073115188
+ ],
+ "ardl": {
+  "simple (−1 a 4)": {
+   "coef": {
+    "dlpm1": -0.0224,
+    "dlp0": -0.0019,
+    "dlp1": 0.0133,
+    "dlp2": 0.035,
+    "dlp3": 0.0384,
+    "dlp4": 0.0168
+   },
+   "p": {
+    "dlpm1": 0.0113,
+    "dlp0": 0.8509,
+    "dlp1": 0.1784,
+    "dlp2": 0.0,
+    "dlp3": 0.0001,
+    "dlp4": 0.0179
+   },
+   "anios": 18
+  },
+  "con inercia (−1 a 4)": {
+   "coef": {
+    "dlpm1": -0.0245,
+    "dlp0": -0.0012,
+    "dlp1": 0.0092,
+    "dlp2": 0.0376,
+    "dlp3": 0.0428,
+    "dlp4": 0.0275
+   },
+   "p": {
+    "dlpm1": 0.0053,
+    "dlp0": 0.9003,
+    "dlp1": 0.3516,
+    "dlp2": 0.0,
+    "dlp3": 0.0,
+    "dlp4": 0.0006
+   },
+   "anios": 18
+  },
+  "con inercia (−1 a 3)": {
+   "coef": {
+    "dlpm1": -0.0131,
+    "dlp0": -0.0096,
+    "dlp1": 0.0091,
+    "dlp2": 0.0318,
+    "dlp3": 0.0458
+   },
+   "p": {
+    "dlpm1": 0.1878,
+    "dlp0": 0.3481,
+    "dlp1": 0.4353,
+    "dlp2": 0.0002,
+    "dlp3": 0.0002
+   },
+   "anios": 19
+  }
+ },
+ "robustez": {
+  "Con inercia (71 países, error agrupado por año)": {
+   "1 año": 0.0118,
+   "2 años": 0.0193,
+   "3 años": 0.0499,
+   "acumulada": 0.081,
+   "error": 0.0259,
+   "n": 1420.0
+  },
+  "Con inercia, error Driscoll-Kraay": {
+   "1 año": 0.0118,
+   "2 años": 0.0193,
+   "3 años": 0.0499,
+   "acumulada": 0.081,
+   "error": 0.0273,
+   "n": 1420.0
+  },
+  "Con inercia, solo datos oficiales": {
+   "1 año": 0.0022,
+   "2 años": 0.0291,
+   "3 años": 0.0661,
+   "acumulada": 0.0974,
+   "error": 0.04,
+   "n": 848.0
+  },
+  "Con inercia, sin Brasil, India, China y Tailandia": {
+   "1 año": 0.0121,
+   "2 años": 0.0104,
+   "3 años": 0.048,
+   "acumulada": 0.0705,
+   "error": 0.0259,
+   "n": 1340.0
+  },
+  "Con inercia, ponderado por área (exploratorio)": {
+   "1 año": 0.0103,
+   "2 años": 0.0914,
+   "3 años": 0.0682,
+   "acumulada": 0.1699,
+   "error": 0.0412,
+   "n": 1420.0
+  },
+  "Agregado mundial (1 serie, 20 años, HAC)": {
+   "1 año": 0.0187,
+   "2 años": 0.0993,
+   "3 años": 0.066,
+   "acumulada": 0.184,
+   "error": 0.0488,
+   "n": 20.0
+  }
+ },
+ "primera_etapa_F": 0.23315645836235735,
+ "corr_area_mundial_precio_2": 0.7189279990508631
+}
