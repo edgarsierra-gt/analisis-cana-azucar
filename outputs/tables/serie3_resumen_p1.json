@@ -1,0 +1,281 @@
+{
+ "paises_panel": 71,
+ "k": 3,
+ "silueta": {
+  "2": {
+   "silueta": 0.162,
+   "nulo (media)": 0.188,
+   "nulo p95": 0.225,
+   "p": 0.895,
+   "grupo más chico": 35.0
+  },
+  "3": {
+   "silueta": 0.197,
+   "nulo (media)": 0.174,
+   "nulo p95": 0.206,
+   "p": 0.09,
+   "grupo más chico": 6.0
+  },
+  "4": {
+   "silueta": 0.194,
+   "nulo (media)": 0.171,
+   "nulo p95": 0.198,
+   "p": 0.07,
+   "grupo más chico": 6.0
+  },
+  "5": {
+   "silueta": 0.201,
+   "nulo (media)": 0.167,
+   "nulo p95": 0.192,
+   "p": 0.015,
+   "grupo más chico": 5.0
+  },
+  "6": {
+   "silueta": 0.165,
+   "nulo (media)": 0.166,
+   "nulo p95": 0.189,
+   "p": 0.535,
+   "grupo más chico": 6.0
+  }
+ },
+ "estabilidad": {
+  "2": {
+   "ARI mediana": 0.43,
+   "ARI p10": 0.007,
+   "ARI p90": 0.734,
+   "grupo más chico (%)": 49.296
+  },
+  "3": {
+   "ARI mediana": 0.526,
+   "ARI p10": 0.18,
+   "ARI p90": 0.873,
+   "grupo más chico (%)": 8.451
+  },
+  "4": {
+   "ARI mediana": 0.471,
+   "ARI p10": 0.247,
+   "ARI p90": 0.73,
+   "grupo más chico (%)": 8.451
+  },
+  "5": {
+   "ARI mediana": 0.505,
+   "ARI p10": 0.28,
+   "ARI p90": 0.69,
+   "grupo más chico (%)": 7.042
+  },
+  "6": {
+   "ARI mediana": 0.432,
+   "ARI p10": 0.286,
+   "ARI p90": 0.565,
+   "grupo más chico (%)": 8.451
+  }
+ },
+ "ari_ward": 0.752487574577436,
+ "grupos": {
+  "Expansión": [
+   "Argentina",
+   "Australia",
+   "Bolivia (Plurinational State of)",
+   "Brazil",
+   "Cameroon",
+   "China, mainland",
+   "Colombia",
+   "Costa Rica",
+   "Côte d'Ivoire",
+   "Egypt",
+   "El Salvador",
+   "Eswatini",
+   "Guatemala",
+   "Honduras",
+   "India",
+   "Iran (Islamic Republic of)",
+   "Kenya",
+   "Lao People's Democratic Republic",
+   "Malawi",
+   "Mali",
+   "Mexico",
+   "Morocco",
+   "Myanmar",
+   "Nepal",
+   "Nicaragua",
+   "Niger",
+   "Pakistan",
+   "Paraguay",
+   "Senegal",
+   "Sri Lanka",
+   "Sudan",
+   "Thailand",
+   "United Republic of Tanzania",
+   "Viet Nam",
+   "Zambia",
+   "Zimbabwe"
+  ],
+  "Madurez o estancamiento": [
+   "Angola",
+   "Bangladesh",
+   "Belize",
+   "Cambodia",
+   "China, Taiwan Province of",
+   "Congo",
+   "Cuba",
+   "Democratic Republic of the Congo",
+   "Dominican Republic",
+   "Ecuador",
+   "Fiji",
+   "Guinea",
+   "Guyana",
+   "Haiti",
+   "Indonesia",
+   "Jamaica",
+   "Japan",
+   "Madagascar",
+   "Mauritius",
+   "Mozambique",
+   "Panama",
+   "Peru",
+   "Philippines",
+   "Somalia",
+   "South Africa",
+   "Uganda",
+   "United States of America",
+   "Uruguay",
+   "Venezuela (Bolivarian Republic of)"
+  ],
+  "Rendimiento muy bajo o datos dudosos": [
+   "Ethiopia",
+   "Ghana",
+   "Liberia",
+   "Nigeria",
+   "Papua New Guinea",
+   "Rwanda"
+  ]
+ },
+ "perfil": {
+  "Rendimiento muy bajo o datos dudosos": {
+   "crec_area": 3.442,
+   "crec_rend": -0.889,
+   "rend_rel": -1.132,
+   "giro_area": -0.685,
+   "giro_rend": -2.7,
+   "inestab": 2.553,
+   "rend_2014_2023": 21.04,
+   "crec_prod": 2.766,
+   "países": 6
+  },
+  "Expansión": {
+   "crec_area": 2.518,
+   "crec_rend": 0.852,
+   "rend_rel": 0.162,
+   "giro_area": -1.78,
+   "giro_rend": -0.71,
+   "inestab": 6.03,
+   "rend_2014_2023": 75.622,
+   "crec_prod": 2.917,
+   "países": 36
+  },
+  "Madurez o estancamiento": {
+   "crec_area": 0.317,
+   "crec_rend": -0.314,
+   "rend_rel": -0.137,
+   "giro_area": -1.541,
+   "giro_rend": 0.835,
+   "inestab": 8.819,
+   "rend_2014_2023": 56.095,
+   "crec_prod": 0.456,
+   "países": 29
+  }
+ },
+ "guatemala": {
+  "grupo": "Expansión",
+  "descriptores": {
+   "crec_area": 3.97,
+   "crec_rend": 0.857,
+   "rend_rel": 0.583,
+   "giro_area": -1.851,
+   "giro_rend": -0.733,
+   "inestab": 8.214,
+   "rend_2014_2023": 115.186,
+   "crec_prod": 4.827
+  },
+  "posicion": {
+   "crec_area": 8,
+   "crec_rend": 19,
+   "rend_rel": 2,
+   "giro_area": 37,
+   "giro_rend": 44,
+   "inestab": 31
+  },
+  "vecinos_descriptores": {
+   "El Salvador": 1.539,
+   "China, mainland": 1.622,
+   "Brazil": 1.629,
+   "Eswatini": 1.637,
+   "Zambia": 1.681,
+   "Mali": 1.803,
+   "Nicaragua": 1.806,
+   "Australia": 1.866,
+   "Paraguay": 1.893,
+   "Egypt": 1.901
+  },
+  "vecinos_trayectoria": {
+   "Eswatini": 1.775,
+   "El Salvador": 2.174,
+   "Malawi": 2.245,
+   "Kenya": 2.306,
+   "Zimbabwe": 2.389,
+   "Nicaragua": 2.642,
+   "Brazil": 2.783,
+   "Senegal": 2.812,
+   "Egypt": 2.837,
+   "Sudan": 2.892
+  },
+  "pares": [
+   "El Salvador",
+   "Eswatini",
+   "Brazil",
+   "Nicaragua",
+   "Egypt"
+  ],
+  "pares_sin_dudosos": [
+   "El Salvador",
+   "Eswatini",
+   "Brazil",
+   "Egypt",
+   "Nicaragua",
+   "Australia"
+  ]
+ },
+ "poco_confiables": [
+  "Ghana",
+  "Liberia",
+  "Guinea",
+  "Papua New Guinea",
+  "Uganda",
+  "Senegal",
+  "Rwanda",
+  "Angola",
+  "Haiti",
+  "Cameroon",
+  "Congo",
+  "Mali"
+ ],
+ "huecos_reporte": [
+  "Saint Lucia",
+  "Yemen",
+  "Antigua and Barbuda",
+  "Saint Vincent and the Grenadines",
+  "Singapore",
+  "Syrian Arab Republic",
+  "Lebanon",
+  "Puerto Rico",
+  "Saint Kitts and Nevis",
+  "French Guiana",
+  "Guadeloupe",
+  "Réunion",
+  "Martinique",
+  "Trinidad and Tobago",
+  "Portugal",
+  "Iraq",
+  "Spain"
+ ]
+}
