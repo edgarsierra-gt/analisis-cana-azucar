@@ -26,7 +26,7 @@ def post(ruta, **cuerpo):
 
 # ----------------------------------------------------------------------------- general
 def test_salud():
-    assert cliente.get("/salud").json() == {"estado": "ok", "version": "1.0.0", "variedades_ciclo": 23,
+    assert cliente.get("/salud").json() == {"estado": "ok", "version": "1.1.0", "variedades_ciclo": 23,
                                             "variedades_pronostico": 40, "grupos": 5}
 
 
