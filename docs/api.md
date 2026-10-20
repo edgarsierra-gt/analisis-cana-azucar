@@ -1,13 +1,16 @@
-# API de campo (Serie IV)
+# API de la prueba (Serie IV)
 
 ## Qué es
 
-Un servicio web que responde las cuatro preguntas de la Serie I con una consulta. Otro sistema (una hoja de cálculo,
-una aplicación web, un chatbot o un flujo automático) le manda datos en JSON y recibe la respuesta en JSON.
+Un servicio web que responde con una consulta las preguntas de la Serie I (campo) y parte de las Series II
+(caldera) y III (mercado). Otro sistema (una hoja de cálculo, una aplicación web, un chatbot o un flujo automático) le
+manda datos en JSON y recibe la respuesta en JSON.
 
-- **Qué pregunta responde cada consulta:** qué variedades ampliar y cada cuántos cortes renovar (pregunta 1), cuánto
-  azúcar esperar (pregunta 2), a qué grupo pertenece una variedad (pregunta 3) y qué lotes se renuevan antes o después
-  de tiempo (pregunta 4).
+- **Qué pregunta responde cada consulta:**
+  - campo: qué variedades ampliar y cada cuántos cortes renovar, cuánto azúcar esperar, a qué grupo pertenece una
+    variedad y qué lotes se renuevan antes o después de tiempo;
+  - caldera: en qué zona de carga opera, cuánto vapor sale según los demás sensores y si un sensor está fallando;
+  - mercado: en qué rango estará el precio del azúcar a 1 y 3 meses.
 - **Cómo funciona:** la API no re-entrena modelos ni lee los datasets. Al arrancar carga los archivos JSON que dejan
   los notebooks (`outputs/models/`) y usa los mismos módulos de `src/` que los notebooks. Por eso sus respuestas
   coinciden con las cifras de los notebooks, y las pruebas automáticas lo comprueban.
@@ -16,7 +19,7 @@ una aplicación web, un chatbot o un flujo automático) le manda datos en JSON y
 
 ```mermaid
 flowchart LR
-    N["Notebooks 02-05<br/>(análisis)"] -->|guardan| J["JSON en outputs/models<br/>curvas · modelo P2 · segmentos"]
+    N["Notebooks 02-12<br/>(análisis)"] -->|guardan| J["JSON en outputs/models<br/>campo · caldera · mercado"]
     J -->|se cargan al arrancar| A["API FastAPI<br/>api/main.py"]
     S["src/campo_*.py<br/>(mismo código que los notebooks)"] --> A
     A --> W["App web"]
@@ -32,10 +35,13 @@ flowchart LR
 | Presupuestar la zafra | Estimar el azúcar por acre de cada variedad en cada finca, con una banda de error honesta. |
 | Clasificar una variedad nueva | Con sus 4 indicadores contra los testigos, ver a qué grupo se parece. |
 | Auditar renovaciones | Subir el CSV de cosechas y ver qué lotes se renovaron antes o después de tiempo, y qué hacer con los lotes en pie. |
+| Respaldar el medidor de vapor | Si el medidor falla o se sospecha de él, estimar el vapor con los demás sensores. |
+| Separar sensor de proceso | Mandar los últimos minutos y saber si un instrumento se separó de sus pares o si es un evento del hogar. |
+| Presupuestar ventas | Ver el rango de precio a 1 y 3 meses y el rango de ingreso de las toneladas sin fijar. |
 | Alimentar otras herramientas | La app de predicción y el chatbot del sitio web consultan esta misma API; no repiten cálculos. |
 
-**Límite principal:** los modelos se entrenaron con ensayos de Louisiana (2010-2021). Sirven para el método y para
-ordenar variedades; los valores absolutos de otra región saldrán de sus propios datos (pregunta 4).
+**Límite principal:** los datos son públicos y de otros lugares: ensayos de Louisiana (2010-2021), una caldera a carbón
+y el mercado mundial. Sirven para el método; los valores de otra operación saldrán de sus propios datos.
 
 ## Cómo correrla
 
@@ -61,6 +67,11 @@ Todas las cifras de los ejemplos salen de llamar a la API con los artefactos del
 | `POST /campo/segmento` | 3 | 4 indicadores en % contra los testigos | grupo, segundo grupo más cercano y distancias |
 | `POST /campo/auditoria` | 4 | registros de cosecha en JSON | estado de cada ciclo, diagnóstico por lote y decisión para los lotes en pie |
 | `POST /campo/auditoria/csv` | 4 | archivo CSV de cosechas | lo mismo, desde una hoja de cálculo |
+| `GET /caldera/sensores` | II · 1 | — | los 30 sensores con nombre, unidad, estado y tratamiento |
+| `POST /caldera/modo` | II · 2 | promedios de 5 min de 9 variables | zona de carga y distancia a cada zona |
+| `POST /caldera/vapor-virtual` | II · 3 | al menos 10 minutos de promedios de 1 min | vapor estimado, banda de 90 % y comparación con el medido |
+| `POST /caldera/verificar` | II · 4 | 1 a 120 minutos de promedios de 1 min | z de los 12 chequeos, alarmas y diagnóstico |
+| `GET /mercado/pronostico?h=1` | III · 3 | horizonte (1 o 3) y, opcional, toneladas | centro y bandas de 80 % y 95 % en ¢/lb, % y US$/t |
 
 ### Pregunta 1 · `GET /campo/variedades`
 
@@ -172,15 +183,119 @@ Ejemplo: un lote que renovó CG02-163 después de 2 cortes y lleva 4 cortes de C
 mismo lote (US$/ha). Sin la columna `corte` la API igual responde, pero no detecta las renovaciones que repiten
 variedad.
 
+## Caldera (Serie II)
+
+Las entradas son promedios de 1 min (o de 5 min para el modo), como en los notebooks; los nombres de campo son los
+tags de la caldera (`PTCA_8322A`, `TE_8332A`...) o las variables derivadas del notebook 08 (`presion_hogar`, `lecho`,
+`o2`, `t_gases`, `retorno_total`). La API no guarda estado: quien la llama manda la ventana de minutos que hace falta.
+
+### `GET /caldera/sensores`
+
+El diccionario corregido del notebook 06: nombre en español, unidad inferida, grupo, cada cuánto se actualiza (5 o
+10 s), estado y tratamiento. Marca los dos sensores que quedan fuera de los modelos (`SXLTCYZ` y `YFJ3_ZD2`).
+
+### `POST /caldera/modo`
+
+```json
+{"vapor": 60.47, "aire_total": 67678.6, "frac_primario": 0.7, "o2": 1.78, "t_hogar": 775.56, "lecho": 10687.39,
+ "agua_atemp": 2.79, "t_vapor": 538.23, "t_gases": 365.98}
+```
+
+```json
+{"modo": "Carga media", "distancias": {"Carga media": 2.091, "Carga alta": 2.478, "Carga baja": 3.921}}
+```
+
+No hay modos discretos (notebook 07): son tres zonas de un continuo dominado por la carga. Si dos distancias están
+cerca, la ventana está en el borde entre zonas.
+
+### `POST /caldera/vapor-virtual`
+
+Entrada: `{"minutos": [...]}` con al menos 10 minutos consecutivos, del más antiguo al más reciente. Cada minuto trae
+18 variables; por ejemplo, el último:
+
+```json
+{"PTCA_8322A": 9.691, "PTCA_8324": 9.351, "TE_8313B": 771.866, "TE_8303": 213.499, "TE_8304": 225.017,
+ "TV_8329ZC": 12.522, "FT_8301": 47123.846, "FT_8302": 18743.768, "YFJ3_AI": 22.62, "YFJ3_ZD1": 5.929,
+ "SXLTCYY": -345.106, "YJJWSLL": 2.732, "TE_8332A": 535.816, "presion_hogar": -160.557, "lecho": 10390.36,
+ "o2": 2.174, "t_gases": 376.258, "retorno_total": 1329.331, "ZZQBCHLL": 60.526}
+```
+
+```json
+{
+  "vapor_t_h": 60.71, "banda_90_t_h": [60.35, 61.08], "error_tipico_t_h": 0.18,
+  "otras_estimaciones": {"hidraulico_una_variable": 60.95, "formula_dos_variables": 60.78},
+  "vapor_medido_t_h": 60.53, "medido_menos_estimado_t_h": -0.19
+}
+```
+
+- Usa el Ridge final del notebook 08: valor actual, rezagos de 1, 2 y 5 min y media de 10 min de cada variable. La
+  caída de presión domo → colector (`raiz_dp_rho`) la calcula la API con `PTCA_8322A`, `PTCA_8324` y `TE_8332A`.
+- **Nunca usa el vapor medido.** `ZZQBCHLL` es opcional y solo sirve para compararlo.
+- `otras_estimaciones` trae la fórmula hidráulica de una variable y la de dos variables, que caben en una pizarra.
+
+### `POST /caldera/verificar`
+
+Entrada: `{"minutos": [...], "retorno_confirmado": true}`, con 1 a 120 minutos. Cada minuto trae las 6 presiones de
+hogar, los pares izquierda-derecha (O₂, lecho, gases, aire de retorno), el vapor medido, el agua de atemperación, la
+válvula y las dos presiones y la temperatura del vapor.
+
+Ejemplo: 6 minutos con el medidor de vapor 3 t/h arriba de lo real.
+
+```json
+{
+  "diagnostico": "sensor: Vapor medido − virtual",
+  "chequeos_en_alarma": ["Vapor medido − virtual"],
+  "chequeos": {
+    "Vapor medido − virtual": {"z": 11.8, "umbral_z": 5, "minutos_seguidos_fuera": 6, "alarma": true,
+                               "falla_minima_detectable": 1.323},
+    "PT_8313C": {"z": -1.21, "umbral_z": 5, "minutos_seguidos_fuera": 0, "alarma": false,
+                 "falla_minima_detectable": 63.418}
+  }
+}
+```
+
+- Los 12 chequeos del notebook 09: cada presión de hogar contra la mediana de las otras 5; O₂, lecho, gases y aire de
+  retorno izquierda contra derecha; vapor medido contra la fórmula de dos variables; y agua contra la apertura de la
+  válvula.
+- **Alarma** cuando un chequeo lleva 5 minutos seguidos fuera de su umbral (persistencia).
+- **Diagnóstico:** si alarman dos o más presiones de hogar y nada más, es un evento del hogar (proceso), no sensores
+  dañados. Si alarma otro chequeo, es ese sensor.
+- `retorno_confirmado` usa el centro del aire de retorno después de la redistribución confirmada del 30/03 (la
+  operación vigente).
+- Las fallas de proceso o equipo las detecta el monitor PCA del notebook 09, que no está en la API: necesita 24 h de
+  historia.
+
+## Mercado (Serie III)
+
+### `GET /mercado/pronostico?h=3&toneladas=10000`
+
+```json
+{
+  "horizonte_meses": 3, "mes_objetivo": "agosto 2024", "fecha_ultimo_cierre": "2024-05-31",
+  "centro_centavos_lb": 18.3,
+  "bandas_centavos_lb": {"80": [15.73, 21.32], "95": [14.52, 22.64]},
+  "bandas_pct": {"80": [-14.0, 16.5], "95": [-20.6, 23.7]},
+  "centro_usd_t": 403.4, "bandas_usd_t": {"80": [346.9, 470.1], "95": [320.2, 499.1]},
+  "ingreso_usd": {"toneladas": 10000.0, "centro": 4034454, "80": [3468669, 4700980], "95": [3202035, 4991044]}
+}
+```
+
+- El centro es el último cierre: ningún modelo probado le ganó a 1 ni a 3 meses (notebook 12).
+- Las bandas son los cuantiles de los errores pasados, medidos en unidades de la volatilidad de 3 meses × √h. Por
+  eso se ensanchan cuando el mercado está agitado.
+- Es el pronóstico con los datos de la prueba (último cierre del 31/05/2024). Para actualizarlo hay que volver a correr
+  el notebook 12 con datos nuevos.
+- Precio No. 11 sin primas, flete ni tipo de cambio; 1 ¢/lb = US$22.05 por tonelada.
+
 ## Validación de entradas y errores
 
 Cada campo tiene un rango físico o económico plausible (por ejemplo, precio entre US$0.05 y 1.00/lb, corte de 0 a 4,
-TCH entre 0 y 400). Una entrada fuera de rango, una variedad o finca desconocida, o un CSV sin las columnas necesarias
+TCH entre 0 y 400, presión del domo entre 0 y 20 MPa: una presión en kPa se rechaza). Una entrada fuera de rango, una variedad o finca desconocida, o un CSV sin las columnas necesarias
 devuelven **422** con un mensaje en español que dice qué corregir.
 
 ## Cómo se verificó
 
-`tests/test_api.py` llama a la API y comprueba las cifras de control de la Serie I:
+`tests/test_api.py` y `tests/test_api_caldera_mercado.py` llaman a la API y comprueban las cifras de los notebooks:
 
 | Pregunta | Qué se comprueba |
 |---|---|
@@ -188,7 +303,14 @@ devuelven **422** con un mensaje en español que dice qué corregir.
 | 2 | las 509 predicciones de 2022 del notebook 03 (467 lotes + 42 plantías) con diferencia ≤ 1 lb/acre |
 | 3 | el 100 % de las 23 asignaciones del notebook 04 |
 | 4 | la auditoría de la API es igual a la de pandas y clasifica bien 1,143 de 1,143 ciclos; el CSV da lo mismo que el JSON |
+| II · 2 | el 100 % de las 1,441 ventanas de 5 min del notebook 07 |
+| II · 3 | 171 minutos con 10 minutos de historia: el vapor estimado es igual al Ridge final del notebook 08 (≤ 0.006 t/h, por redondeo) |
+| II · 4 | el z de los 12 chequeos es igual al de `src/fabrica_anomalias` (el código del notebook 09) en 180 minutos; operación normal sin alarmas; una presión desplazada alarma solo con 5 minutos seguidos; tres presiones a la vez son un evento del hogar; una deriva de 3 t/h del medidor la señala el chequeo de vapor |
+| III · 3 | las bandas de 80 % y 95 % a 1 y 3 meses iguales a las del notebook 12 (≤ 0.02 ¢/lb); −6 % a +7 % y −14 % a +17 % como en el README |
 | todas | entradas inválidas devuelven 422 |
 
+Las muestras de la caldera las exportan los notebooks 07 y 08 (`outputs/tables/serie2_muestra_api_modos.csv` y
+`serie2_muestra_api_vapor.csv`), así que las pruebas no necesitan los datasets.
+
 `tests/test_esquema_postgres.py` comprueba además que la auditoría hecha en PostgreSQL es igual a la de pandas.
-La última corrida dentro de Docker (API + PostgreSQL 16) quedó en `outputs/tests/pytest_docker.txt`: 52 pruebas aprobadas.
+La última corrida dentro de Docker (API + PostgreSQL 16) quedó en `outputs/tests/pytest_docker.txt`: 67 pruebas aprobadas.

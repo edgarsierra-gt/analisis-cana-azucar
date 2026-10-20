@@ -33,7 +33,7 @@ lo que hizo la IA, cómo lo verifiqué y qué sugerencias o errores suyos correg
 | III · Mercado | Serie de precio ajustada por cambio de contrato (D58) | la mitad de las colas pesadas eran saltos de contrato |
 | III · Mercado | Último cierre como pronóstico central y banda según volatilidad (D61) | ningún modelo probado le gana; el valor está en el rango |
 | III · Mercado | Permutación de los años del precio como prueba principal de la oferta (D62) | solo hay 20 años de precio; los errores agrupados prometían de más |
-| IV · API | La API lee artefactos JSON y sus pruebas reproducen las cifras de control (D63, D70) | sin pickles ni datasets, y comprobable |
+| IV · API | La API lee artefactos JSON de las tres series y sus pruebas reproducen las cifras de los notebooks (D63, D70, D76) | sin pickles ni datasets, y comprobable |
 
 **Hipótesis que descarté** (24 en total; las principales):
 
@@ -46,7 +46,7 @@ lo que hizo la IA, cómo lo verifiqué y qué sugerencias o errores suyos correg
 | Un ARIMA pronostica mejor que el ingenuo (H22) | solo contra el ingenuo equivocado; contra el último cierre es 28 % peor |
 | El área no responde al precio (H24) | sí, con 2-3 años de rezago, pero poco (~0.08) y con evidencia causal débil |
 
-**Uso de IA en números.** 71 decisiones y 24 hipótesis descartadas. Corregí 32 errores de fondo de la IA (método,
+**Uso de IA en números.** 77 decisiones y 24 hipótesis descartadas. Corregí 32 errores de fondo de la IA (método,
 cálculo o afirmaciones sin respaldo), agrupé por serie las correcciones menores de texto, redondeo y figuras, y descarté
 3 sugerencias suyas. Al cerrar cada serie de análisis pedí una revisión independiente de cifras a un agente separado y
 corregí todo lo que encontró. Cada serie se volvió a correr desde cero en Windows antes de su commit, y sus cifras de
@@ -1003,6 +1003,41 @@ ciclo, margen, ganancia y precio de equilibrio de las 23 variedades; 509 predicc
 100 % de asignaciones; 1,143/1,143 ciclos y auditoría igual a pandas; CSV igual a JSON), las cifras de los ejemplos de
 `docs/api.md` y que las entradas inválidas devuelvan 422.
 
+**D71. La API suma la caldera y el mercado** (versión 1.1.0): `GET /caldera/sensores`, `POST /caldera/modo`,
+`POST /caldera/vapor-virtual`, `POST /caldera/verificar` y `GET /mercado/pronostico`. Elegí lo que una persona de
+planta o de comercialización consultaría en el momento. Dejé fuera el monitor PCA del notebook 09, porque necesita 24 h
+de historia y se reentrena cada hora (en producción sería un servicio programado), y el detector de sensor congelado,
+que trabaja con muestras de 5 s.
+
+**D72. La API de la caldera no guarda estado.** Recibe promedios de 1 min, como los notebooks, y quien la llama manda
+la ventana que hace falta: al menos 10 minutos para el vapor (el Ridge usa rezagos de 1, 2 y 5 min y la media de
+10 min) y 5 o más para que la verificación aplique la persistencia. Los campos son los tags de la caldera y las
+variables derivadas del notebook 08 (`presion_hogar`, `lecho`, `o2`, `t_gases`, `retorno_total`); la caída de presión
+`raiz_dp_rho` la calcula la API. El sensor virtual nunca usa el vapor medido: si llega, solo se compara.
+
+**D73. Muestras para las pruebas exportadas por los notebooks 07 y 08.** Sin los datasets no se puede probar contra
+datos reales, así que cada notebook guarda una muestra junto a su JSON: las 1,441 ventanas de 5 min con su modo y las
+últimas 3 h en promedios de 1 min con la predicción del Ridge final y los sensores crudos de la verificación. Son
+promedios, como las demás tablas de `outputs/`. Al volver a correr el notebook 07, `serie2_modos.json` cambió solo en
+la cifra 16 (ruido de punto flotante): conservé la versión ya versionada.
+
+**D74. Verificación igual que el notebook 09.** Los 12 chequeos usan el centro, la escala robusta y el umbral de
+`serie2_verificacion.json`. Un chequeo alarma con 5 minutos seguidos fuera de umbral; si solo alarman dos o más
+presiones de hogar, es un evento del hogar. Por defecto uso el centro del aire de retorno después de la
+redistribución confirmada del 30/03, que es la operación vigente.
+
+**D75. Pronóstico del precio:** centro = último cierre y banda = exp(log(cierre) + z · vol_3m · √h), con los
+cuantiles de `serie3_pronostico.json`. Si se mandan toneladas, devuelve el rango de ingreso (1 ¢/lb = US$22.05/t). El
+JSON es del 31/05/2024; actualizarlo pide volver a correr el notebook 12.
+
+**D76. Pruebas de caldera y mercado** (`tests/test_api_caldera_mercado.py`): el 100 % de las 1,441 ventanas de modo;
+el Ridge final en 171 minutos (≤ 0.006 t/h, por redondeo de la salida); el z de los 12 chequeos igual al de
+`src/fabrica_anomalias` en 180 minutos; fallas inyectadas (una presión desplazada alarma solo con 5 minutos seguidos,
+tres presiones a la vez son un evento del hogar, una deriva de 3 t/h la señala el chequeo de vapor); las bandas del
+notebook 12 (≤ 0.02 ¢/lb); y las cifras de los ejemplos de `docs/api.md`. Para que la comparación con
+`src/fabrica_anomalias` corra también en Docker, la imagen suma scikit-learn: pasa de 448 a 723 MB. Dentro de Docker
+pasan las 67 pruebas (62 de la API y 5 del esquema SQL).
+
 ### Uso de IA
 
 - **Qué hizo:** escribió el código de la API, las pruebas, el Docker y la documentación según mi diseño de endpoints
@@ -1012,5 +1047,7 @@ ciclo, margen, ganancia y precio de equilibrio de las 23 variedades; 509 predicc
 - **Errores de fondo de la IA que corregí:**
   1. La primera versión de la prueba de las 509 predicciones mandaba la ventaja del lote como `NaN` en los 8 lotes que
      no la tienen, y fallaba. Ahora se manda como "sin dato", igual que la calculadora del HTML.
-- **Correcciones menores:** las decisiones de la auditoría salían con 10 decimales (ahora 2), y Docker Compose tomaba
-  el nombre del proyecto de la carpeta local, con contenedores de nombre no neutro (ahora `name: analisis-cana`).
+- **Correcciones menores:** las decisiones de la auditoría salían con 10 decimales (ahora 2); Docker Compose tomaba
+  el nombre del proyecto de la carpeta local, con contenedores de nombre no neutro (ahora `name: analisis-cana`); una
+  prueba redondeaba +16.5 % a 16 con `round()` de Python, que redondea al par (ahora redondeo convencional, 17, como en
+  el README); y la prueba de verificación no corría en Docker porque la imagen no traía scikit-learn (D76).
