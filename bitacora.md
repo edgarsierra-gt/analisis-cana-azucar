@@ -481,36 +481,235 @@ La prueba del esquema contra PostgreSQL se omite sin `CAMPO_PG_DSN`; su última 
 
 ---
 
+## Serie II · Fábrica — Caldera (`notebooks/06` a `09`)
+
+Contexto: caldera de lecho fluidizado circulante (CFB) a carbón de una planta química en Zhejiang, China (Cao et al.,
+2025, *A long-tailed distribution time-series dataset in boiler equipment*, Springer Nature/figshare). Son 30
+sensores cada 5 s durante 5 días (27/03 al 01/04/2022). El ingenio usa calderas de bagazo: traslado el método, no los
+valores.
+
+### Decisiones
+
+**D42. Archivo base: `data.csv`.** `data_AutoReg.csv` es idéntico salvo 30 valores imputados del agua de atemperación
+(`YJJWSLL`) en dos huecos. El relleno autorregresivo prolonga la tendencia: en el segundo hueco sigue en ~2 t/h y el
+dato real siguiente es 3.9 t/h. Dejo los 30 faltantes como faltantes (0.03 % de un sensor).
+
+**D43. Diccionario corregido con unidades inferidas** (`serie2_sensores.json`). `columns.csv` tiene estos problemas:
+- el encabezado anuncia 3 columnas y cada fila trae 2;
+- no tiene unidades;
+- los nombres y el orden no coinciden con los datos;
+- hay traducciones confusas: "Pot pressure" es el domo y `TV_8329ZC` es una válvula (%), no una temperatura.
+
+Inferí las unidades de las magnitudes de una CFB típica de 75 t/h, 9.8 MPa y 540 °C. La de vibración (mm/s o µm) queda
+sin confirmar.
+
+**D44. Resolución de análisis ≥ 10 s.** El reloj es perfecto (86,400 filas a 5 s), señal de que el archivo fue
+remuestreado. Cinco sensores cambian solo en filas pares, es decir, cada 10 s: `ZZQBCHLL` (el objetivo de la
+pregunta 3), `ZCLCCY`, `YCLCCY`, `SXLTCYZ` y `SXLTCYY`. Los modelos usan promedios de 1 min.
+
+**D45. Redundancia:**
+- Las seis presiones de hogar forman dos familias (A-B-C y D-E-F; D, E y F con r ≥ 0.996) con desplazamientos fijos
+  de hasta ~40 Pa. En los modelos entra su mediana; conservo los seis individuales para detectar fallas.
+- Los pares izquierda-derecha coherentes (lecho, O₂, gases) entran promediados.
+- **`SXLTCYZ` queda fuera de los modelos:** un diferencial de presión que copia la presión de hogar (r = 0.99, a
+  ~12 Pa), mientras su gemelo derecho no se le parece (r = 0.14). Lo más probable es una toma inferior tapada o un tag
+  mal asignado.
+- **`YFJ3_ZD2` queda fuera de los modelos:** no se relaciona con nada (|r| ≤ 0.24) y su ruido es 4 veces el de su par
+  ZD1, que sí sigue la carga del ventilador.
+
+**D46. Los picos de la corriente del tiro inducido son físicos y los conservo.** Son ~70 por día, de ~5 A y una
+muestra. La corriente sube cuando la presión del hogar está alta (−139 Pa contra −155 en promedio) y baja cuando está
+baja (−200 Pa). Justo después, la presión cambia 2.7 veces más rápido que en un momento cualquiera. Es la respuesta del
+control de tiro.
+
+**D47. Regímenes (pregunta 2):**
+- **Prueba de modos separados:** comparo la silueta de k-means contra una nube gaussiana con la misma correlación.
+  Con k = 2 no la supera; con k ≥ 3 apenas (0.01-0.03).
+- **Número de modos:** remuestreo bloques de 2 h (100 réplicas). La regla de la Serie I (el más reproducible entre
+  3 y 6, sin modos menores al 5 %) da **k = 3**: tres zonas de carga, ARI 0.71.
+- **Eje de operación a igual carga:** residuos contra la carga y su primer componente.
+  - Los minutos con más O₂ y más atemperación tienen el vapor ~7 °C más frío. Es descriptivo y en parte sale por
+    construcción, porque la temperatura del vapor pesa en el eje.
+  - En cambios de 1 min, la atemperación enfría el vapor ~5 min después (r = −0.39).
+  - El efecto propio del O₂ en niveles no se distingue de cero.
+- **Ciclo del lecho:** 17 ciclos de llenado (~5.4 h; de 2.6 a 9.7 h) y descarga (~1.5 h).
+
+**D48. Sensor virtual (pregunta 3):**
+- **Datos y validación:** promedios de 1 min. Validación hacia adelante por día (4 pliegues), con 30 min de
+  separación entre entrenamiento y prueba. Nunca uso el propio vapor rezagado: el sensor virtual tiene que funcionar
+  cuando el medidor falla.
+- **Elegido: Ridge completo** (MAE 0.18 t/h, 0.30 %, R² 0.99). Le gana al modelo hidráulico de una variable,
+  Q = a + b·√(ΔP·ρ) (0.33 t/h), y al gradient boosting (0.28 t/h); ambas diferencias son significativas por bootstrap
+  de bloques de 1 h.
+- **Modelo físico de dos variables** (presión y agua de atemperación, coeficiente ≈ 1.2): 0.23 t/h.
+- **Respaldo sin presiones de vapor:** 0.69 t/h.
+
+**D49. El aire de retorno entra como total, no como izquierda y derecha.** Tras la redistribución del 30/03 cada lado
+por separado cambia de significado. El total se conserva (1,324 → 1,315 Nm³/h).
+
+**D50. Anomalías (pregunta 4), en tres capas:**
+- **Siete reglas físicas** con persistencia, cada 5 s.
+- **Verificación de sensores** por pares y por física, con z robusto. El umbral de cada chequeo es el menor de
+  5/6/7/8/10 que no alarma en los 2 días de referencia; persistencia de 5 min y apagado tras 15.
+- **Monitor de proceso:** PCA reentrenada cada hora con las últimas 24 h, con T² y SPE al percentil 99.9. Los minutos
+  en alarma no entran a la referencia siguiente.
+- **Confirmación del operador:** un cambio deliberado confirmado, como la redistribución del aire de retorno, pausa
+  su chequeo 2 h y lo recentra con la mediana de esas 2 h.
+- **Varias presiones a la vez:** si saltan dos o más chequeos de presión de hogar al mismo tiempo, es un evento del
+  hogar, no varios sensores dañados.
+- **Sensor congelado:** se detecta solo con el pasado (muestras repetidas hasta ese momento), en ~1 min.
+
+**D51. Diagnóstico de sensor contra equipo.** Si salta un chequeo de verificación (o un sensor congelado), es sensor.
+Si no, y salta el monitor o una regla, es proceso o equipo. Lo probé con 5 fallas inyectadas (4 de sensor y 1 de
+equipo, esta última con efectos físicamente coherentes): 5 de 5 bien clasificadas.
+
+**D52. Eficiencia (pregunta 5):**
+- **Supuestos explícitos** en `SupuestosCaldera`, con tablas de vapor IAPWS-97.
+- **Limpieza de superficies:** la temperatura de gases hace un serrucho de ~8 h con caídas de ~14 °C, y su base sube
+  ~2 °C/día.
+  - El serrucho es compatible con ensuciamiento y soplado, pero sus picos siguen ~1.6 h al inicio de las descargas
+    del lecho (p ≈ 0.01). Sin registro de soplados, la causa es hipótesis.
+  - Si es ensuciamiento, recuperar la deriva vale 0.1-0.3 puntos de eficiencia, unos US$10-23 mil al año. Solo varié
+    la fracción del calor que llega a la chimenea (±40 %).
+- **Exceso de aire:** menos de 0.1 punto.
+- **Temperatura del vapor:** su valor está en la turbina; no se puede cuantificar con estos datos.
+
+### Hipótesis descartadas
+
+**H12. "`data_AutoReg.csv` es una versión mejorada de los datos."** No: inventa 30 valores y falla justo en el escalón.
+
+**H13. "Los picos de 1 muestra en la corriente del tiro son errores de transmisión."** No: son la respuesta del
+control de tiro a golpes de presión (D46).
+
+**H14. "La caldera tiene modos de operación discretos."** No en estos 5 días. Hay un continuo dominado por la carga
+(un componente explica el 46 %) y un solo ciclo discreto, el del lecho.
+
+**H15. "Un modelo no lineal estima mejor el vapor."** No: el gradient boosting recibe la misma variable física y queda
+0.1 t/h peor que el Ridge. La relación es lineal en la variable física correcta.
+
+**H16. "Una validación cruzada al azar sirve para series de tiempo."** No: subestima el error entre 17 % y 51 %. El
+boosting es el más engañado.
+
+**H17. "Bajar el exceso de aire es la gran oportunidad."** No en esta caldera: ya opera con ~2.1 % de O₂ y el ahorro
+es menor a 0.1 punto. En calderas de bagazo, con más exceso de aire, sí puede serlo.
+
+### Hallazgos para la Gerencia Industrial
+
+- **La caída de presión del sobrecalentador ya es un medidor de flujo:** con ella sola el vapor se estima con 0.5 % de
+  error.
+- **La redundancia de sensores permite separar un sensor dañado de un problema real.** Donde hay un solo sensor
+  crítico, esa distinción no existe.
+- **La atemperación pasó 12 h fija** (17 tramos de 30 min o más) y el vapor estuvo 27 % del tiempo bajo 535 °C.
+- **Una deriva del medidor de vapor se detecta desde ~1.3 t/h sostenida (~2 %);** en la prueba, a las 1.7 h con
+  ~0.9 t/h.
+- **El lecho se descarga cada ~7 h sin afectar la producción.** Los picos de temperatura de gases ocurren ~1.6 h
+  después de iniciar la descarga (p ≈ 0.01): o la limpieza va en la misma rutina del turno, o el ciclo del lecho
+  mueve la temperatura de gases.
+
+### Uso de IA
+
+- **Qué hizo:** implementó la auditoría de sensores, las pruebas de regímenes, el sensor virtual, las tres capas de
+  anomalías con inyección de fallas y el cálculo de eficiencia con IAPWS-97 según mi diseño, y redactó borradores de
+  los notebooks y del HTML.
+- **Cómo lo verifiqué:** comparé cada cifra del texto contra la salida de los notebooks. Los JSON se verifican solos
+  (07: 100 % de los modos; 08: Ridge con diferencia 0 en 7,182 minutos).
+- **Errores de la IA que corregí:**
+  1. El primer plan trataba los picos de corriente del tiro como errores y los reemplazaba por la mediana. Al mirar la
+     presión del hogar alrededor de cada pico apareció la respuesta del control. Los conservo (D46).
+  2. El primer filtro de picos (Hampel con desvío local) marcaba miles de puntos en sensores cuantizados, donde el
+     desvío local vale 0. Lo cambié a desvío global del residuo y solo eventos de 1-2 muestras.
+  3. La importancia por variable del modelo de combustión ponía primero al aire de retorno izquierdo y derecho. Era un
+     artefacto del par en espejo tras la redistribución: quitar los dos no costaba nada. Uso el total (D49), y la
+     importancia se mide por mecanismo físico.
+  4. Los coeficientes por rezago del Ridge eran ilegibles por colinealidad. Los reemplacé por una ablación de rezagos:
+     1-2 min bajan el error en ~0.08 t/h, y más atrás no agrega.
+  5. La primera comparación con gradient boosting no le daba la variable física, que un árbol no puede formar
+     restando dos columnas. Se la di para que la comparación fuera justa; igual pierde.
+  6. Una PCA fija entrenada con 36 h ponía en alarma el 75 % de los días 3-5, por la deriva de temperaturas y la
+     redistribución. La pasé a ventana móvil de 24 h.
+  7. Con umbral único de 8 desvíos no se detectaban una deriva del 3 % en el vapor ni un sesgo de 0.6 puntos en el
+     O₂. Fijé un umbral por chequeo con la referencia y publico la falla mínima detectable de cada uno.
+  8. El escenario de equipo no lo detectaba el T²: la ventana móvil lo absorbía. Agregué el SPE, excluí de la
+     referencia los minutos en alarma y agregué la regla de O₂ alto.
+  9. Dos escenarios de prueba coincidían con alarmas naturales del monitor, lo que daba detecciones por casualidad. Los
+     moví a ventanas sin alarmas naturales.
+  10. Una exploración previa, con otras semillas, daba k = 4 (ARI 0.67) por encima de k = 3 (0.63). Con las semillas
+      fijas del notebook, k = 3 gana con 60 o con 100 réplicas (0.71-0.72 contra 0.63-0.67); la diferencia está
+      dentro del ruido del bootstrap. Por eso moví el hallazgo del modo ineficiente a un análisis de residuos que no
+      depende de k.
+  11. La deriva de gases se presentó primero como tendencia lineal. El gráfico por hora mostró un serrucho de
+      limpieza; reescribí la oportunidad.
+  12. Corregí cifras redondeadas de más en el texto. Decía "tres veces más rápido" (era 2.7), "el triple de ruido"
+      (era 4.3 veces) y 08:51 en la redistribución (fue ~08:53).
+
+**Revisión independiente de cifras (Serie II).** Pedí a un agente de IA separado comparar cada cifra de los notebooks,
+el README y esta bitácora contra las salidas. Encontró 9 diferencias de fondo y 16 menores; las corregí todas. Las de
+fondo:
+- **El "eje de operación" se presentaba como efecto.** Los ~7 °C entre tercios son descriptivos y en parte salen por
+  construcción. El rezago de la atemperación se había medido sobre niveles autocorrelacionados (r = −0.71 a 6 min);
+  en cambios de 1 min da r = −0.39 a 5 min. El efecto propio del O₂ en niveles no se distingue de cero.
+- **El detector de congelado miraba hacia adelante:** asignaba a cada muestra el largo total de su tramo. Ahora cuenta
+  solo hacia atrás y detecta en ~1 min.
+- **La confirmación del operador usaba las 2 h posteriores al evento desde el minuto 10.** Ahora el chequeo se pausa
+  esas 2 h y se recentra después.
+- **Una alarma en tres presiones de hogar a la vez se leía como "sensores individuales".** Por el propio criterio es
+  un evento del hogar, y ahora así se clasifica.
+- **El serrucho de gases se presentaba como "firma del ensuciamiento"** sin registro de soplados, y con el ciclo del
+  lecho como explicación alternativa. Ahora es hipótesis.
+- **Afirmaciones sin respaldo:**
+  - "Una validación al azar habría elegido el modelo equivocado": el orden no cambia; lo que cambia es el error
+    prometido.
+  - "Detecta derivas de ~1 % en horas": la sensibilidad es ~1.3 t/h (~2 %).
+  - "Intercepto cercano a cero": es −4.9 t/h; la recta vale en el rango observado.
+  - "Supuestos ±50 %": solo se varió la fracción a chimenea, ±40 %.
+  - "Las alertas por zona se prueban en la pregunta 4": no se probaron.
+
+### Integración al repo y corrida en Windows
+
+Trabajé la Serie II en una sesión aparte y la integré al repo con Claude Code. Corrí los notebooks 06→09 y
+`docs/build_serie2_explicacion.py` desde cero en Windows (Python 3.12, `requirements.txt`):
+- Las 15 tablas y JSON salen idénticos a la corrida original (solo los coeficientes del Ridge difieren en la octava
+  cifra significativa, por redondeo) y se regeneran las 15 figuras.
+- Los JSON se verifican solos: 100 % de los modos (07) y Ridge con diferencia 0 en 7,182 minutos (08).
+
+**Errores que corregí al integrar:**
+- Las lecturas y escrituras de JSON no indicaban `encoding="utf-8"`; en Windows fallan, igual que en la Serie I. Lo
+  agregué en los notebooks 06-09.
+- Los notebooks buscaban los datos en `data/raw/`; los moví a `data/raw/serie2/` para que no se mezclen con los de
+  otras series (`data.csv` es un nombre muy genérico).
+
+---
+
 ## Serie IV · API en producción (`api/`, `docs/api.md`)
 
-**D42. La API lee los artefactos JSON; no re-entrena ni usa pickles.** Al arrancar carga `serie1_curvas.json`,
+**D53. La API lee los artefactos JSON; no re-entrena ni usa pickles.** Al arrancar carga `serie1_curvas.json`,
 `serie1_modelo_p2.json` y `serie1_segmentos.json`, y calcula con los mismos módulos de `src/` que los notebooks. Así
 sus respuestas son las cifras de los notebooks y no necesita los datasets.
 *Descartado:* pickles de scikit-learn (dependen de la versión exacta y no se pueden leer) y re-entrenar al arrancar
 (obligaría a llevar los datasets a la imagen).
 
-**D43. Endpoints por pregunta.** `GET /campo/variedades` y `POST /campo/ciclo` (P1), `POST /campo/pronostico` (P2),
+**D54. Endpoints por pregunta.** `GET /campo/variedades` y `POST /campo/ciclo` (P1), `POST /campo/pronostico` (P2),
 `POST /campo/segmento` (P3), `POST /campo/auditoria` y `/campo/auditoria/csv` (P4), más `GET /salud`. Cada respuesta
 trae lo necesario para decidir, no solo el número: ciclo óptimo con el margen de cada ciclo posible, pronóstico con
 banda y desglose, grupo con el segundo más cercano, auditoría con decisión por lote.
 
-**D44. Validación de entradas con rangos plausibles** (pydantic): precio US$0.05-1.00/lb, corte 0-4, TCH 0-400 t/ha,
+**D55. Validación de entradas con rangos plausibles** (pydantic): precio US$0.05-1.00/lb, corte 0-4, TCH 0-400 t/ha,
 etc. Los errores devuelven 422 con un mensaje en español que dice qué corregir. Una variedad sin historia en etapa 5 se
 rechaza: predecirla como si fuera un testigo promedio daría una cifra sin respaldo (es el escenario 3, pendiente).
 
-**D45. Segmento con entradas en %**, como la tabla del notebook 04 (más fácil de llenar que logaritmos); la API las
+**D56. Segmento con entradas en %**, como la tabla del notebook 04 (más fácil de llenar que logaritmos); la API las
 pasa a logaritmo. Con los valores redondeados de la tabla se reproducen las 23 asignaciones; la menor diferencia entre
 el centro más cercano y el segundo es 0.54 desviaciones, así que el redondeo no cambia ninguna. Como no hay grupos
 naturales (D31), la respuesta incluye el segundo grupo y las distancias.
 
-**D46. Pronóstico con la cobertura real de la banda** (74 % en escenario 1, 71 % en escenario 2), no el 80 % nominal
+**D57. Pronóstico con la cobertura real de la banda** (74 % en escenario 1, 71 % en escenario 2), no el 80 % nominal
 (D27). La respuesta da lb/acre y t/ha.
 
-**D47. Auditoría desde JSON o CSV.** El CSV se valida fila por fila con el mismo esquema que el JSON. El óptimo es el
+**D58. Auditoría desde JSON o CSV.** El CSV se valida fila por fila con el mismo esquema que el JSON. El óptimo es el
 del testigo con los supuestos en unidades métricas (4 cortes), igual que el notebook 05. Sin la columna `corte` la API
 responde, pero avisa (`corte_registrado: false`).
 
-**D48. Docker.** Una sola imagen (`python:3.12-slim`, dependencias en `api/requirements.txt`) corre la API y las
+**D59. Docker.** Una sola imagen (`python:3.12-slim`, dependencias en `api/requirements.txt`) corre la API y las
 pruebas; no lleva datasets, notebooks ni PDF. `docker compose up --build` levanta la API; el perfil `pruebas` agrega un
 PostgreSQL 16 temporal (en memoria, sin puertos expuestos) para correr también la prueba del esquema SQL. La imagen lee
 `PORT`, así que sirve igual en Cloud Run. `CORS_ORIGINS` limita qué sitios pueden consultarla.
@@ -519,7 +718,7 @@ La prueba del esquema ahora crea un esquema temporal y lo borra, para poder repe
 pasan las 52 pruebas (47 de la API y 5 del esquema contra PostgreSQL 16), también al repetirlas sobre la misma base
 (`outputs/tests/pytest_docker.txt`). La imagen pesa 448 MB y corre con un usuario sin privilegios.
 
-**D49. Pruebas de la API** (`tests/test_api.py`): reproducen las cifras de control de la Serie I (US$526.3/acre/año;
+**D60. Pruebas de la API** (`tests/test_api.py`): reproducen las cifras de control de la Serie I (US$526.3/acre/año;
 ciclo, margen, ganancia y precio de equilibrio de las 23 variedades; 509 predicciones de 2022 con diferencia ≤ 1 lb/acre;
 100 % de asignaciones; 1,143/1,143 ciclos y auditoría igual a pandas; CSV igual a JSON), las cifras de los ejemplos de
 `docs/api.md` y que las entradas inválidas devuelvan 422.

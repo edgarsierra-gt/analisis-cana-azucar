@@ -1,5 +1,13 @@
 # Prueba técnica · Científico de Datos
 
+| Serie | Tema | Estado |
+|---|---|---|
+| I · Campo | variedades de caña y renovación de lotes | notebooks 01-05 listos |
+| II · Fábrica | caldera de cogeneración | notebooks 06-09 listos |
+| III · Mercado | producción mundial y precio del azúcar | pendiente |
+| IV · Producción | API de la Serie I con Docker Compose y pruebas | lista |
+| V · Presentación | presentación ejecutiva | pendiente |
+
 Estado Serie I · Campo:
 - `notebooks/01_campo_eda.ipynb` — auditoría y EDA (listo)
 - `notebooks/02_campo_recomendacion.ipynb` — pregunta 1: variedades, ciclo de renovación y certeza (listo; el bootstrap tarda ~3 min)
@@ -7,6 +15,12 @@ Estado Serie I · Campo:
 - `notebooks/04_campo_segmentos.ipynb` — pregunta 3: segmentación de variedades (listo; ~1.5 min)
 - `notebooks/05_campo_datos_propios.ipynb` — pregunta 4: datos a capturar, auditoría de renovaciones, distancia,
   zonificación y tamaño de ensayos (listo; ~30 s)
+
+Estado Serie II · Fábrica:
+- `notebooks/06_fabrica_datos.ipynb` — pregunta 1: confiabilidad de archivos y sensores (listo; ~25 s)
+- `notebooks/07_fabrica_regimenes.ipynb` — pregunta 2: regímenes de operación (listo; ~50 s)
+- `notebooks/08_fabrica_sensor_virtual.ipynb` — pregunta 3: sensor virtual del flujo de vapor (listo; ~20 s)
+- `notebooks/09_fabrica_anomalias_eficiencia.ipynb` — preguntas 4 y 5: anomalías, alertas y eficiencia (listo; ~20 s)
 
 ## Serie I · Resumen para la Gerencia Agrícola
 
@@ -30,15 +44,62 @@ variedades.
 
 Explicación visual e interactiva: `docs/serie1_explicacion.html`.
 
+## Serie II · Resumen para la Gerencia Industrial
+
+Caldera de lecho fluidizado circulante a carbón (≈60 t/h, 9.8 MPa, 540 °C), 30 sensores cada 5 s durante 5 días.
+En el ingenio las calderas son de bagazo: se traslada el método, no los valores.
+
+1. **Datos (notebook 06).**
+   - `data_AutoReg.csv` inventa 30 valores; uso `data.csv`.
+   - El diccionario no trae unidades y describe mal al menos un sensor.
+   - Cinco sensores, incluido el flujo de vapor, se actualizan cada 10 s.
+   - Un diferencial de presión copia la presión del hogar (toma tapada o tag mal asignado) y una vibración es ruido:
+     ambos quedan fuera de los modelos.
+   - Los ~70 picos diarios de la corriente del tiro inducido son respuesta del control, no errores.
+2. **Regímenes (notebook 07).**
+   - No hay estados separados: la carga manda.
+   - Hay tres zonas de carga y un eje de operación independiente de ella: los minutos con más O₂ y más atemperación
+     tienen el vapor ~7 °C más frío (descriptivo).
+   - El efecto que se mide es la atemperación: sus cambios enfrían el vapor ~5 min después.
+   - El único régimen discreto es el ciclo del lecho: se llena ~5.4 h y se descarga ~1.5 h, sin afectar la
+     producción.
+3. **Sensor virtual (notebook 08).**
+   - La caída de presión domo → colector ya es un medidor de flujo: Q ∝ √(ΔP·ρ), con 0.5 % de error.
+   - El Ridge completo llega a 0.30 % (0.18 t/h, R² 0.99), validado hacia adelante por día.
+   - El gradient boosting es peor. Sin presiones de vapor, el respaldo da 1.1 %.
+   - La caldera responde en 1-2 min.
+4. **Anomalías (notebook 09, parte A).** Tres capas: reglas físicas, verificación de sensores por redundancia y un
+   monitor PCA (T² y SPE) con ventana móvil.
+   - El criterio para separar sensor de equipo: un sensor se separa de sus pares; un equipo mueve variables acopladas
+     y los pares coinciden.
+   - Con 5 fallas inyectadas, 5 de 5 bien clasificadas.
+   - ~9 alarmas por día entre las tres capas, todas con diagnóstico. Los umbrales de las reglas se calibraron con
+     estos mismos datos, así que esa cifra sale en parte por construcción.
+5. **Eficiencia (notebook 09, parte B).**
+   - **Limpieza de superficies:** los gases hacen un serrucho de ~8 h, compatible con ensuciamiento y soplado (o con
+     el ciclo del lecho; sin registro de soplados no se distingue). Su base sube ~2 °C/día. Si es ensuciamiento,
+     recuperar la deriva vale 0.1-0.3 puntos de eficiencia, unos US$10-23 mil al año con supuestos declarados.
+   - **Exceso de aire:** ya está bajo; ahorra menos de 0.1 punto.
+   - **Temperatura del vapor:** su valor está en la turbina.
+   - Para estimar en absoluto faltan combustible, chimenea y CO.
+
+Explicación visual e interactiva: `docs/serie2_explicacion.html`.
+
 ## Cómo ejecutar
 1. `pip install -r requirements.txt`
-2. Colocar el CSV original de Louisiana en `data/raw/All_Genotypes_2010_onwards.csv`
-   (fuente: data.gov / Ag Data Commons, "Louisiana Sugarcane yield data (2010-2021)"). Los datasets no se versionan.
-3. Desde `notebooks/`, en orden: `jupyter nbconvert --to notebook --execute --inplace 01_campo_eda.ipynb`, luego
-   `02_campo_recomendacion.ipynb`, `03_campo_modelo.ipynb`, `04_campo_segmentos.ipynb` y `05_campo_datos_propios.ipynb`
-   (del 03 en adelante leen salidas del 02)
-4. Documento explicativo interactivo: `python docs/build_serie1_explicacion.py` (desde la raíz) regenera
-   `docs/serie1_explicacion.html` con las cifras de los notebooks. Se abre en cualquier navegador; no necesita servidor.
+2. Colocar los datasets (no se versionan):
+   - Serie I: el CSV de Louisiana en `data/raw/All_Genotypes_2010_onwards.csv` (fuente: data.gov / Ag Data Commons,
+     "Louisiana Sugarcane yield data (2010-2021)").
+   - Serie II: `data.csv`, `data_AutoReg.csv` y `columns.csv` en `data/raw/serie2/` (dataset *Time-Series of
+     Industrial Boiler Operations*).
+3. Desde `notebooks/`, en orden, con `jupyter nbconvert --to notebook --execute --inplace <notebook>.ipynb`:
+   - Serie I: `01_campo_eda`, `02_campo_recomendacion`, `03_campo_modelo`, `04_campo_segmentos` y
+     `05_campo_datos_propios` (del 03 en adelante leen salidas del 02).
+   - Serie II: `06_fabrica_datos`, `07_fabrica_regimenes`, `08_fabrica_sensor_virtual` y
+     `09_fabrica_anomalias_eficiencia` (el 07 lee el resumen del 06; el 09 lee los del 06 y 08).
+4. Documentos explicativos interactivos (desde la raíz): `python docs/build_serie1_explicacion.py` y
+   `python docs/build_serie2_explicacion.py` regeneran `docs/serie1_explicacion.html` y `docs/serie2_explicacion.html`
+   con las cifras de los notebooks. Se abren en cualquier navegador; no necesitan servidor.
 
 ## Serie IV · API en producción
 
@@ -65,26 +126,43 @@ las asignaciones de grupos y 1,143/1,143 ciclos de la auditoría. Última corrid
 52 pruebas aprobadas (`outputs/tests/pytest_docker.txt`).
 
 ## Estructura
-- `src/campo_data.py` — carga y limpieza del dataset de campo (reglas documentadas; la usarán notebooks y API)
+
+Serie I · Campo
+- `src/campo_data.py` — carga y limpieza del dataset de campo (reglas documentadas; la usan notebooks y API)
 - `src/campo_economia.py` — comparación contra testigos, curvas por variedad y economía del ciclo de renovación
 - `src/campo_modelo.py` — variables "as-of" sin fuga, historia por año, métricas y bootstrap pareado (pregunta 2)
-- `outputs/models/serie1_curvas.json` — parámetros por variedad y curva de testigos (insumo de la API, pregunta 1)
-- `outputs/models/serie1_modelo_p2.json` — modelo de la pregunta 2 en JSON (coeficientes, bases, fincas, variedades, banda)
 - `src/campo_segmentos.py` — indicadores por variedad (caña, calidad, longevidad, estabilidad) y nombres de grupos (pregunta 3)
-- `outputs/models/serie1_segmentos.json` — grupos de la pregunta 3: medias, desvíos y centros para asignar variedades nuevas
-- `docs/serie1_explicacion.html` — explicación visual e interactiva de la Serie I (EDA y las cuatro preguntas, con calculadoras)
 - `src/campo_renovacion.py` — auditoría de renovaciones por lote y regla de reemplazo (pregunta 4)
 - `src/campo_ensayos.py` — componentes de varianza, potencia de ensayos y distancia de Gower (pregunta 4)
+- `outputs/models/serie1_curvas.json` — parámetros por variedad y curva de testigos (insumo de la API, pregunta 1)
+- `outputs/models/serie1_modelo_p2.json` — modelo de la pregunta 2 en JSON (coeficientes, bases, fincas, variedades, banda)
+- `outputs/models/serie1_segmentos.json` — grupos de la pregunta 3: medias, desvíos y centros para asignar variedades nuevas
 - `sql/esquema_campo.sql` — modelo de datos de campo para PostgreSQL (pregunta 4)
 - `tests/test_esquema_postgres.py` — prueba de punta a punta del esquema (requiere `CAMPO_PG_DSN`; sin ella se omite). Última corrida
   contra PostgreSQL 16: `outputs/tests/pytest_postgres.txt` (5 aprobadas)
-- `outputs/tests/pytest_docker.txt` — salida de todas las pruebas dentro de Docker (API + PostgreSQL 16: 52 aprobadas)
-- `api/` — API de la Serie IV: `main.py` (rutas y OpenAPI), `esquemas.py` (validación de entradas), `servicios.py`
-  (cálculos sobre los JSON), `requirements.txt` (dependencias de la imagen Docker)
+- `docs/serie1_explicacion.html` — explicación visual e interactiva de la Serie I (EDA y las cuatro preguntas, con calculadoras)
+
+Serie II · Fábrica
+- `src/fabrica_datos.py` — carga, diccionario corregido, auditoría de sensores, banderas, variables derivadas
+- `src/fabrica_regimenes.py` — modos (k-means con nulo gaussiano y bootstrap por bloques), residuos a igual carga,
+  ciclo del lecho
+- `src/fabrica_sensor_virtual.py` — tabla de 1 min, rezagos sin fuga, pliegues hacia adelante, modelos, bootstrap
+- `src/fabrica_anomalias.py` — verificación de sensores, sensores congelados, monitor PCA (T² y SPE), reglas, fallas
+  sintéticas
+- `src/fabrica_eficiencia.py` — supuestos de caldera, calor útil (IAPWS-97), pérdidas y ahorro
+- `outputs/models/serie2_*.json` — diccionario corregido, modos, sensor virtual y verificación (insumos para la API)
+- `docs/serie2_explicacion.html` — explicación visual e interactiva de la Serie II
+
+Serie IV · Producción
+- `api/` — API: `main.py` (rutas y OpenAPI), `esquemas.py` (validación de entradas), `servicios.py` (cálculos sobre
+  los JSON), `requirements.txt` (dependencias de la imagen Docker)
 - `Dockerfile`, `docker-compose.yml` — imagen de la API y servicios de pruebas (PostgreSQL 16 temporal)
 - `tests/test_api.py` — pruebas de la API con las cifras de control de la Serie I
+- `outputs/tests/pytest_docker.txt` — salida de todas las pruebas dentro de Docker (API + PostgreSQL 16: 52 aprobadas)
 - `docs/api.md` — documentación de la API: qué es, para qué sirve, cada consulta con ejemplo
-- `notebooks/` — un notebook por etapa de análisis
+
+General
+- `notebooks/` — un notebook por etapa de análisis (con su versión HTML)
 - `outputs/figures`, `outputs/tables` — generados por los notebooks
 - `bitacora.md` — decisiones, hipótesis descartadas y uso de IA
 
@@ -102,3 +180,24 @@ No lo desarrollé: decidí priorizar los escenarios 1 y 2. Cómo lo abordaría:
    variedades que entraron a etapa 5 en el año t con lo aprendido de las que entraron antes.
 4. **Riesgo principal.** Sesgo de supervivencia: solo se observa en etapa 5 a las que ganaron en etapas tempranas. La
    pendiente calibrada ya incorpora ese encogimiento; el intervalo debe ser bastante más ancho que en los escenarios 1-2.
+
+### Serie II · Caldera
+- **Chequeo de gases más fino:** hoy el par izquierda-derecha solo ve derivas de ~27 °C. Un modelo de la temperatura
+  de gases (carga, O₂, tiempo desde la última limpieza) lo bajaría a pocos grados.
+- **Referencias más largas:** con 2-3 meses, el monitor de proceso puede usar ventanas por zona de carga y fase del
+  lecho, y los umbrales se fijan con eventos confirmados.
+- **Arranques y paros:** no están en estos 5 días. Serían los regímenes realmente distintos y necesitan su propio
+  modelo.
+- **Eficiencia absoluta:** con flujo y poder calorífico del combustible, temperatura de chimenea y CO, el balance de
+  energía reemplaza los supuestos.
+
+### Serie IV · Endpoints de la caldera
+La API expone hoy la Serie I. Los artefactos de la Serie II ya están en JSON y cada notebook verifica que reproducen
+sus cifras (08: Ridge con diferencia 0 en 7,182 minutos; 07: 100 % de los modos), así que agregarlos es directo:
+
+| Artefacto | Endpoint | Entrada | Salida |
+|---|---|---|---|
+| `serie2_sensor_virtual.json` | `POST /caldera/vapor-virtual` | promedios de 1 min de los sensores (con los últimos 10 min) | vapor estimado (t/h) y banda; también la fórmula de dos variables |
+| `serie2_verificacion.json` | `POST /caldera/verificar` | promedios de 1 min | z de cada chequeo, alarmas y sensor señalado |
+| `serie2_modos.json` | `POST /caldera/modo` | promedio de 5 min de 9 variables | zona de carga (centro más cercano) |
+| `serie2_sensores.json` | `GET /caldera/sensores` | — | diccionario corregido, unidades, estado y tratamiento |
