@@ -4,7 +4,7 @@
 |---|---|---|
 | I · Campo | variedades de caña y renovación de lotes | notebooks 01-05 listos |
 | II · Fábrica | caldera de cogeneración | notebooks 06-09 listos |
-| III · Mercado | producción mundial y precio del azúcar | pendiente |
+| III · Mercado | producción mundial y precio del azúcar | notebooks 10-13 listos |
 | IV · Producción | API de la Serie I con Docker Compose y pruebas | lista |
 | V · Presentación | presentación ejecutiva | pendiente |
 
@@ -21,6 +21,12 @@ Estado Serie II · Fábrica:
 - `notebooks/07_fabrica_regimenes.ipynb` — pregunta 2: regímenes de operación (listo; ~50 s)
 - `notebooks/08_fabrica_sensor_virtual.ipynb` — pregunta 3: sensor virtual del flujo de vapor (listo; ~20 s)
 - `notebooks/09_fabrica_anomalias_eficiencia.ipynb` — preguntas 4 y 5: anomalías, alertas y eficiencia (listo; ~20 s)
+
+Estado Serie III · Mercado:
+- `notebooks/10_mercado_paises.ipynb` — pregunta 1: segmentación de países y datos poco confiables (listo; ~1.5 min)
+- `notebooks/11_mercado_precio.ipynb` — pregunta 2: volatilidad, regímenes, extremos y verificación (listo; ~25 s)
+- `notebooks/12_mercado_pronostico.ipynb` — pregunta 3: pronóstico a 1 y 3 meses con bandas (listo; ~15 s)
+- `notebooks/13_mercado_oferta.ipynb` — pregunta 4: respuesta de la oferta al precio (listo; ~2 min)
 
 ## Serie I · Resumen para la Gerencia Agrícola
 
@@ -85,6 +91,37 @@ En el ingenio las calderas son de bagazo: se traslada el método, no los valores
 
 Explicación visual e interactiva: `docs/serie2_explicacion.html`.
 
+## Serie III · Resumen para la Gerencia General y Comercial
+
+1. **Países (notebook 10).**
+   - **Datos poco confiables en FAOSTAT:**
+     - Liberia repite el mismo rendimiento 33 años, y Guinea y Papúa Nueva Guinea no tienen datos oficiales.
+     - Los departamentos franceses dejan de reportar en 2006.
+     - En 2023, menos de la mitad de los datos del panel son oficiales.
+     - Guatemala: la producción de 2014-2016 está inflada y el área de 2019-2023 es imputada (el USDA reporta 12-15 %
+       más área en 2021-2022).
+   - **No hay grupos naturales bien separados.** Uso una tipología de tres: expansión, madurez y datos dudosos.
+   - **Guatemala** es uno de 4 países de 71 en el cuartil superior de crecimiento de área **y** de rendimiento. Sus
+     pares por trayectoria son El Salvador, Eswatini, Brasil, Nicaragua y Egipto, no Colombia ni México.
+2. **Precio (notebook 11).**
+   - **La serie pega contratos.** Hay 97 saltos por cambio de contrato que no son mercado; los corrijo.
+   - **Dos regímenes de volatilidad:** calma (3.5 % semanal) y turbulencia (5.9 %).
+   - **Colas pesadas:** unas 36 veces más días extremos que una normal. Los ciclos de nivel no se distinguen del azar.
+   - **La serie es real:** los extremos coinciden al centavo y al día con fuentes públicas, y los promedios anuales
+     coinciden con el Banco Mundial y el FMI (−1 % a +3 %).
+3. **Pronóstico (notebook 12).**
+   - Ningún modelo probado le gana al **último cierre** a 1 y 3 meses: ~5 % y ~12 % de error.
+   - La utilidad está en la **banda según volatilidad**, que queda calibrada. Cada ¢/lb equivale a US$22/t.
+4. **Oferta (notebook 13).**
+   - **Asociación robusta pero pequeña** del área con el precio de 2-3 años antes: elasticidad acumulada de ~0.08.
+     Sobrevive a controlar la inercia (ARDL), a quitar cualquier año y a usar solo datos oficiales.
+   - **La evidencia causal es débil:**
+     - la permutación da p = 0.05-0.08 a una cola;
+     - el placebo del año siguiente falla en algunas muestras (la oferta también mueve el precio);
+     - la versión ponderada por tamaño (~0.17, p = 0.01) es exploratoria.
+
+Explicación visual e interactiva: `docs/serie3_explicacion.html`.
+
 ## Cómo ejecutar
 1. `pip install -r requirements.txt`
 2. Colocar los datasets (no se versionan):
@@ -92,14 +129,21 @@ Explicación visual e interactiva: `docs/serie2_explicacion.html`.
      "Louisiana Sugarcane yield data (2010-2021)").
    - Serie II: `data.csv`, `data_AutoReg.csv` y `columns.csv` en `data/raw/serie2/` (dataset *Time-Series of
      Industrial Boiler Operations*).
+   - Serie III, en `data/raw/serie3/`: `Production_Crops_Livestock_E_All_Data.csv` y
+     `Production_Crops_Livestock_E_All_Data_NOFLAG.csv` (FAOSTAT, *Production: Crops and livestock products*, todos los
+     datos), `all_agricultural_products_data.csv` e `individual_data/` con `Sugar_data.csv`, `Coffee_data.csv`,
+     `Cocoa_data.csv` y `Cotton_data.csv` (*Agricultural Commodities Futures*).
 3. Desde `notebooks/`, en orden, con `jupyter nbconvert --to notebook --execute --inplace <notebook>.ipynb`:
    - Serie I: `01_campo_eda`, `02_campo_recomendacion`, `03_campo_modelo`, `04_campo_segmentos` y
      `05_campo_datos_propios` (del 03 en adelante leen salidas del 02).
    - Serie II: `06_fabrica_datos`, `07_fabrica_regimenes`, `08_fabrica_sensor_virtual` y
      `09_fabrica_anomalias_eficiencia` (el 07 lee el resumen del 06; el 09 lee los del 06 y 08).
-4. Documentos explicativos interactivos (desde la raíz): `python docs/build_serie1_explicacion.py` y
-   `python docs/build_serie2_explicacion.py` regeneran `docs/serie1_explicacion.html` y `docs/serie2_explicacion.html`
-   con las cifras de los notebooks. Se abren en cualquier navegador; no necesitan servidor.
+   - Serie III: `10_mercado_paises`, `11_mercado_precio`, `12_mercado_pronostico` y `13_mercado_oferta`, en cualquier
+     orden (cada uno lee los datos crudos; ninguno depende de otro).
+4. Documentos explicativos interactivos (desde la raíz): `python docs/build_serie1_explicacion.py`,
+   `python docs/build_serie2_explicacion.py` y `python docs/build_serie3_explicacion.py` regeneran
+   `docs/serie1_explicacion.html`, `docs/serie2_explicacion.html` y `docs/serie3_explicacion.html` con las cifras de
+   los notebooks. Se abren en cualquier navegador; no necesitan servidor.
 
 ## Serie IV · API en producción
 
@@ -153,6 +197,18 @@ Serie II · Fábrica
 - `outputs/models/serie2_*.json` — diccionario corregido, modos, sensor virtual y verificación (insumos para la API)
 - `docs/serie2_explicacion.html` — explicación visual e interactiva de la Serie II
 
+Serie III · Mercado
+- `src/mercado_faostat.py` — carga, banderas, panel limpio (agregados, China, sucesores), calidad por país,
+  descriptores de trayectoria, grupos con nulo gaussiano y bootstrap, y distancia entre trayectorias
+- `src/mercado_precio.py` — auditoría, calendario de vencimientos, retornos crudos y ajustados, Markov de volatilidad,
+  giros de 20 % contra un paseo aleatorio y extremos
+- `src/mercado_pronostico.py` — tabla mensual, modelos, origen rodante sin fuga, bootstrap pareado, Diebold-Mariano y
+  bandas fija y según volatilidad
+- `src/mercado_oferta.py` — panel de oferta, efectos fijos (con la inercia propia, ARDL), errores por año o
+  Driscoll-Kraay, permutación, jackknife por año y agregado mundial
+- `outputs/models/serie3_pronostico.json` — centro y banda del pronóstico a 1 y 3 meses (insumo para la API)
+- `docs/serie3_explicacion.html` — explicación visual e interactiva de la Serie III
+
 Serie IV · Producción
 - `api/` — API: `main.py` (rutas y OpenAPI), `esquemas.py` (validación de entradas), `servicios.py` (cálculos sobre
   los JSON), `requirements.txt` (dependencias de la imagen Docker)
@@ -191,9 +247,23 @@ No lo desarrollé: decidí priorizar los escenarios 1 y 2. Cómo lo abordaría:
 - **Eficiencia absoluta:** con flujo y poder calorífico del combustible, temperatura de chimenea y CO, el balance de
   energía reemplaza los supuestos.
 
-### Serie IV · Endpoints de la caldera
-La API expone hoy la Serie I. Los artefactos de la Serie II ya están en JSON y cada notebook verifica que reproducen
-sus cifras (08: Ridge con diferencia 0 en 7,182 minutos; 07: 100 % de los modos), así que agregarlos es directo:
+### Serie III · Mercado
+- **Respuesta de la oferta con más historia:** extender el precio a 1960-2023 con la serie anual del Banco Mundial
+  (*Pink Sheet*, "Sugar, world"). Pasaría de 20 a ~60 años de variación del precio, con más poder para la prueba de
+  permutación.
+- **Precio que ve cada país:** convertir el No. 11 a moneda local y deflactar (tipo de cambio y precios del Banco
+  Mundial). La respuesta medida en dólares probablemente subestima la real.
+- **Causalidad:** usar el avance mensual de la zafra brasileña (UNICA) o choques de clima en Brasil como instrumento.
+  El rendimiento anual es un instrumento débil (F = 0.2).
+- **Pronóstico:** agregar la curva completa de futuros (todos los vencimientos), porque el contrato que vence en la
+  fecha objetivo ya es el pronóstico del mercado. También fundamentos: avance de zafra, política de la India, real y
+  petróleo.
+- **Guatemala:** reemplazar FAOSTAT 2014-2023 por las estadísticas de la gremial y de su centro de investigación.
+
+### Serie IV · Endpoints de la caldera y del mercado
+La API expone hoy la Serie I. Los artefactos de las Series II y III ya están en JSON y cada notebook verifica que
+reproducen sus cifras (08: Ridge con diferencia 0 en 7,182 minutos; 07: 100 % de los modos), así que agregarlos es
+directo:
 
 | Artefacto | Endpoint | Entrada | Salida |
 |---|---|---|---|
@@ -201,3 +271,4 @@ sus cifras (08: Ridge con diferencia 0 en 7,182 minutos; 07: 100 % de los modos)
 | `serie2_verificacion.json` | `POST /caldera/verificar` | promedios de 1 min | z de cada chequeo, alarmas y sensor señalado |
 | `serie2_modos.json` | `POST /caldera/modo` | promedio de 5 min de 9 variables | zona de carga (centro más cercano) |
 | `serie2_sensores.json` | `GET /caldera/sensores` | — | diccionario corregido, unidades, estado y tratamiento |
+| `serie3_pronostico.json` | `GET /mercado/pronostico?h=1` o `h=3` | horizonte | centro (último cierre) y banda (cuantiles z × volatilidad de 3 meses × √h), con la fecha del dato |

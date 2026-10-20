@@ -7,6 +7,51 @@ cálculos, redactar borradores de texto y revisar cifras. Las preguntas, los mé
 acepté ningún resultado de la IA sin verificarlo con los datos. Al final de cada serie hay una sección "Uso de IA" con
 lo que hizo la IA, cómo lo verifiqué y qué sugerencias o errores suyos corregí o descarté.
 
+## Resumen
+
+**Cómo decidí en las tres series.** Cuatro reglas que se repiten:
+1. **Auditar los datos antes de modelar.** Cada serie tenía una trampa en el archivo: coma decimal y unidades en
+   libras, no toneladas (D1, D2); un archivo con 30 valores inventados (D42); un precio que pega contratos distintos
+   (D58).
+2. **Probar contra el azar antes de hablar de grupos o ciclos.** En ninguna serie hay grupos naturales (D31, D47,
+   D56), y los ciclos del precio no se distinguen de un paseo aleatorio (D59). Uso los grupos como tipologías útiles,
+   no como hechos.
+3. **Validar como se usaría.** Siempre hacia adelante en el tiempo y sin fuga: por zafra (D22), por día (D48), con
+   origen rodante (D61). La validación al azar promete entre 17 % y 51 % menos error del real (H16).
+4. **Simple antes que complejo.** En las tres series el modelo lineal o el ingenuo empata o gana a los árboles y al
+   ARIMA (D26, H15, H22). Me quedo con el que se explica.
+
+**Las decisiones que más pesan.**
+
+| Serie | Decisión | Por qué |
+|---|---|---|
+| I · Campo | Comparar cada variedad contra 4 testigos fijos del mismo ensayo y corte (D14) | quita lugar, año y suelo con una regla que no cambia entre años |
+| I · Campo | Economía solo con etapa 5 y certeza por bootstrap de ensayos completos (D8, D19) | las parcelas tempranas inflan ~1.5× y las de un ensayo no son independientes |
+| I · Campo | Ridge en dos piezas: nivel de la finca + ventaja de la variedad (D24-D26) | empata o gana y se explica con 3 coeficientes |
+| II · Caldera | Sensor virtual con la caída de presión domo-colector (D48) | es física de medidor de flujo: 0.30 % de error validado por día |
+| II · Caldera | Anomalías en tres capas con diagnóstico sensor/equipo (D50, D51) | un sensor se separa de sus pares; un equipo mueve variables acopladas |
+| III · Mercado | Serie de precio ajustada por cambio de contrato (D58) | la mitad de las colas pesadas eran saltos de contrato |
+| III · Mercado | Último cierre como pronóstico central y banda según volatilidad (D61) | ningún modelo probado le gana; el valor está en el rango |
+| III · Mercado | Permutación de los años del precio como prueba principal de la oferta (D62) | solo hay 20 años de precio; los errores agrupados prometían de más |
+| IV · API | La API lee artefactos JSON y sus pruebas reproducen las cifras de control (D63, D70) | sin pickles ni datasets, y comprobable |
+
+**Hipótesis que descarté** (24 en total; las principales):
+
+| Hipótesis | Qué la descartó |
+|---|---|
+| El costo de corte cambia el ranking de variedades (H1) | Spearman 0.98 entre ranking por azúcar y por margen |
+| La cosecha del lote el año pasado es el mejor predictor (H5) | es la peor referencia: el efecto del año no se repite |
+| El archivo `data_AutoReg.csv` mejora los datos (H12) | inventa 30 valores y falla justo en un escalón |
+| Los picos de corriente del tiro son errores (H13) | la presión del hogar reacciona a ellos: son el control |
+| Un ARIMA pronostica mejor que el ingenuo (H22) | solo contra el ingenuo equivocado; contra el último cierre es 28 % peor |
+| El área no responde al precio (H24) | sí, con 2-3 años de rezago, pero poco (~0.08) y con evidencia causal débil |
+
+**Uso de IA en números.** 71 decisiones y 24 hipótesis descartadas. Corregí 32 errores de fondo de la IA (método,
+cálculo o afirmaciones sin respaldo), agrupé por serie las correcciones menores de texto, redondeo y figuras, y descarté
+3 sugerencias suyas. Al cerrar cada serie de análisis pedí una revisión independiente de cifras a un agente separado y
+corregí todo lo que encontró. Cada serie se volvió a correr desde cero en Windows antes de su commit, y sus cifras de
+control coinciden.
+
 ---
 
 ## Serie I · Campo — Auditoría y EDA (`notebooks/01_campo_eda.ipynb`)
@@ -161,7 +206,7 @@ HOCP14-885 y L01-299 la mantienen o la aumentan.
 - **Cómo lo verifiqué:** cobertura de testigos por ensayo y corte, comparación entre extrapolación lineal y
   conservadora, conteo de réplicas válidas del bootstrap, y el JSON de curvas, que reproduce el ciclo y el margen de las
   23 variedades.
-- **Errores de la IA que corregí:**
+- **Errores de fondo de la IA que corregí:**
   1. En la primera corrida del bootstrap, el margen vacío del ciclo de 5 cortes en 48 réplicas se tomaba como máximo
      (`argmax` con NaN) y la variedad salía sin ranking. Eso subestimaba P(top 3) (HOCP14-885: 94.8 % en vez de
      99.6 %). Se notó porque P(gana a testigos) salía idéntica (0.952) en variedades con intervalos muy distintos.
@@ -253,18 +298,16 @@ modelos); desde la primera soca, lo que la variedad hizo en el mismo lote la pre
   prueba (confusión entre clima y mezcla de variedades). Es falsa: la correlación entre el efecto año y la ventaja media
   de las variedades del año es −0.07, y la pendiente con y sin efectos fijos de lote es casi la misma (0.88 vs 0.91
   desde 2014).
-- **Errores de la IA que corregí:**
+- **Errores de fondo de la IA que corregí:**
   1. La primera descomposición del error usaba el promedio del lote incluyendo la propia parcela (79 % "nivel") y un
      oráculo que veía su propio error (R² 0.84). Lo corregí con el promedio de las otras parcelas (correlación
      intraclase): 77 % y R² 0.81.
   2. La primera banda de 80 % usaba residuos de entrenamiento y cubría 73 %. La cambié por errores de zafras anteriores
      y reporto la cobertura real (74 %) en lugar de prometer 80 %.
-  3. Una primera figura comparaba "nivel" vs "ventaja" con dos dispersiones de r casi igual (0.49 y 0.48), que no
-     mostraban lo que el texto decía. La reemplacé por tres lotes reales con orden típico (ρ cercano a la mediana).
-  4. Los borradores de texto se escribieron antes de ejecutar; corregí las cifras que no coincidían (p. ej. "la banda
-     cubre 8 de cada 10", "ρ de 0.42 a 0.52").
-  5. El HTML mostraba +6 % para la zafra 2013 y el notebook +5 %: el HTML redondeaba un dato ya redondeado a un decimal
-     (5.5). Ahora el resumen guarda 3 decimales.
+- **Correcciones menores (texto, redondeo y figuras):** una figura de "nivel" contra "ventaja" con dos dispersiones de
+  r casi igual (0.49 y 0.48) que no mostraba lo que decía el texto (la reemplacé por tres lotes reales); cifras de
+  borradores escritos antes de ejecutar ("la banda cubre 8 de cada 10", "ρ de 0.42 a 0.52"); y el HTML redondeaba un
+  dato ya redondeado (+6 % contra +5 % en la zafra 2013; ahora el resumen guarda 3 decimales).
 
 ---
 
@@ -331,7 +374,7 @@ son ruido de parcela. Corregido en D30.
   externa según mi diseño, y redactó borradores del notebook.
 - **Cómo lo verifiqué:** comparé cada cifra del texto contra las salidas del notebook, y el JSON contra el 100 % de las
   asignaciones.
-- **Errores de la IA que corregí:**
+- **Errores de fondo de la IA que corregí:**
   1. Regla de k frágil (ARI ≥ 0.6 con k = 6 en 0.598). La cambié por "más reproducible sin grupos de una variedad" y
      declaro que la fijé después de explorar.
   2. El primer texto decía que HOCP14-885 quedaba "entre completas y mucha caña". La co-asignación muestra que se mezcla
@@ -339,8 +382,8 @@ son ruido de parcela. Corregido en D30.
   3. El primer texto del grupo "mucha caña" hablaba de "cosecha temprana" y "ciclos cortos". Lo primero no está en los
      datos y lo segundo no se cumple (ciclos óptimos de 3-4 cortes en la pregunta 1); lo reemplacé por lo que sí
      muestran los datos (pierden ~3 % por corte).
-  4. Las etiquetas del mapa de variedades se pisaban y una quedaba sobre el punto equivocado; pedí una colocación que
-     evita choques.
+- **Correcciones menores (figuras):** las etiquetas del mapa de variedades se pisaban y una quedaba sobre el punto
+  equivocado; ahora se colocan evitando choques.
 
 ---
 
@@ -404,43 +447,42 @@ también puede subir con la distancia.
   de potencia según mi diseño; armó los datos simulados para probar el código y redactó borradores del notebook.
 - **Cómo lo verifiqué:** con datos simulados, con PostgreSQL real (5 pruebas aprobadas) y contra las cifras de las
   preguntas 1-3 (la economía métrica reproduce US$526.3/acre/año).
-- **Errores de la IA que corregí:**
-  1. El primer texto decía que el costo por tonelada "no cambia" el ciclo óptimo; la grilla mostró que sí cambia a
-     partir de US$37/t. Lo corregí a "casi no".
-  2. La primera grilla de costos llegaba a US$40/t, y el "equilibrio" de las variedades recomendadas era ese tope, no
+- **Errores de fondo de la IA que corregí:**
+  1. La primera grilla de costos llegaba a US$40/t, y el "equilibrio" de las variedades recomendadas era ese tope, no
      un resultado. La amplié a US$60/t.
-  3. El primer cálculo de potencia usaba "2 cohortes = 8 años", pero cohortes superpuestas no suman años de cosecha
+  2. El primer cálculo de potencia usaba "2 cohortes = 8 años", pero cohortes superpuestas no suman años de cosecha
      distintos. Lo reemplacé por 6 años de cosecha.
-  4. El primer intento de componentes de varianza usaba el ambiente finca-año y dejaba la caída por variedad en el
+  3. El primer intento de componentes de varianza usaba el ambiente finca-año y dejaba la caída por variedad en el
      residuo (inflaba la interacción a 16.5 %). Lo corregí con lote-año y caída propia por variedad: 7.7 %.
-  5. El equilibrio por distancia salía de una grilla de US$1/t y el notebook decía "desde ~US$35/t", cuando a US$35 el
+  4. El equilibrio por distancia salía de una grilla de US$1/t y el notebook decía "desde ~US$35/t", cuando a US$35 el
      testigo todavía cubre costos. Ahora se calcula por bisección: testigo US$35.9/t; HOCP14-885 43.2, HOL15-508 43.6 y
      L15-306 41.3.
-  6. "15-20 fincas por cohorte" solo llega a 80 % de potencia si la interacción no supera 1.5 veces la de Louisiana.
+  5. "15-20 fincas por cohorte" solo llega a 80 % de potencia si la interacción no supera 1.5 veces la de Louisiana.
      Lo cambié a 20 fincas (5 por estrato) con la condición explícita (D41).
-  7. El 25 % de renovaciones que se pierden sin número de corte se presentaba como un hecho general; sale de la
+  6. El 25 % de renovaciones que se pierden sin número de corte se presentaba como un hecho general; sale de la
      simulación y depende de cuántas renovaciones repiten variedad.
-  8. El HTML decía "2.6 veces" (interacción de Louisiana) junto a una calculadora que, con su valor inicial (×1.5),
-     mostraba 3.6. Ahora el texto se calcula con los valores de la calculadora.
-  9. El primer texto de H10 decía "una finca más vale mucho más que una repetición más". Al comparar 1 finca contra 1
+  7. El primer texto de H10 decía "una finca más vale mucho más que una repetición más". Al comparar 1 finca contra 1
      repetición, la repetición sumaba más potencia (2.3 contra 1.5 puntos), porque agrega más parcelas. La comparación
      justa es a igual número de parcelas.
+- **Correcciones menores (texto):** el costo por tonelada "no cambia" el ciclo óptimo pasó a "casi no" (cambia desde
+  US$37/t); y el HTML decía "2.6 veces" junto a una calculadora que, con su valor inicial (×1.5), mostraba 3.6 (ahora
+  el texto se calcula con los valores de la calculadora).
 
 ---
 
 ## Serie I · Cierre: revisión independiente de cifras
 
 Al cerrar la Serie I pedí a un agente de IA separado, que no participó en el análisis, comparar cada cifra del README,
-la bitácora, los notebooks 04-05, `CLAUDE.md` y el HTML contra las salidas (notebooks, JSON y CSV). Encontró 7
+la bitácora, los notebooks 04-05, las instrucciones del proyecto y el HTML contra las salidas (notebooks, JSON y CSV). Encontró 7
 diferencias de fondo y 5 menores; las corregí todas:
 - "Error típico de 22 % por lote": la métrica es por parcela (una variedad en una finca y zafra).
-- "15-20 fincas por cohorte": ver punto 6 de la pregunta 4.
+- "15-20 fincas por cohorte": ver punto 5 de la pregunta 4.
 - "La calidad viene con longevidad y estabilidad": calidad-estabilidad tiene r = 0.16, sin significancia. Ahora dice
   "la calidad viene con longevidad, y la longevidad con estabilidad".
 - D33 omitía una asignación dudosa (L12-201, 58 %). H9 hablaba de "desvío" donde el 67 % es de la varianza.
 - H10 citaba cifras de una versión anterior (1.9 contra 1.6 puntos); con el código actual, 2.3 contra 1.5.
-- El 25 % simulado y el equilibrio por distancia: puntos 5 y 7 de la pregunta 4.
-- `CLAUDE.md` decía que cada notebook verifica su JSON; el 02 no lo hacía. Agregué la verificación: el JSON de curvas
+- El 25 % simulado y el equilibrio por distancia: puntos 6 y 4 de la pregunta 4.
+- Las instrucciones del proyecto decían que cada notebook verifica su JSON; el 02 no lo hacía. Agregué la verificación: el JSON de curvas
   reproduce el ciclo y el margen de las 23 variedades (diferencia máxima < 10⁻⁶).
 - Menores: estabilidad de las nuevas medida con 2-4 años (no 3-4); "fibra comparable contra los testigos"; los perfiles
   simulados de zonificación se construyen *a partir de* los promedios de CENGICAÑA (dos combinan estratos vecinos).
@@ -613,7 +655,7 @@ es menor a 0.1 punto. En calderas de bagazo, con más exceso de aire, sí puede 
   los notebooks y del HTML.
 - **Cómo lo verifiqué:** comparé cada cifra del texto contra la salida de los notebooks. Los JSON se verifican solos
   (07: 100 % de los modos; 08: Ridge con diferencia 0 en 7,182 minutos).
-- **Errores de la IA que corregí:**
+- **Errores de fondo de la IA que corregí:**
   1. El primer plan trataba los picos de corriente del tiro como errores y los reemplazaba por la mediana. Al mirar la
      presión del hogar alrededor de cada pico apareció la respuesta del control. Los conservo (D46).
   2. El primer filtro de picos (Hampel con desvío local) marcaba miles de puntos en sensores cuantizados, donde el
@@ -639,8 +681,8 @@ es menor a 0.1 punto. En calderas de bagazo, con más exceso de aire, sí puede 
       depende de k.
   11. La deriva de gases se presentó primero como tendencia lineal. El gráfico por hora mostró un serrucho de
       limpieza; reescribí la oportunidad.
-  12. Corregí cifras redondeadas de más en el texto. Decía "tres veces más rápido" (era 2.7), "el triple de ruido"
-      (era 4.3 veces) y 08:51 en la redistribución (fue ~08:53).
+- **Correcciones menores (redondeo):** "tres veces más rápido" (era 2.7), "el triple de ruido" (era 4.3 veces) y
+  08:51 en la redistribución (fue ~08:53).
 
 **Revisión independiente de cifras (Serie II).** Pedí a un agente de IA separado comparar cada cifra de los notebooks,
 el README y esta bitácora contra las salidas. Encontró 9 diferencias de fondo y 16 menores; las corregí todas. Las de
@@ -680,36 +722,274 @@ Trabajé la Serie II en una sesión aparte y la integré al repo con Claude Code
 
 ---
 
+## Serie III · Mercado — Producción mundial y precio del azúcar (`notebooks/10` a `13`)
+
+Contexto:
+- **FAOSTAT**, *Production: Crops and livestock products*, cultivo *Sugar cane* (código 156), 1961-2023, con banderas
+  por dato.
+- **`Sugar_data.csv`:** futuro de azúcar No. 11 (ICE), contrato más próximo de Yahoo Finance (`SB=F`), diario de marzo
+  de 2000 a junio de 2024, en ¢/lb.
+
+Ningún modelo usa datos fuera de los de la prueba. Las fuentes públicas citadas (ICE, Banco Mundial, FMI, USDA, prensa
+financiera) solo sirven para verificar.
+
+### Decisiones
+
+**D53. FAOSTAT: archivo completo y panel limpio.**
+- El archivo sin banderas trae exactamente los mismos valores; uso el completo por las banderas.
+- Las unidades son únicas (ha, t y kg/ha, sin hg/ha), y el rendimiento es producción / área: difiere más de 1 % solo
+  en países de menos de 1,000 ha.
+- Ajustes del panel:
+  - quito los agregados (código ≥ 5000) y la fila "China", que es la suma de China continental y Taiwán;
+  - encadeno Etiopía PDR → Etiopía y Sudán (anterior) → Sudán (Sudán del Sur no reporta caña);
+  - recalculo el rendimiento en t/ha.
+
+**D54. Datos poco confiables (pregunta 1).** Cinco alertas por país:
+- % no oficial;
+- % imputado;
+- años seguidos con el mismo rendimiento;
+- saltos de más de 50 %;
+- variación casi nula.
+
+Lo que encuentran:
+- Liberia repite el mismo rendimiento 33 años y Ghana 11; Guinea y Papúa Nueva Guinea no tienen ni un dato oficial de
+  producción.
+- Reunión, Guadalupe, Martinica y Guayana Francesa desaparecen en 2006 sin cerrar su industria: es un hueco de reporte.
+  Puerto Rico, San Cristóbal y Nieves y Trinidad y Tobago sí cerraron.
+- **La imputación crece en los años recientes:** los datos oficiales de producción del panel pasan de 73 % en
+  1961-2009 a 45 % en 2023.
+- **Guatemala:**
+  - 1977-1985: producción estimada en cifras redondas.
+  - 2014-2016: producción de ~33.5 millones de t. El USDA da ~28 millones para 2016/17 (270 mil ha × 104 t/ha).
+  - 2019-2023: área imputada. El USDA reporta 251-258 mil ha en 2020/21-2022/23, contra 224 mil de FAOSTAT en
+    2021-2022.
+
+**D55. Segmentación por trayectoria, no por tamaño (pregunta 1).**
+- **Panel:** 71 países con producción desde 1976 o antes hasta 2023 (≥ 45 años) y al menos 5,000 ha en 2014-2023.
+- **Seis descriptores:**
+  - crecimiento del área y del rendimiento (pendiente Theil-Sen del log);
+  - rendimiento 2014-2023 frente a la mediana;
+  - cambio de ritmo después de 1991 en área y en rendimiento;
+  - inestabilidad del rendimiento.
+  La producción es la suma de los dos crecimientos y no la agrego aparte.
+- **Escala robusta:** mediana e IQR, recortada a ±3.
+
+**D56. Grupos probados contra el azar (misma regla de las Series I y II).**
+- **Contra un nulo gaussiano con la misma covarianza:** k-means apenas lo supera con k = 3-5 (p de 0.015 a 0.09), y con
+  k = 2 y 6 no lo supera.
+- **Estabilidad al remuestrear países:** ARI ~0.5.
+- **Elección:** la regla "el k más reproducible entre 3 y 6, sin grupos menores al 5 %" da **k = 3**, que uso como
+  tipología. Los nombres se asignan por regla: expansión, madurez o estancamiento, y rendimiento muy bajo o datos
+  dudosos. Ward da una partición parecida (ARI 0.75).
+
+**D57. Pares de Guatemala con dos métodos independientes.**
+- **Los dos métodos:** cercanía en los descriptores y distancia entre trayectorias por bloques de 5 años (área relativa
+  a su nivel actual y rendimiento).
+- **Regla:** un par es real si queda entre los 10 más cercanos en los dos. Resultado: **El Salvador, Eswatini, Brasil,
+  Nicaragua y Egipto**.
+- **Robustez:** se mantienen los cinco al quitar los 21 países con datos dudosos.
+
+**D58. El precio pega contratos: serie ajustada (pregunta 2).**
+- **Cuándo cambia de contrato:** el No. 11 vence el último día hábil de febrero, abril, junio y septiembre (ICE).
+- **Prueba:**
+  - el día siguiente al vencimiento, el precio se mueve 4.4 % contra 1.5 % en un día normal, y 3.9 puntos de eso son
+    la brecha nocturna;
+  - esos 97 días aportan 11 de los 25 movimientos más grandes;
+  - las 11 filas con OHLC imposible caen todas en días de vencimiento.
+- **Ajuste:** el día del cambio uso el movimiento de apertura a cierre del contrato nuevo. Solo con eso, la curtosis
+  baja de 6.0 a 2.9.
+- **Exclusiones:** excluyo los dos días de vencimiento con volumen cero (28/04/2000, −18 %, y 30/06/2000, −8 %). Con
+  todo, la curtosis queda en 1.9 y el retorno acumulado pasa de ×3.8 a ×2.6.
+- **Uso:** el nivel crudo es la referencia de precio; la serie ajustada, para volatilidad, extremos y errores.
+
+**D59. Regímenes (pregunta 2).**
+- **Volatilidad:** Markov sobre retornos semanales; el BIC elige 2 regímenes sobre 1 y 3. Calma: 3.5 % semanal, 76 %
+  del tiempo. Turbulencia: 5.9 % semanal, 24 % del tiempo.
+- **Nivel:** comparo los giros de 20 % (34) contra un paseo aleatorio con la misma volatilidad (31-47). Los ciclos de
+  nivel no se distinguen del azar.
+
+**D60. Verificación contra el mercado real.**
+- **Extremos:** el máximo de 2011 (36.08), el mínimo de 2020 (9.05) y el máximo de 2023 (28.14) coinciden al centavo y
+  al día con fuentes públicas.
+- **Promedios anuales:** difieren entre −1.1 % y +3.2 % contra el FMI, y hasta +4.1 % contra el Banco Mundial (2011).
+- **Calendario:** el hueco del 11-17/09/2001 coincide con el cierre de la bolsa.
+- **Choques comunes:** coinciden con café, cacao y algodón en 2008 y 2020.
+
+**D61. Pronóstico (pregunta 3).**
+- **Objetivo:** el promedio mensual del contrato más próximo a 1 y 3 meses.
+- **Validación:** origen rodante desde 12/2008, entrenando solo con pares ya realizados (t' + h ≤ t).
+- **Baseline:** el **último cierre**, no el promedio del mes. Promediar crea autocorrelación artificial (0.28 contra
+  0.08 en cierres).
+- **Criterio:** bootstrap de bloques de 12 meses y Diebold-Mariano.
+- **Bandas:** cuantiles de errores pasados realizados, en unidades de volatilidad de 3 meses × √h.
+
+**D62. Respuesta de la oferta (pregunta 4).**
+- **Panel:** países de 2000 a 2023 en diferencias de log, con efectos fijos por país y precios rezagados de 1 a 3 años.
+- **Placebos:** el precio del mismo año y del siguiente.
+- **Inercia:** versión ARDL con los dos rezagos del propio crecimiento.
+- **Errores:** agrupados por año y Driscoll-Kraay.
+- **Prueba de permutación de los años del precio:** es la prueba principal, porque el precio es común a todos los
+  países y solo hay 20 años.
+- **Robustez:**
+  - solo datos oficiales;
+  - sin Brasil, India, China y Tailandia;
+  - ponderado por área;
+  - agregado mundial;
+  - quitando un año a la vez.
+
+### Hipótesis descartadas
+
+**H18. "Hay tipos de países productores bien separados."** No: los grupos apenas superan a datos sin grupos. Son una
+tipología útil, no una clasificación natural.
+
+**H19. "Los pares de Guatemala son los productores de su tamaño (Colombia, México)."** No: por trayectoria, sus pares
+son El Salvador, Eswatini, Brasil, Nicaragua y Egipto. Colombia y Perú ya tenían su área en los 60, y México no tiene
+el rendimiento.
+
+**H20. "La serie de precio es una serie continua del mercado."** No: pega contratos. Sin ajuste, la mitad de las colas
+pesadas son cambios de contrato.
+
+**H21. "El precio del azúcar tiene ciclos que se pueden anticipar."** No: los giros de 20 % no se distinguen de un
+paseo aleatorio, y a 1 y 3 meses nada le gana al último cierre.
+
+**H22. "Un ARIMA pronostica mejor que el ingenuo."** Solo contra el ingenuo equivocado (el promedio del mes). Contra el
+último cierre es 28 % peor a 1 mes.
+
+**H23. "La cosecha de Brasil sirve como instrumento para la causalidad precio → oferta."** No con datos anuales: la
+primera etapa tiene F = 0.2.
+
+**H24. "El área no responde al precio."** Hay una asociación robusta con el precio de 2-3 años antes, pequeña
+(elasticidad acumulada de ~0.08). La evidencia causal es débil:
+- la permutación da p = 0.05-0.08 a una cola, y 0.11 con 4 rezagos;
+- el placebo del año siguiente falla en algunas muestras (la oferta también mueve el precio);
+- la versión ponderada (~0.17, p = 0.01) es exploratoria.
+
+### Hallazgos para la Gerencia General y Comercial
+
+- **Guatemala combina expansión de área y rendimiento de punta:** solo 4 de 71 países están en el cuartil superior de
+  los dos. Como el área ya se frenó, el crecimiento futuro depende del rendimiento y de la calidad de la caña.
+- **FAOSTAT no sirve para Guatemala en 2014-2023 sin contraste:** la producción de 2014-2016 está inflada y el área de
+  2019-2023 es imputada.
+- **El riesgo de precio cambia de régimen:** en turbulencia, una semana de ±10 % pasa 1 de cada 11 semanas; en calma,
+  1 de cada 261.
+- **La forma de la curva es un indicador comercial:** el contrato próximo cotizó por encima del siguiente en
+  2001-2002, 2010-2011 y 2021-2024.
+- **El precio no se puede adivinar, pero su rango sí:** con la volatilidad de mayo de 2024, la banda 80 % va de −6 % a
+  +7 % a 1 mes y de −14 % a +17 % a 3 meses. Cada ¢/lb equivale a US$22 por tonelada.
+- **La oferta mundial se asocia con el precio de 2-3 años antes:** no conviene expandir área por un precio alto de
+  hoy.
+
+### Uso de IA
+
+- **Qué hizo:** implementó según mi diseño la auditoría de FAOSTAT, los descriptores de trayectoria con dos métodos de
+  pares, la detección y el ajuste del cambio de contrato, el Markov de volatilidad, los giros de 20 % contra un paseo
+  aleatorio, el pronóstico con origen rodante y bandas según volatilidad, y el panel de oferta con prueba de
+  permutación. También redactó borradores de los notebooks y del HTML.
+- **Cómo lo verifiqué:** comparé cada cifra del texto contra la salida de los notebooks, y los eventos y promedios,
+  contra fuentes públicas.
+- **Errores de fondo de la IA que corregí:**
+  1. La IA dio primero como pares de Guatemala a "El Salvador, Nicaragua, Eswatini, Malaui y Zambia", a partir de una
+     exploración. Con la regla formal (top 10 en ambos métodos), Malaui y Zambia salen en uno solo y sus datos son
+     mayoritariamente no oficiales; los pares son El Salvador, Eswatini, Brasil, Nicaragua y Egipto.
+  2. La primera exploración del pronóstico comparaba el AR(1) contra el promedio del mes y parecía ganarle. El baseline
+     correcto es el último cierre, contra el que pierde (D61, H22).
+  3. El texto de las bandas afirmaba que la banda fija cubría menos en turbulencia. En el período evaluado solo hay 6
+     meses turbulentos de 149, así que esa comparación no se puede hacer; la retiré.
+  4. En la oferta se afirmó primero que los placebos "dan cero". Con el precio cortado en 2023 (sin el 2024 parcial),
+     el precio del año siguiente se asocia negativamente con el área (−0.02). La revisión independiente marcó además
+     que varios textos seguían diciendo "pasa placebos" (ver abajo).
+  5. Los errores agrupados por año daban t = 3.1 para la respuesta del área. Con solo 20 años de precio, la prueba de
+     permutación da p = 0.05 a una cola. Presento la permutación como prueba principal.
+  6. En la figura de oferta agregada, los ceros de los dos ejes no coincidían, lo que exageraba la relación. Los
+     alineé.
+- **Correcciones menores (cifras):** "tres de cada cuatro" datos de producción oficiales (son 66 % en todo el archivo
+  y 45 % en 2023); 0.09 → 0.08 en la autocorrelación de cierres; 31-48 → 31-47 en el rango del paseo aleatorio; y
+  10-13 % → 12-15 % en la diferencia de área con el USDA.
+
+**Revisión independiente de cifras (Serie III).** Pedí a un agente de IA separado comparar cada cifra de los
+notebooks contra sus salidas y revisar el código de pronóstico en busca de fuga de información. Confirmó que no hay
+fuga: entrenamiento, bandas y predictores usan solo información disponible en cada origen. Encontró 1 problema de
+fondo, 5 medios y varios menores; los corregí todos.
+- **Los placebos fallan (fondo).** El texto decía que el placebo "pasa". El precio del año siguiente se asocia
+  negativamente con el área (−0.02, p = 0.01) y con la producción. Si la oferta mueve el precio y el área tiene
+  inercia, los rezagos podrían recoger esa historia.
+  - Agregué un modelo ARDL con los rezagos del propio crecimiento: la respuesta a 2-3 años se mantiene.
+  - El placebo deja de ser significativo con 19 años de muestra (−0.013, p = 0.19), pero no con 18.
+  - La conclusión pasó de "consistente con una respuesta causal" a "asociación rezagada robusta, evidencia causal
+    débil".
+- **Certeza sobre la causalidad inversa:** la asociación entre la producción y el precio del mismo año bajó de certeza
+  alta a media. Se apoya en errores agrupados de 20 años y también es compatible con causas comunes.
+- **Contradicción con las preguntas 2 y 3:** la oferta "explicaba la forma del ciclo" y se recomendaba "esperar más
+  competencia". Eso implica una reversión del precio que las preguntas 2 y 3 descartan. La reescribí como rezago de la
+  expansión de competidores, no como pronóstico del precio.
+- **Especificación elegida después de ver resultados:** la versión ponderada por área (p = 0.01) se presentaba como
+  confirmación. Ahora es exploratoria (Brasil e India pesan 55 %). Agregué la sensibilidad con 4 rezagos (p = 0.11).
+- **Colas pesadas:** "90 veces" usaba una escala robusta. Con la desviación estándar de la muestra, que es la que usaría
+  un modelo normal, son ~36 veces.
+- **Artefacto que seguía en la serie ajustada:** el −18 % del 28/04/2000, declarado artefacto, seguía ahí, junto con el
+  30/06/2000. Excluí los dos (vencimientos con volumen cero). Cambiaron la curtosis (2.9 → 1.9), el acumulado
+  (×2.0 → ×2.6) y los regímenes (turbulencia 6.2 % → 5.9 % semanal; 22 % → 24 % del tiempo).
+- **Menores:**
+  - la cobertura de las bandas por régimen se presentaba como resultado firme, con solo 8 meses turbulentos;
+  - la limitación de "el objetivo mezcla contratos" era falsa. El desajuste real es entre el último cierre (contrato que
+    vence) y el mes objetivo: 0.89 contra 0.82 ¢/lb;
+  - "no se puede mejorar" pasó a "ninguno de los modelos probados lo mejora";
+  - una cita de Bloomberg no se pudo verificar y se quitó;
+  - corregí rangos (5-11 ¢/lb en 2000-2004; diferencias de hasta 4.1 % con el Banco Mundial; 21 puntos en la
+    correlación agregada);
+  - Eswatini no mejoró su rendimiento;
+  - la silueta con k = 3 no supera el percentil 95 del nulo;
+  - maticé la comparación con el USDA porque las zafras no coinciden con el año de FAOSTAT.
+- **Un error propio detectado al corregir:** al agregar los rezagos propios al modelo, la "elasticidad acumulada"
+  sumaba también esos coeficientes. Lo corregí antes de reportar.
+- **Un error de etiquetado:** el último día de la serie (24/06/2024, mes incompleto) se marcaba como vencimiento. Lo
+  corregí.
+
+### Integración al repo y corrida en Windows
+
+Trabajé la Serie III en una sesión aparte y la integré al repo con Claude Code. Corrí los notebooks 10→13 y
+`docs/build_serie3_explicacion.py` desde cero en Windows (Python 3.12, `requirements.txt`):
+- 11 de las 12 tablas y JSON salen idénticos a la corrida original y se regeneran las 12 figuras.
+- El resumen de la pregunta 2 difiere solo en la tercera o cuarta cifra significativa del Markov (por ejemplo, la
+  duración esperada de la calma da 59.518, 59.515 o 59.512 semanas según la corrida). El modelo ya usa semilla fija;
+  la variación viene del optimizador numérico y del álgebra lineal con varios hilos, y aparece incluso entre dos
+  corridas en la misma máquina. Ninguna cifra citada cambia: el BIC sigue eligiendo 2 regímenes, y una semana de
+  ±10 % sigue pasando 1 de cada 11 semanas en turbulencia y 1 de cada 261 en calma.
+- Esta serie ya leía y escribía todo con `encoding="utf-8"`. Solo moví los datos a `data/raw/serie3/` para que no se
+  mezclen con los de otras series.
+
+---
+
 ## Serie IV · API en producción (`api/`, `docs/api.md`)
 
-**D53. La API lee los artefactos JSON; no re-entrena ni usa pickles.** Al arrancar carga `serie1_curvas.json`,
+**D63. La API lee los artefactos JSON; no re-entrena ni usa pickles.** Al arrancar carga `serie1_curvas.json`,
 `serie1_modelo_p2.json` y `serie1_segmentos.json`, y calcula con los mismos módulos de `src/` que los notebooks. Así
 sus respuestas son las cifras de los notebooks y no necesita los datasets.
 *Descartado:* pickles de scikit-learn (dependen de la versión exacta y no se pueden leer) y re-entrenar al arrancar
 (obligaría a llevar los datasets a la imagen).
 
-**D54. Endpoints por pregunta.** `GET /campo/variedades` y `POST /campo/ciclo` (P1), `POST /campo/pronostico` (P2),
+**D64. Endpoints por pregunta.** `GET /campo/variedades` y `POST /campo/ciclo` (P1), `POST /campo/pronostico` (P2),
 `POST /campo/segmento` (P3), `POST /campo/auditoria` y `/campo/auditoria/csv` (P4), más `GET /salud`. Cada respuesta
 trae lo necesario para decidir, no solo el número: ciclo óptimo con el margen de cada ciclo posible, pronóstico con
 banda y desglose, grupo con el segundo más cercano, auditoría con decisión por lote.
 
-**D55. Validación de entradas con rangos plausibles** (pydantic): precio US$0.05-1.00/lb, corte 0-4, TCH 0-400 t/ha,
+**D65. Validación de entradas con rangos plausibles** (pydantic): precio US$0.05-1.00/lb, corte 0-4, TCH 0-400 t/ha,
 etc. Los errores devuelven 422 con un mensaje en español que dice qué corregir. Una variedad sin historia en etapa 5 se
 rechaza: predecirla como si fuera un testigo promedio daría una cifra sin respaldo (es el escenario 3, pendiente).
 
-**D56. Segmento con entradas en %**, como la tabla del notebook 04 (más fácil de llenar que logaritmos); la API las
+**D66. Segmento con entradas en %**, como la tabla del notebook 04 (más fácil de llenar que logaritmos); la API las
 pasa a logaritmo. Con los valores redondeados de la tabla se reproducen las 23 asignaciones; la menor diferencia entre
 el centro más cercano y el segundo es 0.54 desviaciones, así que el redondeo no cambia ninguna. Como no hay grupos
 naturales (D31), la respuesta incluye el segundo grupo y las distancias.
 
-**D57. Pronóstico con la cobertura real de la banda** (74 % en escenario 1, 71 % en escenario 2), no el 80 % nominal
+**D67. Pronóstico con la cobertura real de la banda** (74 % en escenario 1, 71 % en escenario 2), no el 80 % nominal
 (D27). La respuesta da lb/acre y t/ha.
 
-**D58. Auditoría desde JSON o CSV.** El CSV se valida fila por fila con el mismo esquema que el JSON. El óptimo es el
+**D68. Auditoría desde JSON o CSV.** El CSV se valida fila por fila con el mismo esquema que el JSON. El óptimo es el
 del testigo con los supuestos en unidades métricas (4 cortes), igual que el notebook 05. Sin la columna `corte` la API
 responde, pero avisa (`corte_registrado: false`).
 
-**D59. Docker.** Una sola imagen (`python:3.12-slim`, dependencias en `api/requirements.txt`) corre la API y las
+**D69. Docker.** Una sola imagen (`python:3.12-slim`, dependencias en `api/requirements.txt`) corre la API y las
 pruebas; no lleva datasets, notebooks ni PDF. `docker compose up --build` levanta la API; el perfil `pruebas` agrega un
 PostgreSQL 16 temporal (en memoria, sin puertos expuestos) para correr también la prueba del esquema SQL. La imagen lee
 `PORT`, así que sirve igual en Cloud Run. `CORS_ORIGINS` limita qué sitios pueden consultarla.
@@ -718,7 +998,7 @@ La prueba del esquema ahora crea un esquema temporal y lo borra, para poder repe
 pasan las 52 pruebas (47 de la API y 5 del esquema contra PostgreSQL 16), también al repetirlas sobre la misma base
 (`outputs/tests/pytest_docker.txt`). La imagen pesa 448 MB y corre con un usuario sin privilegios.
 
-**D60. Pruebas de la API** (`tests/test_api.py`): reproducen las cifras de control de la Serie I (US$526.3/acre/año;
+**D70. Pruebas de la API** (`tests/test_api.py`): reproducen las cifras de control de la Serie I (US$526.3/acre/año;
 ciclo, margen, ganancia y precio de equilibrio de las 23 variedades; 509 predicciones de 2022 con diferencia ≤ 1 lb/acre;
 100 % de asignaciones; 1,143/1,143 ciclos y auditoría igual a pandas; CSV igual a JSON), las cifras de los ejemplos de
 `docs/api.md` y que las entradas inválidas devuelvan 422.
@@ -729,9 +1009,8 @@ ciclo, margen, ganancia y precio de equilibrio de las 23 variedades; 509 predicc
   y respuestas.
 - **Cómo lo verifiqué:** con las pruebas automáticas contra las cifras de control de los notebooks, y comparando cada
   ejemplo de `docs/api.md` con una llamada real.
-- **Errores de la IA que corregí:**
+- **Errores de fondo de la IA que corregí:**
   1. La primera versión de la prueba de las 509 predicciones mandaba la ventaja del lote como `NaN` en los 8 lotes que
      no la tienen, y fallaba. Ahora se manda como "sin dato", igual que la calculadora del HTML.
-  2. Las decisiones de la auditoría salían con 10 decimales; ahora se redondean a 2.
-  3. Docker Compose tomaba el nombre del proyecto de la carpeta local, y los contenedores salían con un nombre que no
-     es neutro. Se fijó `name: analisis-cana` en `docker-compose.yml`.
+- **Correcciones menores:** las decisiones de la auditoría salían con 10 decimales (ahora 2), y Docker Compose tomaba
+  el nombre del proyecto de la carpeta local, con contenedores de nombre no neutro (ahora `name: analisis-cana`).
