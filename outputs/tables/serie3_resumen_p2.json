@@ -1,0 +1,188 @@
+{
+ "auditoria": {
+  "filas": 6097,
+  "desde": "2000-03-01",
+  "hasta": "2024-06-24",
+  "fechas_duplicadas": 0,
+  "fines_de_semana": 0,
+  "faltantes": 0,
+  "ohlc_imposible": 11,
+  "volumen_cero": 93,
+  "dias_planos_ohlc": 1,
+  "huecos_mayores_a_4_dias": 18,
+  "rango_cierre": [
+   4.960000038146973,
+   35.310001373291016
+  ]
+ },
+ "dias_cambio": 97,
+ "por_tipo_de_dia": {
+  "normal": {
+   "crudo": 1.47,
+   "brecha": 0.4,
+   "intradia": 1.394,
+   "días": 5708
+  },
+  "fin de mes sin vencimiento": {
+   "crudo": 1.456,
+   "brecha": 0.336,
+   "intradia": 1.44,
+   "días": 195
+  },
+  "vencimiento": {
+   "crudo": 2.411,
+   "brecha": 0.493,
+   "intradia": 2.411,
+   "días": 97
+  },
+  "cambio de contrato": {
+   "crudo": 4.373,
+   "brecha": 3.92,
+   "intradia": 1.944,
+   "días": 97
+  }
+ },
+ "top25_por_tipo": {
+  "normal": 13,
+  "cambio de contrato": 11,
+  "vencimiento": 1
+ },
+ "ohlc_imposible_por_tipo": {
+  "vencimiento": 11
+ },
+ "crudo": {
+  "vol": 0.33363362762213944,
+  "curtosis": 5.978815515503186,
+  "acumulado": 3.822834718101002
+ },
+ "ajustado": {
+  "vol": 0.3148405380067891,
+  "curtosis": 1.9301271667702289,
+  "acumulado": 2.5852865935146205
+ },
+ "vol_anual": {
+  "2000": 35.98,
+  "2001": 30.23,
+  "2002": 37.62,
+  "2003": 29.73,
+  "2004": 29.11,
+  "2005": 22.18,
+  "2006": 37.56,
+  "2007": 24.83,
+  "2008": 45.45,
+  "2009": 36.4,
+  "2010": 48.73,
+  "2011": 39.48,
+  "2012": 26.2,
+  "2013": 17.76,
+  "2014": 24.23,
+  "2015": 30.47,
+  "2016": 32.8,
+  "2017": 29.38,
+  "2018": 28.34,
+  "2019": 22.92,
+  "2020": 30.96,
+  "2021": 27.06,
+  "2022": 21.32,
+  "2023": 28.36,
+  "2024": 27.81
+ },
+ "arch_p": 7.585375454757789e-49,
+ "bic": {
+  "1": 7329.622431537352,
+  "2": 7266.248511832776,
+  "3": 7297.375495920582
+ },
+ "regimenes": {
+  "Calma": {
+   "volatilidad semanal (%)": 3.458,
+   "volatilidad anual equivalente (%)": 24.935,
+   "duración esperada (semanas)": 59.512,
+   "% de las semanas": 75.512
+  },
+  "Turbulencia": {
+   "volatilidad semanal (%)": 5.912,
+   "volatilidad anual equivalente (%)": 42.635,
+   "duración esperada (semanas)": 23.824,
+   "% de las semanas": 24.488
+  }
+ },
+ "prob_semana_10": {
+  "Calma": 0.003829004042987425,
+  "Turbulencia": 0.09076955288167321
+ },
+ "fases_20": 34,
+ "fases_paseo": [
+  39.452,
+  31.0,
+  47.0
+ ],
+ "colas": {
+  "|z| > 3": {
+   "días (desviación estándar)": 63,
+   "días (escala robusta)": 113,
+   "esperados si fuera normal": 16.453,
+   "veces más (desviación estándar)": 3.829
+  },
+  "|z| > 4": {
+   "días (desviación estándar)": 14,
+   "días (escala robusta)": 32,
+   "esperados si fuera normal": 0.386,
+   "veces más (desviación estándar)": 36.269
+  },
+  "|z| > 5": {
+   "días (desviación estándar)": 6,
+   "días (escala robusta)": 8,
+   "esperados si fuera normal": 0.003,
+   "veces más (desviación estándar)": 1717.372
+  }
+ },
+ "gl_t": 6.023816771777639,
+ "brecha_por_anio": {
+  "2000": 6.388,
+  "2001": -4.438,
+  "2002": -7.304,
+  "2003": -0.608,
+  "2004": 5.176,
+  "2005": 2.974,
+  "2006": 3.769,
+  "2007": 0.764,
+  "2008": 8.083,
+  "2009": 3.734,
+  "2010": -5.056,
+  "2011": -6.727,
+  "2012": -0.606,
+  "2013": 1.627,
+  "2014": 5.807,
+  "2015": 1.859,
+  "2016": 0.75,
+  "2017": 1.243,
+  "2018": 3.009,
+  "2019": 3.3,
+  "2020": 1.123,
+  "2021": -1.042,
+  "2022": -2.136,
+  "2023": -2.689,
+  "2024": -2.276
+ },
+ "episodios": {
+  "Crisis financiera (jul-dic 2008)": {
+   "Azúcar": -13.92,
+   "Café": -26.62,
+   "Cacao": -20.68,
+   "Algodón": -28.73
+  },
+  "COVID (20 feb-27 abr 2020)": {
+   "Azúcar": -40.19,
+   "Café": 0.97,
+   "Cacao": -20.11,
+   "Algodón": -21.56
+  },
+  "Rebote (27 abr-31 dic 2020)": {
+   "Azúcar": 68.19,
+   "Café": 22.61,
+   "Cacao": 10.86,
+   "Algodón": 44.85
+  }
+ }
+}
