@@ -9207,13 +9207,7 @@ montos menores es una palanca posible, aunque sin la corriente del ventilador pr
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>El JSON reproduce el 100.0 % de las asignaciones</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>
+<pre>El JSON reproduce el 100.0 % de las asignaciones
 </pre>
 </div>
 </div>
@@ -9221,6 +9215,36 @@ montos menores es una palanca posible, aunque sin la corriente del ventilador pr
 <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[9]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>6294</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=fbccb8ec">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Muestra para las pruebas de la API (Serie IV): las ventanas de 5 min con sus 9 variables y el modo asignado.</span>
+<span class="c1"># Con ella, tests/test_api_caldera.py comprueba que POST /caldera/modo reproduce el 100 % de las asignaciones.</span>
+<span class="n">W</span><span class="p">[</span><span class="n">COLS</span> <span class="o">+</span> <span class="p">[</span><span class="s2">"modo"</span><span class="p">]]</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TAB</span> <span class="o">/</span> <span class="s2">"serie2_muestra_api_modos.csv"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Muestra para la API: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">W</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> ventanas de 5 min"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Muestra para la API: 1,441 ventanas de 5 min
+</pre>
 </div>
 </div>
 </div>

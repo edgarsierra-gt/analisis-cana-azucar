@@ -9144,6 +9144,44 @@ Fórmula hidráulica ajustada con los 5 días: Q = -4.94 + 1051.0·√(ΔP·ρ)
 </div>
 </div>
 </div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a52604b5">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Muestra para las pruebas de la API (Serie IV): las últimas 3 h en promedios de 1 min, con lo que predice el Ridge</span>
+<span class="c1"># final y los sensores crudos que usa la verificación de la pregunta 4. Con ella, tests/test_api_caldera.py comprueba</span>
+<span class="c1"># que POST /caldera/vapor-virtual reproduce el modelo y que POST /caldera/verificar coincide con src/fabrica_anomalias.</span>
+<span class="n">VENT</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">180</span><span class="p">:]</span>
+<span class="n">CRUDOS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"PT_8313A"</span><span class="p">,</span> <span class="s2">"PT_8313B"</span><span class="p">,</span> <span class="s2">"PT_8313C"</span><span class="p">,</span> <span class="s2">"PT_8313D"</span><span class="p">,</span> <span class="s2">"PT_8313E"</span><span class="p">,</span> <span class="s2">"PT_8313F"</span><span class="p">,</span> <span class="s2">"AIR_8301A"</span><span class="p">,</span> <span class="s2">"AIR_8301B"</span><span class="p">,</span> <span class="s2">"ZCLCCY"</span><span class="p">,</span>
+          <span class="s2">"YCLCCY"</span><span class="p">,</span> <span class="s2">"TE_8319A"</span><span class="p">,</span> <span class="s2">"TE_8319B"</span><span class="p">,</span> <span class="s2">"FT_8306A"</span><span class="p">,</span> <span class="s2">"FT_8306B"</span><span class="p">]</span>
+<span class="n">M1</span> <span class="o">=</span> <span class="n">DF</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s2">"1min"</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">interpolate</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>          <span class="c1"># igual que la verificación del notebook 09</span>
+<span class="n">muestra</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">VENT</span><span class="p">,</span> <span class="n">todas</span> <span class="o">+</span> <span class="p">[</span><span class="n">OBJETIVO</span><span class="p">]]</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">M1</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">VENT</span><span class="p">,</span> <span class="n">CRUDOS</span><span class="p">])</span>
+<span class="n">completo</span> <span class="o">=</span> <span class="n">FA</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">VENT</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">muestra</span><span class="p">[</span><span class="s2">"pred_ridge"</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">final</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">FA</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">VENT</span><span class="p">][</span><span class="n">completo</span><span class="p">]),</span> <span class="n">index</span><span class="o">=</span><span class="n">VENT</span><span class="p">[</span><span class="n">completo</span><span class="p">])</span>
+<span class="n">muestra</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">TAB</span> <span class="o">/</span> <span class="s2">"serie2_muestra_api_vapor.csv"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Muestra para la API: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">muestra</span><span class="p">)</span><span class="si">}</span><span class="s2"> minutos, </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">completo</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="si">}</span><span class="s2"> con predicción del Ridge final"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Muestra para la API: 180 minutos, 180 con predicción del Ridge final
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=3b758706">
 <div class="jp-Cell-inputWrapper" tabindex="0">
