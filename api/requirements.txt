@@ -9,3 +9,4 @@ python-multipart==0.0.32
 pytest==9.1.1
 httpx==0.28.1
 psycopg[binary]==3.3.6
+scikit-learn==1.9.1   # la prueba de verificación compara contra src/fabrica_anomalias (código del notebook 09)
