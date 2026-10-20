@@ -1,0 +1,31 @@
+,descripción,unidad,estado,tratamiento
+PT_8313A,Presión de hogar superior A,Pa,redundante (6 presiones de hogar),modelos: mediana de los 6; fallas: cada uno
+PT_8313B,Presión de hogar superior B,Pa,redundante (6 presiones de hogar),modelos: mediana de los 6; fallas: cada uno
+PT_8313C,Presión de hogar superior C,Pa,redundante (6 presiones de hogar),modelos: mediana de los 6; fallas: cada uno
+PT_8313D,Presión de hogar superior D,Pa,redundante (6 presiones de hogar),modelos: mediana de los 6; fallas: cada uno
+PT_8313E,Presión de hogar superior E,Pa,redundante (6 presiones de hogar),modelos: mediana de los 6; fallas: cada uno
+PT_8313F,Presión de hogar superior F,Pa,redundante (6 presiones de hogar),modelos: mediana de los 6; fallas: cada uno
+PTCA_8322A,Presión del domo (izq.),MPa,"confiable, resolución 0.01 MPa",usar
+PTCA_8324,Presión de vapor a la salida del colector,MPa,"confiable, resolución 0.01 MPa",usar
+TE_8319A,Temperatura de gases a la salida del economizador superior (izq.),°C,confiable; der. +34 °C fijo,promedio izq./der.; verificar calibración
+TE_8319B,Temperatura de gases a la salida del economizador superior (der.),°C,confiable; der. +34 °C fijo,promedio izq./der.; verificar calibración
+TE_8313B,"Temperatura del hogar, parte superior (der.)",°C,confiable,usar
+TE_8303,Temperatura del aire primario a la salida del precalentador,°C,confiable,usar
+TE_8304,Temperatura del aire secundario a la salida del precalentador,°C,confiable,usar
+TV_8329ZC,Apertura de la válvula del atemperador primario,%,confiable; 12 h fija (operación),usar
+FT_8301,Flujo de aire primario,Nm³/h,confiable,usar
+FT_8302,Flujo de aire secundario,Nm³/h,confiable,usar
+FT_8306A,Flujo de aire a la cámara de retorno (izq.),Nm³/h,confiable; redistribución 30/03 ~08:53,usar
+AIR_8301A,O₂ en gases a la entrada del economizador superior (izq.),% vol,confiable,promedio izq./der.
+FT_8306B,Flujo de aire a la cámara de retorno (der.),Nm³/h,confiable; redistribución 30/03 ~08:53,usar
+AIR_8301B,O₂ en gases a la entrada del economizador superior (der.),% vol,confiable,promedio izq./der.
+YFJ3_AI,Corriente del motor del ventilador de tiro inducido,A,"confiable, con transitorios de control",usar en promedios de 1 min; transitorios a la pregunta 4
+YFJ3_ZD1,Vibración de chumacera del tiro inducido A,mm/s?,confiable,usar
+YFJ3_ZD2,Vibración de chumacera del tiro inducido B,mm/s?,sospechoso: ruido sin relación,fuera de modelos; verificar con mantenimiento
+SXLTCYZ,Diferencial de presión hogar superior-inferior (izq.),Pa,sospechoso: copia la presión de hogar,fuera de modelos; revisar toma inferior
+SXLTCYY,Diferencial de presión hogar superior-inferior (der.),Pa,"confiable, actualiza cada 10 s",usar; resolución ≥ 10 s
+ZCLCCY,Diferencial de presión del lecho (izq.),Pa,"confiable, actualiza cada 10 s",promedio izq./der.; resolución ≥ 10 s
+YCLCCY,Diferencial de presión del lecho (der.),Pa,"confiable, actualiza cada 10 s",promedio izq./der.; resolución ≥ 10 s
+YJJWSLL,Flujo de agua de atemperación primaria,t/h,30 faltantes,dejar faltantes; no usar data_AutoReg.csv
+ZZQBCHLL,Flujo de vapor principal (compensado),t/h,"calculado (compensado), actualiza cada 10 s",objetivo de la pregunta 3; resolución ≥ 10 s
+TE_8332A,Temperatura del vapor a la salida de la caldera,°C,confiable,usar

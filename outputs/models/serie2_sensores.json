@@ -1,0 +1,319 @@
+{
+ "descripcion": "Serie II · diccionario corregido y tratamiento de los 30 sensores de la caldera",
+ "archivo_base": "data.csv",
+ "periodo_s": 5,
+ "sensores": {
+  "PT_8313A": {
+   "descripcion": "Presión de hogar superior A",
+   "unidad": "Pa",
+   "grupo": "hogar",
+   "actualiza_s": 5,
+   "estado": "redundante (6 presiones de hogar)",
+   "tratamiento": "modelos: mediana de los 6; fallas: cada uno",
+   "p01": -292.93,
+   "p99": -24.96
+  },
+  "PT_8313B": {
+   "descripcion": "Presión de hogar superior B",
+   "unidad": "Pa",
+   "grupo": "hogar",
+   "actualiza_s": 5,
+   "estado": "redundante (6 presiones de hogar)",
+   "tratamiento": "modelos: mediana de los 6; fallas: cada uno",
+   "p01": -335.3934,
+   "p99": -78.15920000000041
+  },
+  "PT_8313C": {
+   "descripcion": "Presión de hogar superior C",
+   "unidad": "Pa",
+   "grupo": "hogar",
+   "actualiza_s": 5,
+   "estado": "redundante (6 presiones de hogar)",
+   "tratamiento": "modelos: mediana de los 6; fallas: cada uno",
+   "p01": -287.22,
+   "p99": -49.63
+  },
+  "PT_8313D": {
+   "descripcion": "Presión de hogar superior D",
+   "unidad": "Pa",
+   "grupo": "hogar",
+   "actualiza_s": 5,
+   "estado": "redundante (6 presiones de hogar)",
+   "tratamiento": "modelos: mediana de los 6; fallas: cada uno",
+   "p01": -250.71,
+   "p99": -12.87
+  },
+  "PT_8313E": {
+   "descripcion": "Presión de hogar superior E",
+   "unidad": "Pa",
+   "grupo": "hogar",
+   "actualiza_s": 5,
+   "estado": "redundante (6 presiones de hogar)",
+   "tratamiento": "modelos: mediana de los 6; fallas: cada uno",
+   "p01": -310.6408,
+   "p99": -53.24
+  },
+  "PT_8313F": {
+   "descripcion": "Presión de hogar superior F",
+   "unidad": "Pa",
+   "grupo": "hogar",
+   "actualiza_s": 5,
+   "estado": "redundante (6 presiones de hogar)",
+   "tratamiento": "modelos: mediana de los 6; fallas: cada uno",
+   "p01": -296.8709,
+   "p99": -44.01
+  },
+  "PTCA_8322A": {
+   "descripcion": "Presión del domo (izq.)",
+   "unidad": "MPa",
+   "grupo": "vapor",
+   "actualiza_s": 5,
+   "estado": "confiable, resolución 0.01 MPa",
+   "tratamiento": "usar",
+   "p01": 9.54,
+   "p99": 9.93
+  },
+  "PTCA_8324": {
+   "descripcion": "Presión de vapor a la salida del colector",
+   "unidad": "MPa",
+   "grupo": "vapor",
+   "actualiza_s": 5,
+   "estado": "confiable, resolución 0.01 MPa",
+   "tratamiento": "usar",
+   "p01": 9.2,
+   "p99": 9.6
+  },
+  "TE_8319A": {
+   "descripcion": "Temperatura de gases a la salida del economizador superior (izq.)",
+   "unidad": "°C",
+   "grupo": "gases",
+   "actualiza_s": 5,
+   "estado": "confiable; der. +34 °C fijo",
+   "tratamiento": "promedio izq./der.; verificar calibración",
+   "p01": 344.24,
+   "p99": 369.1701
+  },
+  "TE_8319B": {
+   "descripcion": "Temperatura de gases a la salida del economizador superior (der.)",
+   "unidad": "°C",
+   "grupo": "gases",
+   "actualiza_s": 5,
+   "estado": "confiable; der. +34 °C fijo",
+   "tratamiento": "promedio izq./der.; verificar calibración",
+   "p01": 369.87,
+   "p99": 409.79
+  },
+  "TE_8313B": {
+   "descripcion": "Temperatura del hogar, parte superior (der.)",
+   "unidad": "°C",
+   "grupo": "hogar",
+   "actualiza_s": 5,
+   "estado": "confiable",
+   "tratamiento": "usar",
+   "p01": 746.02,
+   "p99": 797.27
+  },
+  "TE_8303": {
+   "descripcion": "Temperatura del aire primario a la salida del precalentador",
+   "unidad": "°C",
+   "grupo": "aire",
+   "actualiza_s": 5,
+   "estado": "confiable",
+   "tratamiento": "usar",
+   "p01": 200.03,
+   "p99": 222.83
+  },
+  "TE_8304": {
+   "descripcion": "Temperatura del aire secundario a la salida del precalentador",
+   "unidad": "°C",
+   "grupo": "aire",
+   "actualiza_s": 5,
+   "estado": "confiable",
+   "tratamiento": "usar",
+   "p01": 214.81,
+   "p99": 230.27
+  },
+  "TV_8329ZC": {
+   "descripcion": "Apertura de la válvula del atemperador primario",
+   "unidad": "%",
+   "grupo": "vapor",
+   "actualiza_s": 5,
+   "estado": "confiable; 12 h fija (operación)",
+   "tratamiento": "usar",
+   "p01": 5.56,
+   "p99": 28.02
+  },
+  "FT_8301": {
+   "descripcion": "Flujo de aire primario",
+   "unidad": "Nm³/h",
+   "grupo": "aire",
+   "actualiza_s": 5,
+   "estado": "confiable",
+   "tratamiento": "usar",
+   "p01": 42720.13,
+   "p99": 50577.36
+  },
+  "FT_8302": {
+   "descripcion": "Flujo de aire secundario",
+   "unidad": "Nm³/h",
+   "grupo": "aire",
+   "actualiza_s": 5,
+   "estado": "confiable",
+   "tratamiento": "usar",
+   "p01": 14735.47,
+   "p99": 24807.68
+  },
+  "FT_8306A": {
+   "descripcion": "Flujo de aire a la cámara de retorno (izq.)",
+   "unidad": "Nm³/h",
+   "grupo": "aire",
+   "actualiza_s": 5,
+   "estado": "confiable; redistribución 30/03 ~08:53",
+   "tratamiento": "usar",
+   "p01": 655.31,
+   "p99": 739.15
+  },
+  "AIR_8301A": {
+   "descripcion": "O₂ en gases a la entrada del economizador superior (izq.)",
+   "unidad": "% vol",
+   "grupo": "gases",
+   "actualiza_s": 5,
+   "estado": "confiable",
+   "tratamiento": "promedio izq./der.",
+   "p01": 1.27,
+   "p99": 3.1
+  },
+  "FT_8306B": {
+   "descripcion": "Flujo de aire a la cámara de retorno (der.)",
+   "unidad": "Nm³/h",
+   "grupo": "aire",
+   "actualiza_s": 5,
+   "estado": "confiable; redistribución 30/03 ~08:53",
+   "tratamiento": "usar",
+   "p01": 585.5396999999999,
+   "p99": 657.29
+  },
+  "AIR_8301B": {
+   "descripcion": "O₂ en gases a la entrada del economizador superior (der.)",
+   "unidad": "% vol",
+   "grupo": "gases",
+   "actualiza_s": 5,
+   "estado": "confiable",
+   "tratamiento": "promedio izq./der.",
+   "p01": 1.34,
+   "p99": 3.4200999999999477
+  },
+  "YFJ3_AI": {
+   "descripcion": "Corriente del motor del ventilador de tiro inducido",
+   "unidad": "A",
+   "grupo": "tiro",
+   "actualiza_s": 5,
+   "estado": "confiable, con transitorios de control",
+   "tratamiento": "usar en promedios de 1 min; transitorios a la pregunta 4",
+   "p01": 20.67,
+   "p99": 25.14
+  },
+  "YFJ3_ZD1": {
+   "descripcion": "Vibración de chumacera del tiro inducido A",
+   "unidad": "mm/s?",
+   "grupo": "tiro",
+   "actualiza_s": 5,
+   "estado": "confiable",
+   "tratamiento": "usar",
+   "p01": 4.47,
+   "p99": 7.25
+  },
+  "YFJ3_ZD2": {
+   "descripcion": "Vibración de chumacera del tiro inducido B",
+   "unidad": "mm/s?",
+   "grupo": "tiro",
+   "actualiza_s": 5,
+   "estado": "sospechoso: ruido sin relación",
+   "tratamiento": "fuera de modelos; verificar con mantenimiento",
+   "p01": 3.63,
+   "p99": 12.57
+  },
+  "SXLTCYZ": {
+   "descripcion": "Diferencial de presión hogar superior-inferior (izq.)",
+   "unidad": "Pa",
+   "grupo": "lecho",
+   "actualiza_s": 10,
+   "estado": "sospechoso: copia la presión de hogar",
+   "tratamiento": "fuera de modelos; revisar toma inferior",
+   "p01": -280.7217,
+   "p99": -10.73
+  },
+  "SXLTCYY": {
+   "descripcion": "Diferencial de presión hogar superior-inferior (der.)",
+   "unidad": "Pa",
+   "grupo": "lecho",
+   "actualiza_s": 10,
+   "estado": "confiable, actualiza cada 10 s",
+   "tratamiento": "usar; resolución ≥ 10 s",
+   "p01": -524.0217,
+   "p99": -233.39
+  },
+  "ZCLCCY": {
+   "descripcion": "Diferencial de presión del lecho (izq.)",
+   "unidad": "Pa",
+   "grupo": "lecho",
+   "actualiza_s": 10,
+   "estado": "confiable, actualiza cada 10 s",
+   "tratamiento": "promedio izq./der.; resolución ≥ 10 s",
+   "p01": 9246.629799999999,
+   "p99": 11434.871000000001
+  },
+  "YCLCCY": {
+   "descripcion": "Diferencial de presión del lecho (der.)",
+   "unidad": "Pa",
+   "grupo": "lecho",
+   "actualiza_s": 10,
+   "estado": "confiable, actualiza cada 10 s",
+   "tratamiento": "promedio izq./der.; resolución ≥ 10 s",
+   "p01": 9230.4996,
+   "p99": 11357.494199999997
+  },
+  "YJJWSLL": {
+   "descripcion": "Flujo de agua de atemperación primaria",
+   "unidad": "t/h",
+   "grupo": "vapor",
+   "actualiza_s": 5,
+   "estado": "30 faltantes",
+   "tratamiento": "dejar faltantes; no usar data_AutoReg.csv",
+   "p01": 2.0,
+   "p99": 3.65
+  },
+  "ZZQBCHLL": {
+   "descripcion": "Flujo de vapor principal (compensado)",
+   "unidad": "t/h",
+   "grupo": "vapor",
+   "actualiza_s": 10,
+   "estado": "calculado (compensado), actualiza cada 10 s",
+   "tratamiento": "objetivo de la pregunta 3; resolución ≥ 10 s",
+   "p01": 53.41,
+   "p99": 64.90009999999995
+  },
+  "TE_8332A": {
+   "descripcion": "Temperatura del vapor a la salida de la caldera",
+   "unidad": "°C",
+   "grupo": "vapor",
+   "actualiza_s": 5,
+   "estado": "confiable",
+   "tratamiento": "usar",
+   "p01": 526.95,
+   "p99": 546.59
+  }
+ },
+ "excluir_modelos": [
+  "SXLTCYZ",
+  "YFJ3_ZD2"
+ ],
+ "presion_hogar": [
+  "PT_8313A",
+  "PT_8313B",
+  "PT_8313C",
+  "PT_8313D",
+  "PT_8313E",
+  "PT_8313F"
+ ]
+}

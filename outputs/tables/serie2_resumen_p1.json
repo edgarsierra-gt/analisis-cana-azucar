@@ -1,0 +1,16 @@
+{
+ "celdas_distintas_autoreg": 30,
+ "faltantes": 30,
+ "sensores_cada_10s": [
+  "SXLTCYZ",
+  "SXLTCYY",
+  "ZCLCCY",
+  "YCLCCY",
+  "ZZQBCHLL"
+ ],
+ "picos_tiro": 360,
+ "horas_valvula_fija": 12.022222222222222,
+ "tramos_valvula_fija": 17,
+ "salto_retorno": "2022-03-30 08:53:00",
+ "r_sxltcyz_pt8313a": 0.9928193995924519
+}
