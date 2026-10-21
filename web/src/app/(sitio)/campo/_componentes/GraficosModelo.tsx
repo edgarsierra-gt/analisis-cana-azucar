@@ -4,7 +4,7 @@ import * as Plot from "@observablehq/plot";
 import { COLORES, PlotFigura } from "@/components/graficos/PlotFigura";
 import { conSigno, num, pct } from "@/lib/formato";
 
-const halo = { stroke: "var(--papel)", strokeWidth: 3 } as const;
+const halo = { stroke: "var(--fondo)", strokeWidth: 3 } as const;
 
 /* ── Error de cada modelo en los dos escenarios ───────────────────────────── */
 type FilaModelo = { escenario: string; modelo: string; mae: number; mape: number; elegido: boolean };
@@ -109,7 +109,8 @@ export function GraficoZafras({ filas }: { filas: FilaZafra[] }) {
         },
         marks: [
           Plot.barY(filas, {
-            x: "zafra", y: "sesgo", fill: (d: FilaZafra) => (d.destacada ? COLORES.campo : COLORES.contexto),
+            // Las zafras que quedaron muy abajo van en tinta, no en el verde de la serie: el verde se leería como "bueno".
+            x: "zafra", y: "sesgo", fill: (d: FilaZafra) => (d.destacada ? COLORES.tinta : COLORES.contexto),
             tip: true,
             title: (d: FilaZafra) => `Zafra ${d.zafra}\nReal contra predicho: ${conSigno(d.sesgo, 1)} %${d.cobertura === null ? "" : `\nCasos dentro de la banda: ${pct(d.cobertura * 100)}`}`,
           }),

@@ -1,10 +1,10 @@
-.certeza { display: inline-flex; align-items: center; gap: var(--e-2); font-family: var(--fuente-dato); font-size: var(--t-etiqueta); letter-spacing: 0.04em; text-transform: uppercase; font-weight: 600; }
-.marcas { display: inline-flex; gap: 2px; }
-.marcas i { width: 6px; height: 12px; border: 1px solid currentColor; }
-.alta { color: var(--certeza-alta); }
-.alta .marcas i { background: currentColor; }
-.media { color: var(--certeza-media); }
-.media .marcas i:nth-child(-n + 2) { background: currentColor; }
-.baja { color: var(--certeza-baja); }
-.baja .marcas i:first-child { background: currentColor; }
-.motivo { text-transform: none; letter-spacing: 0; font-weight: 400; color: var(--tinta-2); }
+/* "Certeza alta" en texto y un medidor de tres segmentos rellenos en el color de la página: los llenos en el color de
+   la serie, los vacíos en su tinte medio. Sin contornos. El texto dice el nivel; el color solo lo acompaña. */
+.certeza { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--e-1) var(--e-3); font-size: var(--t-texto); line-height: 1.4; }
+.marcas { display: inline-flex; gap: 3px; }
+.marcas span { width: 10px; height: 18px; background: var(--serie-medio); }
+.nivel { font-weight: 600; color: var(--tinta); }
+.motivo { flex-basis: 100%; font-weight: 400; color: var(--tinta); }
+.alta .marcas span { background: var(--serie); }
+.media .marcas span:nth-child(-n + 2) { background: var(--serie); }
+.baja .marcas span:first-child { background: var(--serie); }

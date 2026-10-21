@@ -22,8 +22,9 @@ function marcas(desde: Date, hasta: Date, paso: number): Date[] {
 }
 
 /**
- * Promedios mensuales reales y la banda vigente del pronóstico (junio y agosto de 2024), desde el último cierre.
- * Raya gruesa: banda 80 %; raya fina: banda 95 %. Círculo vacío: promedio real de junio hasta el día 24.
+ * Promedios mensuales reales del último año y la banda vigente del pronóstico (junio y agosto de 2024), desde el último
+ * cierre. Raya gruesa: banda 80 %; raya fina: banda 95 %. Círculo vacío: promedio real de junio hasta el día 24.
+ * Con un año de historia, la banda ocupa la cuarta parte del ancho; en pantallas anchas lleva su rango rotulado.
  */
 export function GraficoBanda({
   reales, bandas, origen, realParcial, etiqueta,
@@ -45,12 +46,12 @@ export function GraficoBanda({
 
   return (
     <PlotFigura
-      alto={340}
+      alto={380}
       etiqueta={etiqueta}
       crear={(ancho) => {
-        // En pantallas angostas: un año de historia, rótulos cortos y rayas más delgadas.
+        // Un año de historia. En pantallas angostas: rótulos cortos (solo el mes) y rayas más delgadas.
         const angosto = ancho < 520;
-        const historia = angosto ? serie.slice(-12) : serie;
+        const historia = serie.slice(-12);
         return {
           marginLeft: 40,
           marginRight: 12,
@@ -73,8 +74,10 @@ export function GraficoBanda({
               x: "x", y: "y", r: 5, stroke: COLORES.tinta, strokeWidth: 1.6, fill: "none", dx: angosto ? 11 : 15,
             }),
             Plot.text(banda, {
-              x: "x", y: "p97_5", text: (b: BandaMes) => (angosto ? b.mes.slice(0, 3) : b.mes), dy: -10,
-              fill: COLORES.mercado, fontWeight: 600, fontSize: 11.5,
+              x: "x", y: "p97_5", dy: -10, lineAnchor: "bottom", lineHeight: 1.25,
+              text: (b: BandaMes) => (angosto ? b.mes.slice(0, 3) : `${b.mes}
+${num(b.p10, 1)} a ${num(b.p90, 1)}`),
+              fill: COLORES.mercado, fontWeight: 600, fontSize: 13,
             }),
             Plot.tip(
               banda,

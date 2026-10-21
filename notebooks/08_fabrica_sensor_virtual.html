@@ -9153,7 +9153,7 @@ Fórmula hidráulica ajustada con los 5 días: Q = -4.94 + 1051.0·√(ΔP·ρ)
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Muestra para las pruebas de la API (Serie IV): las últimas 3 h en promedios de 1 min, con lo que predice el Ridge</span>
-<span class="c1"># final y los sensores crudos que usa la verificación de la pregunta 4. Con ella, tests/test_api_caldera.py comprueba</span>
+<span class="c1"># final y los sensores crudos que usa la verificación de la pregunta 4. Con ella, tests/test_api_caldera_mercado.py comprueba</span>
 <span class="c1"># que POST /caldera/vapor-virtual reproduce el modelo y que POST /caldera/verificar coincide con src/fabrica_anomalias.</span>
 <span class="n">VENT</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">180</span><span class="p">:]</span>
 <span class="n">CRUDOS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"PT_8313A"</span><span class="p">,</span> <span class="s2">"PT_8313B"</span><span class="p">,</span> <span class="s2">"PT_8313C"</span><span class="p">,</span> <span class="s2">"PT_8313D"</span><span class="p">,</span> <span class="s2">"PT_8313E"</span><span class="p">,</span> <span class="s2">"PT_8313F"</span><span class="p">,</span> <span class="s2">"AIR_8301A"</span><span class="p">,</span> <span class="s2">"AIR_8301B"</span><span class="p">,</span> <span class="s2">"ZCLCCY"</span><span class="p">,</span>

@@ -20,3 +20,7 @@ CLAUDE.md
 
 # configuración local del asistente
 .claude/
+
+# archivos de trabajo de la skill de diseño (capturas e informes) y su registro de instalación
+.taste-skill/
+skills-lock.json

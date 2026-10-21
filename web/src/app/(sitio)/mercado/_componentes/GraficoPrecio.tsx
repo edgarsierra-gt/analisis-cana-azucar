@@ -30,7 +30,7 @@ export function GraficoPrecio({
         marks: [
           Plot.rect(tramos, { x1: "x1", x2: "x2", fill: COLORES.resalte, fillOpacity: 0.24 }),
           Plot.text([{ x: new Date((+masLargo.x1 + +masLargo.x2) / 2), texto: "Turbulencia" }], {
-            x: "x", text: "texto", frameAnchor: "bottom", dy: -8, fill: COLORES.tinta2, fontSize: 11,
+            x: "x", text: "texto", frameAnchor: "bottom", dy: -8, fill: COLORES.tinta2, fontSize: 13,
           }),
           Plot.ruleY([0], { stroke: COLORES.tinta }),
           Plot.lineY(datos, { x: "fecha", y: "cierre", stroke: COLORES.mercado, strokeWidth: 1.25 }),

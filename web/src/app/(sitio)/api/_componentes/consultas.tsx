@@ -17,16 +17,44 @@ import { num, pctFraccion, usd } from "@/lib/formato";
 export const VERSION_API = "1.2.0"; // fuente: api/main.py, VERSION
 
 export type Bloque = { rotulo: string; texto: string };
+export type Enlace = { href: string; texto: string };
 export type Consulta = {
   metodo: "GET" | "POST";
   ruta: string;
   /** Serie y pregunta de la prueba que responde, como en docs/api.md */
   pregunta?: string;
+  /** La herramienta de este sitio que la usa en vivo */
+  herramienta?: Enlace;
   para: React.ReactNode;
   entrada: React.ReactNode;
   devuelve: React.ReactNode;
   ejemplo?: { titulo?: string; contexto?: React.ReactNode; bloques: Bloque[]; lectura?: React.ReactNode };
 };
+
+/**
+ * Sección del análisis que responde cada pregunta de la prueba ("I · 1" = Serie I, pregunta 1). Los href son los id del
+ * índice de cada página: así cada consulta y cada prueba llevan a su análisis.
+ */
+export const ANALISIS: Record<string, Enlace & { serie: string; n: number }> = {
+  "I · 1": { serie: "campo", n: 1, href: "/campo#variedades", texto: "variedades y renovación" },
+  "I · 2": { serie: "campo", n: 2, href: "/campo#pronostico", texto: "cuánto azúcar esperar" },
+  "I · 3": { serie: "campo", n: 3, href: "/campo#perfiles", texto: "rol de cada variedad" },
+  "I · 4": { serie: "campo", n: 4, href: "/campo#datos-propios", texto: "datos propios y renovaciones" },
+  "II · 1": { serie: "caldera", n: 1, href: "/caldera#datos", texto: "datos y sensores" },
+  "II · 2": { serie: "caldera", n: 2, href: "/caldera#modos", texto: "modos de operación" },
+  "II · 3": { serie: "caldera", n: 3, href: "/caldera#vapor", texto: "sensor virtual de vapor" },
+  "II · 4": { serie: "caldera", n: 4, href: "/caldera#anomalias", texto: "anomalías" },
+  "III · 3": { serie: "mercado", n: 3, href: "/mercado#pronostico", texto: "pronóstico del precio" },
+};
+
+// Herramientas de este sitio que llaman a cada consulta (app/(sitio)/herramientas: CalculadoraCiclo, PronosticoAzucar,
+// AuditoriaCsv, SimuladorCaldera y PronosticoPrecio).
+const H_CICLO: Enlace = { href: "/herramientas#ciclo", texto: "Ciclo y precio" };
+const H_PRONOSTICO: Enlace = { href: "/herramientas#pronostico", texto: "Azúcar por acre" };
+const H_AUDITORIA: Enlace = { href: "/herramientas#auditoria", texto: "Auditoría de lotes" };
+const H_CALDERA: Enlace = { href: "/herramientas#caldera", texto: "Caldera" };
+const H_MERCADO: Enlace = { href: "/herramientas#mercado", texto: "Precio del azúcar" };
+const H_ASISTENTE: Enlace = { href: "/asistente", texto: "el asistente" };
 export type Grupo = {
   clave: string;
   serie?: "campo" | "caldera" | "mercado";
@@ -178,12 +206,13 @@ export const GRUPOS: Grupo[] = [
   {
     clave: "campo",
     serie: "campo",
-    titulo: "Campo · Serie I",
+    titulo: "Campo (Serie I)",
     descripcion: "Las cuatro preguntas de campo, con los ensayos de etapa 5 de Louisiana.",
     consultas: [
       {
         metodo: "GET",
         ruta: "/campo/variedades",
+        herramienta: H_CICLO,
         pregunta: "I · 1",
         para: "Qué variedades ampliar: el ranking por margen anual.",
         entrada: <>Precio del azúcar en US$/lb (opcional, <code>?precio=0.20</code>).</>,
@@ -197,6 +226,7 @@ export const GRUPOS: Grupo[] = [
       {
         metodo: "POST",
         ruta: "/campo/ciclo",
+        herramienta: H_CICLO,
         pregunta: "I · 1",
         para: "Cada cuántos cortes renovar una variedad y con qué precio deja de convenir.",
         entrada: <>Variedad y, opcionales, los supuestos: <code>precio</code>, <code>corte</code>, <code>mantenimiento</code>, <code>renovacion</code>, <code>barbecho</code> (años sin caña) y <code>extrapolar</code>.</>,
@@ -210,6 +240,7 @@ export const GRUPOS: Grupo[] = [
       {
         metodo: "POST",
         ruta: "/campo/pronostico",
+        herramienta: H_PRONOSTICO,
         pregunta: "I · 2",
         para: "Cuánto azúcar esperar de una variedad en una finca y corte, con banda de error.",
         entrada: <>Variedad, finca (o <code>&quot;nueva&quot;</code>), corte de 0 a 4 y, opcional, la ventaja del lote el año pasado.</>,
@@ -256,6 +287,7 @@ export const GRUPOS: Grupo[] = [
       {
         metodo: "POST",
         ruta: "/campo/auditoria/csv",
+        herramienta: H_AUDITORIA,
         pregunta: "I · 4",
         para: "La misma auditoría, desde una hoja de cálculo.",
         entrada: "Archivo CSV de cosechas, con los mismos nombres de columna (hasta 10 MB).",
@@ -271,7 +303,7 @@ export const GRUPOS: Grupo[] = [
   {
     clave: "caldera",
     serie: "caldera",
-    titulo: "Caldera · Serie II",
+    titulo: "Caldera (Serie II)",
     descripcion: "Entradas en promedios de 1 min (o de 5 min para la zona de carga), como en los notebooks. La API no guarda estado: quien consulta manda la ventana de minutos que hace falta.",
     consultas: [
       {
@@ -297,6 +329,7 @@ export const GRUPOS: Grupo[] = [
       {
         metodo: "POST",
         ruta: "/caldera/vapor-virtual",
+        herramienta: H_CALDERA,
         pregunta: "II · 3",
         para: "Cuánto vapor sale según los demás sensores: un respaldo del medidor.",
         entrada: <>Al menos {conteos.ventanaVapor} minutos consecutivos de promedios de 1 min, del más antiguo al más reciente.</>,
@@ -310,6 +343,7 @@ export const GRUPOS: Grupo[] = [
       {
         metodo: "POST",
         ruta: "/caldera/verificar",
+        herramienta: H_CALDERA,
         pregunta: "II · 4",
         para: "Si un instrumento se separó de sus pares o si es un evento del hogar.",
         entrada: "De 1 a 120 minutos de promedios de 1 min: presiones de hogar, pares izquierda-derecha, vapor, agua, válvula, presiones y temperatura del vapor.",
@@ -325,11 +359,12 @@ export const GRUPOS: Grupo[] = [
   {
     clave: "mercado",
     serie: "mercado",
-    titulo: "Mercado · Serie III",
+    titulo: "Mercado (Serie III)",
     consultas: [
       {
         metodo: "GET",
         ruta: "/mercado/pronostico",
+        herramienta: H_MERCADO,
         pregunta: "III · 3",
         para: "En qué rango estará el precio del azúcar a 1 y 3 meses.",
         entrada: <>Horizonte <code>h</code> (1 o 3 meses) y, opcional, <code>toneladas</code> sin fijar.</>,
@@ -354,6 +389,7 @@ export const GRUPOS: Grupo[] = [
       {
         metodo: "POST",
         ruta: "/asistente",
+        herramienta: H_ASISTENTE,
         para: "Preguntar en lenguaje natural sobre campo, caldera o mercado.",
         entrada: "La pregunta (hasta 500 caracteres) y, opcional, los últimos 8 mensajes de la conversación.",
         devuelve: "La respuesta en Markdown, las herramientas que consultó y las preguntas que le quedan hoy.",
@@ -365,6 +401,7 @@ export const GRUPOS: Grupo[] = [
       {
         metodo: "GET",
         ruta: "/asistente/estado",
+        herramienta: H_ASISTENTE,
         para: "Saber si el asistente está activo y cuántas preguntas quedan hoy.",
         entrada: "Ninguna.",
         devuelve: "Si está disponible, el modelo, el límite diario y las preguntas restantes. No gasta la cuota.",

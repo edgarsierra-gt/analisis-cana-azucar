@@ -57,7 +57,7 @@ function Cilindro({ x, y, w, h, ry = 8 }: { x: number; y: number; w: number; h: 
   );
 }
 
-/** Texto de una línea. `c` es la clase: titulo, sub, texto, mono, codigo, rotulo. */
+/** Texto de una línea. `c` es la clase: titulo, sub, texto, nota, rotuloZona, codigo, rotulo. */
 function T({
   x, y, c = "texto", ancla, children,
 }: {
@@ -74,14 +74,12 @@ function T({
   );
 }
 
-const Linea = ({ x1, x2, y }: { x1: number; x2: number; y: number }) => <line className={s.separador} x1={x1} x2={x2} y1={y} y2={y} />;
-
-/** Rótulo de zona sobre su borde punteado, con un fondo de papel que corta la línea (como la leyenda de un fieldset). */
+/** Rótulo de zona sobre su borde punteado, con un fondo blanco que corta la línea (como la leyenda de un fieldset). */
 function Leyenda({ x, y, children }: { x: number; y: number; children: string }) {
-  const ancho = children.length * 7.3 + 10; // JetBrains Mono a 11 px con 0.06em de espaciado
+  const ancho = children.length * 7.2 + 10; // Public Sans 600 a 13.5 unidades: unos 7.2 por carácter
   return (
     <g>
-      <rect className={s.fondoLeyenda} x={x - 5} y={y - 10} width={ancho} height={14} />
+      <rect className={s.fondoLeyenda} x={x - 5} y={y - 11} width={ancho} height={16} />
       <text x={x} y={y} className={s.leyenda}>
         {children}
       </text>
@@ -103,22 +101,21 @@ export function DiagramaAsistente({ herramientas }: { herramientas: number }) {
   return (
     <div className={s.diagrama}>
       {/* ── Pantalla ancha: de izquierda a derecha ─────────────────────────────────────────────── */}
-      <svg className={`${s.lienzo} ${s.horizontal}`} viewBox="0 0 1120 620" role="img" aria-labelledby="diag-h-t diag-h-d">
+      <svg className={`${s.lienzo} ${s.horizontal}`} viewBox="0 0 1120 640" role="img" aria-labelledby="diag-h-t diag-h-d">
         <title id="diag-h-t">Cómo responde el asistente, en 8 pasos</title>
         <desc id="diag-h-d">{desc}</desc>
 
         {/* Zonas */}
-        <T x={8} y={58} c="mono">VISITANTE</T>
-        <rect className={s.zona} x={300} y={36} width={408} height={572} rx={4} />
-        <T x={316} y={58} c="mono">CLOUD RUN · FASTAPI (PYTHON)</T>
+        <T x={8} y={58} c="rotuloZona">Visitante</T>
+        <rect className={s.zona} x={300} y={36} width={408} height={592} rx={4} />
+        <T x={316} y={58} c="rotuloZona">Cloud Run · FastAPI (Python)</T>
         <rect className={s.zona} x={870} y={36} width={242} height={404} rx={4} />
-        <T x={886} y={58} c="mono">VERTEX AI · REGIÓN GLOBAL</T>
+        <T x={886} y={58} c="rotuloZona">Vertex AI · región global</T>
 
         {/* Navegador */}
         <Caja x={8} y={84} w={168} h={232} />
         <T x={24} y={112} c="titulo">Navegador</T>
-        <T x={24} y={132} c="mono">PÁGINA /ASISTENTE</T>
-        <Linea x1={24} x2={160} y={146} />
+        <T x={24} y={133} c="nota">Página /asistente</T>
         <T x={24} y={170}>Guarda los turnos</T>
         <T x={24} y={189}>en la pestaña</T>
         <T x={24} y={214}>{`Manda los últimos ${L.maxHistorial}`}</T>
@@ -155,25 +152,24 @@ export function DiagramaAsistente({ herramientas }: { herramientas: number }) {
         <Caja x={324} y={392} w={360} h={72} />
         <T x={340} y={416} c="sub">{`${herramientas} herramientas`}</T>
         <T x={340} y={436}>Las mismas funciones de los endpoints</T>
-        <T x={340} y={454} c="mono">CAMPO · CALDERA · MERCADO · HALLAZGOS</T>
+        <T x={340} y={455} c="nota">Campo, caldera, mercado y hallazgos</T>
         <Flecha d={[[504, 464], [504, 496]]} />
         <T x={516} y={486} c="rotulo">lee</T>
-        <Cilindro x={324} y={496} w={360} h={100} ry={9} />
-        <T x={340} y={534} c="sub">Salidas de los notebooks</T>
-        <T x={340} y={555} c="codigo">outputs/models/*.json · outputs/tables/*.json</T>
-        <T x={340} y={576}>y el resumen de cada serie (README)</T>
+        <Cilindro x={324} y={496} w={360} h={116} ry={9} />
+        <T x={340} y={533} c="sub">Salidas de los notebooks</T>
+        <T x={340} y={554} c="codigo">outputs/models/*.json</T>
+        <T x={340} y={572} c="codigo">outputs/tables/*.json</T>
+        <T x={340} y={593}>y el resumen de cada serie (README)</T>
 
         {/* Gemini */}
         <Caja x={894} y={84} w={202} h={268} />
         <T x={910} y={112} c="titulo">{modelo}</T>
-        <T x={910} y={132} c="mono">MODELO DE LENGUAJE</T>
-        <Linea x1={910} x2={1080} y={146} />
+        <T x={910} y={133} c="nota">Modelo de lenguaje</T>
         <T x={910} y={170} c="sub">Instrucciones fijas</T>
         <T x={910} y={190}>Usa solo las herramientas</T>
         <T x={910} y={208}>Cita el notebook</T>
         <T x={910} y={226}>No nombra ingenios</T>
         <T x={910} y={244}>No cambia de tema</T>
-        <Linea x1={910} x2={1080} y={258} />
         <T x={910} y={282} c="sub">{`${herramientas} herramientas`}</T>
         <T x={910} y={302}>declaradas con nombre,</T>
         <T x={910} y={320}>descripción y argumentos</T>
@@ -199,13 +195,14 @@ export function DiagramaAsistente({ herramientas }: { herramientas: number }) {
         <T x={718} y={293} c="rotulo">resultado</T>
         <Flecha d={[[894, 330], [684, 330]]} />
         <T x={860} y={323} c="rotulo" ancla="end">respuesta final</T>
-        <T x={720} y={372} c="monoChico">4 A 6 SE REPITEN:</T>
-        <T x={720} y={388} c="monoChico">{`MÁXIMO ${L.maxPasos} PASOS`}</T>
+        <T x={720} y={372} c="nota">4 a 6 se repiten:</T>
+        <T x={720} y={390} c="nota">{`máximo ${L.maxPasos} pasos`}</T>
 
-        {/* Credenciales: la cuenta de servicio de Cloud Run, sin llaves */}
+        {/* Credenciales: la cuenta de servicio de Cloud Run, sin llaves. El rótulo va todo debajo de la línea, para que
+            no se junte con la nota de los pasos 4 a 6, que queda encima. */}
         <line className={s.credencial} x1={708} x2={870} y1={420} y2={420} />
-        <T x={789} y={412} c="monoChico" ancla="middle">CUENTA DE SERVICIO</T>
-        <T x={789} y={436} c="monoChico" ancla="middle">SIN LLAVES</T>
+        <T x={789} y={442} c="nota" ancla="middle">Cuenta de servicio,</T>
+        <T x={789} y={460} c="nota" ancla="middle">sin llaves</T>
 
         {/* Pasos */}
         <Paso n={1} x={192} y={118} />
@@ -223,22 +220,22 @@ export function DiagramaAsistente({ herramientas }: { herramientas: number }) {
         <title id="diag-v-t">Cómo responde el asistente, en 8 pasos</title>
         <desc id="diag-v-d">{desc}</desc>
 
-        <T x={12} y={18} c="mono">VISITANTE</T>
+        <T x={12} y={18} c="rotuloZona">Visitante</T>
         <Caja x={12} y={28} w={336} h={78} />
         <T x={28} y={56} c="titulo">Navegador</T>
-        <T x={124} y={56} c="mono">PÁGINA /ASISTENTE</T>
+        <T x={124} y={56} c="nota">Página /asistente</T>
         <T x={28} y={80}>{`Guarda los turnos y manda los últimos ${L.maxHistorial}.`}</T>
         <T x={28} y={98}>Muestra la respuesta y lo que consultó.</T>
 
         {/* Cloud Run */}
         <rect className={s.zona} x={4} y={150} width={352} height={532} rx={4} />
-        <Leyenda x={156} y={154}>CLOUD RUN · FASTAPI</Leyenda>
+        <Leyenda x={152} y={154}>Cloud Run · FastAPI</Leyenda>
 
         <Caja x={40} y={196} w={132} h={100} />
         <T x={52} y={218} c="sub">Validación</T>
         <T x={52} y={240}>{`1 a ${L.maxCaracteres}`}</T>
         <T x={52} y={258}>caracteres</T>
-        <T x={52} y={276}>{`historial: máx. ${L.maxHistorial}`}</T>
+        <T x={52} y={276}>{`${L.maxHistorial} de historial`}</T>
         <Caja x={188} y={196} w={132} h={100} />
         <T x={200} y={218} c="sub">Límite por IP</T>
         <T x={200} y={240}>{`${L.porDia} por día`}</T>
@@ -258,7 +255,7 @@ export function DiagramaAsistente({ herramientas }: { herramientas: number }) {
         <T x={150} y={456} c="rotulo">ejecuta y devuelve</T>
         <Caja x={40} y={470} w={280} h={64} />
         <T x={56} y={494} c="sub">{`${herramientas} herramientas`}</T>
-        <T x={56} y={516}>Las mismas funciones de los endpoints</T>
+        <T x={56} y={516}>Las mismas funciones de la API</T>
         <Flecha d={[[180, 534], [180, 566]]} />
         <T x={192} y={554} c="rotulo">lee</T>
         <Cilindro x={40} y={566} w={280} h={98} />
@@ -269,17 +266,17 @@ export function DiagramaAsistente({ herramientas }: { herramientas: number }) {
 
         {/* Vertex AI */}
         <rect className={s.zona} x={4} y={700} width={352} height={246} rx={4} />
-        <Leyenda x={40} y={704}>VERTEX AI · REGIÓN GLOBAL</Leyenda>
+        <Leyenda x={40} y={704}>Vertex AI · región global</Leyenda>
         <Caja x={40} y={728} w={312} h={186} />
         <T x={56} y={756} c="titulo">{modelo}</T>
-        <T x={56} y={774} c="mono">MODELO DE LENGUAJE</T>
+        <T x={56} y={775} c="nota">Modelo de lenguaje</T>
         <T x={56} y={798}>Instrucciones fijas: usa solo las</T>
         <T x={56} y={816}>herramientas, cita el notebook, no</T>
         <T x={56} y={834}>nombra ingenios ni cambia de tema.</T>
         <T x={56} y={856}>Pide herramientas y redacta.</T>
         <T x={56} y={876}>{`Si está saturado: ${respaldo}, ${L.minutosRespaldo} min.`}</T>
-        <T x={56} y={900} c="monoChico">{`4 A 6 SE REPITEN: MÁXIMO ${L.maxPasos} PASOS`}</T>
-        <T x={40} y={934} c="monoChico">CUENTA DE SERVICIO DE CLOUD RUN · SIN LLAVES</T>
+        <T x={56} y={900} c="nota">{`4 a 6 se repiten: máximo ${L.maxPasos} pasos`}</T>
+        <T x={40} y={934} c="nota">Cuenta de servicio de Cloud Run, sin llaves</T>
 
         {/* Navegador ⇄ API */}
         <Flecha d={[[130, 106], [130, 196]]} />

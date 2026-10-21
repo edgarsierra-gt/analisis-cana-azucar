@@ -5,7 +5,9 @@ import s from "./Formula.module.css";
 export function Formula({ a, b, c, mae }: { a: number; b: number; c: number; mae: number }) {
   return (
     <div className={s.formula}>
-      <p className="etiqueta">Sensor virtual físico, dos variables · error típico en días no vistos: {num(mae, 2)} t/h</p>
+      <p className={s.titulo}>
+        El sensor virtual físico, con dos variables, se equivoca {num(mae, 2)} t/h en días que no vio
+      </p>
       <p className={s.ecuacion}>
         <span className={s.lado}>Vapor (t/h)</span>
         <span className={s.igual}>=</span>

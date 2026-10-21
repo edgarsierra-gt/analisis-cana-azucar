@@ -1,14 +1,54 @@
-.ficha { background: var(--hoja); border: 1px solid var(--linea); border-top: 4px solid var(--serie); padding: var(--e-5) var(--e-6) var(--e-6); }
-.titulo { color: var(--serie); }
-.lista { margin-top: var(--e-3); }
-.lista > div { display: grid; grid-template-columns: 13rem 1fr; gap: var(--e-5); padding: var(--e-4) 0; border-top: 1px solid var(--linea-suave); }
-.lista > div:first-child { border-top: 0; }
-.lista dt { font-weight: 650; font-size: var(--t-chico); color: var(--tinta); }
-.lista dd { margin: 0; color: var(--tinta-2); }
+/* Banda del tinte de la serie, sin borde. A todo el ancho: sale del marco hasta los dos bordes de la pantalla y devuelve
+   su contenido al marco con el relleno. 100cqw es el ancho de <main> (container-type en globals.css). */
+.ficha {
+  background: var(--serie-fondo);
+  padding-block: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+}
+.pantalla {
+  --sangria: calc((100cqw - var(--marco)) / 2);
+  width: 100cqw;
+  max-width: none !important;
+  margin-left: calc(-1 * var(--sangria));
+  padding-inline: var(--sangria);
+}
+.marco { padding-inline: clamp(1rem, 0.4rem + 2.5vw, 2.5rem); }
+/* La Evaluación cierra su pregunta: más aire antes que el que separa los bloques de adentro */
+:global(.contenedor) .ficha { margin-top: 5rem; }
+
+.interior { max-width: var(--span-8); }
+/* El título de la banda va en el color de la serie (4.7:1 sobre su tinte) */
+.titulo { font-size: var(--t-entrada); font-weight: 600; color: var(--serie); }
+
+.lista dt { font-size: var(--t-texto); font-weight: 600; line-height: 1.4; color: var(--tinta); }
+.lista dd { margin: var(--e-2) 0 0; font-size: var(--t-texto); line-height: 1.6; color: var(--tinta); }
 .lista dd > * + * { margin-top: var(--e-2); }
-.decision dd { color: var(--tinta); font-weight: 500; }
-.motivo { margin-top: var(--e-2); font-size: var(--t-chico); color: var(--tinta-2); }
-@media (max-width: 680px) {
-  .ficha { padding: var(--e-4); }
-  .lista > div { grid-template-columns: 1fr; gap: var(--e-1); }
+
+/* La decisión primero, como enunciado, en un panel blanco: es lo que gerencia lee en 30 segundos */
+.decision {
+  margin-top: var(--e-5);
+  background: var(--fondo);
+  padding: var(--e-5) var(--e-6) var(--e-6);
+  max-width: var(--span-8);
+}
+.decision dt { font-weight: 400; color: var(--apagado); font-size: var(--t-pequeno); }
+.decision dd { font-size: var(--t-entrada); line-height: 1.45; max-width: 52ch; }
+
+/* Tres columnas, cada una con su barra de 4 px y su título; 32-48 px entre ellas */
+.pares { display: grid; gap: var(--e-7) var(--sep-columnas); margin-top: var(--e-7); }
+.pares > div { position: relative; padding-top: calc(var(--barra) + var(--e-4)); min-width: 0; }
+.pares > div::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: var(--barra);
+  background: var(--serie);
+}
+@media (min-width: 900px) {
+  .pares { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .interior { max-width: none; }
+}
+.certeza { margin-top: var(--e-7); max-width: 64ch; }
+.certeza > dt { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.certeza > dd { margin-top: 0; }
+.motivo { margin-top: var(--e-2); }
+
+@media (max-width: 560px) {
+  .decision { padding: var(--e-4) var(--e-4) var(--e-5); }
 }

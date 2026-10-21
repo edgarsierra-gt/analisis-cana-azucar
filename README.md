@@ -18,7 +18,7 @@ Autor: Edgar Sierra.
   banda de 80 % cubrió 78 % de los meses a 1 mes y 84 % a 3 meses (notebook 12).
 - **Puesta en marcha:** API con 14 consultas en Cloud Run, 120 pruebas aprobadas dentro de Docker con PostgreSQL 16,
   un sitio y una presentación para la gerencia, y un asistente con Gemini que responde con las cifras de la API.
-- **Criterio:** la bitácora registra 84 decisiones técnicas, 24 hipótesis descartadas y 34 errores de fondo de la IA
+- **Criterio:** la bitácora registra 85 decisiones técnicas, 24 hipótesis descartadas y 34 errores de fondo de la IA
   que detecté y corregí.
 
 | Qué | Dónde |
@@ -34,7 +34,7 @@ Autor: Edgar Sierra.
 Docker Compose, Google Cloud Run, Vertex AI (Gemini), Next.js en Vercel y Observable Plot.
 
 **Cómo revisarlo en 5 minutos:**
-1. La [presentación](https://www.edgarsierra.com/analisis-cana-azucar/presentacion): 18 diapositivas.
+1. La [presentación](https://www.edgarsierra.com/analisis-cana-azucar/presentacion): 16 diapositivas y un anexo.
 2. Una consulta en vivo en las [herramientas](https://www.edgarsierra.com/analisis-cana-azucar/herramientas).
 3. La [documentación de la API](https://analisis-cana-api-36437889250.us-central1.run.app/docs).
 4. El resumen al inicio de [`bitacora.md`](bitacora.md).
@@ -47,7 +47,7 @@ Docker Compose, Google Cloud Run, Vertex AI (Gemini), Next.js en Vercel y Observ
 | II · Fábrica | confiabilidad de los 30 sensores, zonas de carga, sensor virtual del vapor, alertas y eficiencia | notebooks 06-09, `src/fabrica_*.py` |
 | III · Mercado | pares de Guatemala entre los países productores, comportamiento del precio No. 11, pronóstico a 1 y 3 meses y respuesta de la oferta | notebooks 10-13, `src/mercado_*.py` |
 | IV · Producción | API REST con 14 consultas, Docker Compose y 120 pruebas automatizadas, desplegada en Cloud Run | `api/`, `tests/`, `Dockerfile`, `docker-compose.yml` |
-| V · Presentación | 18 diapositivas para 15-20 minutos, con notas del orador y guion de demostración | `web/src/app/presentacion/` y el sitio |
+| V · Presentación | 16 diapositivas para unos 18 minutos, más 8 de anexo, con notas del orador y demostración en vivo | `web/src/app/presentacion/` y el sitio |
 | Puntos extra | herramientas que consultan la API y un asistente con Gemini en Vertex AI | `web/`, `api/asistente.py` |
 
 El notebook 01 es la auditoría de los datos y cierra con las decisiones que pasan al modelado. Del 02 al 13, cada
@@ -60,7 +60,7 @@ estimado, sus riesgos y con qué certeza lo afirmo.
 |---|---|---|
 | Series I a III | Hechas. En la Serie I, pregunta 2, el escenario 3 (variedad nueva) queda diseñado, no desarrollado | notebooks 01-13, [Pendientes](#pendientes-y-cómo-los-abordaría) |
 | Serie IV: API, Docker Compose y pruebas | Hecha y desplegada en Cloud Run | `api/`, `tests/` |
-| Serie V: presentación de 15-20 minutos | Hecha: 18 diapositivas con notas del orador | `/presentacion` |
+| Serie V: presentación de 15-20 minutos | Hecha: 16 diapositivas, 8 de anexo y notas del orador | `/presentacion` |
 | Extra: aplicación de predicción | Hecha | `/herramientas` |
 | Extra: servidor MCP, bot de Telegram con n8n y modelo local | Resuelto a mi manera, con un asistente web en Vertex AI; explico por qué en [Puntos extra](#puntos-extra) | `/asistente` |
 | Extra: MLflow | No lo instalé; explico cómo elijo, versiono y monitoreo sin él, y cuándo lo agregaría | [MLflow](#mlflow-cómo-elijo-versiono-y-monitoreo-los-modelos) |
@@ -225,8 +225,9 @@ Explicación visual e interactiva: `docs/serie2_explicacion.html`.
    - Ningún modelo probado le gana al **último cierre** a 1 y 3 meses: ~5 % y ~12 % de error.
    - La utilidad está en la **banda según volatilidad**, que queda calibrada. Cada ¢/lb equivale a US$22/t.
 4. **Oferta (notebook 13).**
-   - **Asociación robusta pero pequeña** del área con el precio de 2-3 años antes: elasticidad acumulada de ~0.08.
-     Sobrevive a controlar la inercia (ARDL), a quitar cualquier año y a usar solo datos oficiales.
+   - **Asociación estable pero pequeña** del área con el precio de 2-3 años antes: elasticidad acumulada de ~0.08.
+     Su magnitud y su signo sobreviven a controlar la inercia (ARDL), a quitar cualquier año y a usar solo datos
+     oficiales. La producción muestra un perfil parecido, con evidencia más débil (permutación p = 0.12).
    - **La evidencia causal es débil:**
      - la permutación da p = 0.05-0.08 a una cola;
      - el placebo del año siguiente falla en algunas muestras (la oferta también mueve el precio);
@@ -301,17 +302,21 @@ corro antes de cada despliegue; todavía no hay integración continua (ver [Pend
 Está en el sitio: [/analisis-cana-azucar/presentacion](https://www.edgarsierra.com/analisis-cana-azucar/presentacion).
 
 - **Para quién:** Gerencia General, Agrícola e Industrial, en lenguaje de negocio.
-- **Qué tiene:** 18 diapositivas en formato 16:9. Por cada serie, las preguntas clave y su evaluación gerencial
-  (recomendación, impacto, riesgos y certeza). Cierra con la API, la demostración, las decisiones y los próximos
-  pasos.
-- **Para 15-20 minutos:** las notas del orador (tecla N) traen lo que digo y respuestas a preguntas probables. Se
-  avanza con las flechas y se imprime a PDF desde el navegador.
-- **Para profundizar:** cada diapositiva de contenido (13 de 18; no la portada, los separadores ni el cierre) enlaza a
-  la sección del sitio con la metodología, la evidencia, los supuestos y los límites de ese análisis.
-- **Demostración:** la diapositiva 16 trae el guion de cuatro consultas en vivo en `/herramientas`.
+- **El relato:** empieza por las respuestas, una decisión por gerencia con su cifra y su certeza. Sigue un bloque
+  por serie (campo, caldera y mercado) con su evaluación gerencial; luego cómo lo llevé a producción, con la
+  demostración en vivo; el criterio con el que decidí, y cierra con lo que pido para decidir con datos del ingenio.
+- **Qué tiene:** 16 diapositivas en formato 16:9 para unos 18 minutos, más 8 de anexo para las preguntas técnicas
+  (perfiles de variedad, tamaño de ensayos, modos y gases de la caldera, Guatemala, modelos comparados, arquitectura y
+  límites). Una barra de capítulos indica en qué parte va la exposición.
+- **Notas del orador:** con la tecla N, lo que digo en cada diapositiva y respuestas a preguntas probables. Se avanza
+  con las flechas, F pone pantalla completa y se imprime a PDF desde el navegador (una diapositiva por página).
+- **Para profundizar:** las diapositivas de contenido enlazan a la sección del sitio con la metodología, la evidencia,
+  los supuestos y los límites de ese análisis.
+- **Demostración:** la diapositiva 14 muestra cuatro consultas en vivo (campo, caldera, mercado y asistente) y abre
+  las herramientas del sitio.
 
 La mayoría de sus cifras se calculan de los mismos archivos de `outputs/` que usa el resto del sitio. Las pocas
-escritas a mano (como las 120 pruebas o las 84 decisiones) salen de las pruebas y la bitácora.
+escritas a mano (como las 120 pruebas o las 85 decisiones) salen de las pruebas y la bitácora.
 
 ## Puntos extra
 
@@ -396,7 +401,7 @@ No instalé MLflow. Con un entrenamiento por notebook y modelos que caben en un 
 | Base de datos | PostgreSQL 16 (`sql/esquema_campo.sql`) | El modelo de datos de campo (pregunta 4) se prueba contra PostgreSQL real: sus reglas rechazan cuatro errores de captura, y la auditoría de renovaciones con los datos leídos de la base da los mismos estados que con pandas. |
 | Despliegue de la API | Cloud Run (Google Cloud) | Es serverless: escala a cero cuando nadie la usa y tiene un tope de 2 instancias para acotar el costo. Usa el mismo `Dockerfile` que en local, con HTTPS y sin servidores que mantener. |
 | Presentar los resultados | Sitio en Next.js, desplegado en Vercel y publicado en mi dominio | Una gerencia no abre notebooks. El sitio se abre en cualquier dispositivo, cada página es estática (rápida y sin costo de servidor) y se despliega sola con cada push a `main`. Lo publiqué en `edgarsierra.com` con un rewrite para mostrar el ciclo completo en un entorno real, no solo en mi computadora. |
-| Gráficos y diseño | Observable Plot y un sistema de diseño propio (`web/DESIGN.md`) | Gráficos sobrios, numerados y con su fuente, pensados para leer una cifra en 30 segundos y verificarla en 3 minutos. |
+| Gráficos y diseño | Observable Plot y un sistema de diseño propio (`web/DESIGN.md`), auditado con una skill de diseño que mide cada página en un navegador real | Fondo blanco para analizar, un color por serie y gráficos con su fuente, pensados para leer una cifra en 30 segundos y verificarla en 3 minutos (bitácora D84). |
 | Presentación ejecutiva | Diapositivas dentro del mismo sitio | Leen los mismos archivos que el resto del sitio, tienen notas del orador y la demostración de la API queda a un clic. |
 | Lenguaje natural | Gemini en Vertex AI con llamadas a funciones | Ver [Puntos extra](#lenguaje-natural-asistente-con-gemini-en-vertex-ai). |
 
@@ -543,7 +548,7 @@ Serie IV · Producción
 
 Serie V y sitio web
 - `web/`: sitio en Next.js que presenta las tres series, la API, las herramientas, el asistente y la presentación
-- `web/src/app/presentacion/`: presentación ejecutiva (18 diapositivas con notas del orador)
+- `web/src/app/presentacion/`: presentación ejecutiva (16 diapositivas, 8 de anexo y notas del orador)
 - `web/DESIGN.md`: sistema de diseño y reglas de redacción del sitio
 - `web/scripts/sincronizar-datos.mjs`: copia las salidas de `outputs/` al sitio antes de `npm run dev` y de
   `npm run build`

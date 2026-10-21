@@ -14,12 +14,14 @@ export type ErrorModelo = {
   ganador: boolean;
 };
 
-function barras(filas: ErrorModelo[], maximo: number): Plot.PlotOptions {
+function barras(filas: ErrorModelo[], mayor: number, ancho: number): Plot.PlotOptions {
+  // Espacio a la derecha para el rótulo de 13 px de cada barra: el doble del mayor error en el teléfono, menos en pantallas anchas.
+  const maximo = mayor * (ancho < 520 ? 2 : 1.45);
   return {
-    marginLeft: 156,
+    marginLeft: 180,   // "Regresión con momentum" a 14 px no cabía en 156 y se cortaba en el borde del teléfono
     marginRight: 8,
     marginTop: 4,
-    marginBottom: 32,
+    marginBottom: 44,   // el título del eje va bajo las marcas, sin pisar 3.5-4.5
     x: { label: "Error absoluto medio (¢/lb)", domain: [0, maximo], grid: true },
     y: { label: null, domain: filas.map((f) => f.modelo), padding: 0.25 },
     marks: [
@@ -30,7 +32,7 @@ function barras(filas: ErrorModelo[], maximo: number): Plot.PlotOptions {
         y: "modelo",
         dx: 5,
         textAnchor: "start",
-        fontSize: 11.5,
+        fontSize: 13,
         fill: COLORES.tinta,
         text: (d: ErrorModelo) => (d.ganador ? `${num(d.mae, 2)} (el menor)` : `${num(d.mae, 2)} · ${num(d.peor, 0)} % más`),
       }),
@@ -40,14 +42,13 @@ function barras(filas: ErrorModelo[], maximo: number): Plot.PlotOptions {
 
 /** Error de cada modelo en la validación hacia adelante, a 1 y a 3 meses, con la misma escala. */
 export function GraficoErrores({ h1, h3, etiqueta }: { h1: ErrorModelo[]; h3: ErrorModelo[]; etiqueta: string }) {
-  // Espacio a la derecha para el rótulo de cada barra.
-  const maximo = Math.max(...h1.map((f) => f.mae), ...h3.map((f) => f.mae)) * 1.55;
+  const mayor = Math.max(...h1.map((f) => f.mae), ...h3.map((f) => f.mae));
   return (
     <div className={s.apilado}>
-      <p className={`etiqueta ${s.subtitulo}`}>A 1 mes</p>
-      <PlotFigura alto={150} etiqueta={`${etiqueta} Horizonte de 1 mes.`} crear={() => barras(h1, maximo)} />
-      <p className={`etiqueta ${s.subtitulo}`}>A 3 meses</p>
-      <PlotFigura alto={150} etiqueta={`${etiqueta} Horizonte de 3 meses.`} crear={() => barras(h3, maximo)} />
+      <p className={s.subtitulo}>A 1 mes</p>
+      <PlotFigura alto={162} etiqueta={`${etiqueta} Horizonte de 1 mes.`} crear={(ancho) => barras(h1, mayor, ancho)} />
+      <p className={s.subtitulo}>A 3 meses</p>
+      <PlotFigura alto={162} etiqueta={`${etiqueta} Horizonte de 3 meses.`} crear={(ancho) => barras(h3, mayor, ancho)} />
     </div>
   );
 }

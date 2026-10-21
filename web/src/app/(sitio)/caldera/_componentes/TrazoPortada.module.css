@@ -1,0 +1,33 @@
+/* El vapor medido y el estimado, en blanco sobre el campo de la portada. Solo desde 900 px (ver TrazoPortada.tsx). */
+.trazo { margin: var(--e-7) 0 0; color: var(--sobre-serie); }
+@media (max-width: 899px) { .trazo { display: none; } }
+
+.leyenda {
+  list-style: none;
+  margin: 0 0 var(--e-3);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-1) var(--e-5);
+  font-size: var(--t-pequeno);
+  line-height: 1.45;
+}
+.leyenda li { display: inline-flex; align-items: center; gap: var(--e-2); }
+.leyenda li + li { margin-top: 0; }
+.muestra { display: inline-block; flex: none; width: 1.25rem; }
+/* El medido es una franja translúcida; el estimado, la línea fina que corre por dentro. */
+.muestraMedido { height: 6px; background: color-mix(in srgb, var(--sobre-serie) 48%, transparent); }
+.muestraEstimado { height: 2px; background: var(--sobre-serie); }
+
+.grafica { display: block; width: 100%; height: 7.5rem; overflow: visible; }
+.medido, .estimado { fill: none; vector-effect: non-scaling-stroke; stroke-linejoin: round; stroke-linecap: round; }
+.medido { stroke: color-mix(in srgb, var(--sobre-serie) 48%, transparent); stroke-width: 6; }
+.estimado { stroke: var(--sobre-serie); stroke-width: 1.4; }
+
+/* Horas bajo la gráfica: la primera y la última alineadas a los bordes, las demás centradas en su hora. */
+.horas { position: relative; height: 1.45em; margin-top: var(--e-2); font-size: var(--t-pequeno); line-height: 1.45; font-variant-numeric: tabular-nums lining-nums; }
+.horas span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+.horas span:first-child { transform: none; }
+.horas span:last-child { transform: translateX(-100%); }
+
+.pie { margin-top: var(--e-4); font-size: var(--t-pequeno); line-height: 1.45; max-width: 46ch; }

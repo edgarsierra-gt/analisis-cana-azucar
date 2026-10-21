@@ -71,7 +71,8 @@ export function SimuladorFallas({ escenarios, inicial = 0 }: { escenarios: Escen
           marks: [
             Plot.rect(falla, { x1: "a", x2: "b", fill: COLORES.resalte, fillOpacity: 0.22 }),
             Plot.ruleY([1], { stroke: COLORES.tinta, strokeDasharray: "5 4" }),
-            Plot.text(["umbral"], { x: () => datos[0].t, y: () => 1, text: (d) => d, dy: -7, dx: 2, textAnchor: "start", fill: COLORES.tinta2 }),
+            // El rótulo va al final, donde las dos señales ya bajaron: al inicio se montaba sobre la línea de verificación.
+            Plot.text(["umbral"], { x: () => datos[datos.length - 1].t, y: () => 1, text: (d) => d, dy: -8, dx: -2, textAnchor: "end", fill: COLORES.tinta2, stroke: COLORES.fondo, strokeWidth: 4, paintOrder: "stroke" }),
             Plot.lineY(datos, { x: "t", y: "mon", stroke: COLORES.tinta, strokeWidth: 1.1 }),
             Plot.lineY(datos, { x: "t", y: "ver", stroke: COLORES.caldera, strokeWidth: 1.5 }),
           ],

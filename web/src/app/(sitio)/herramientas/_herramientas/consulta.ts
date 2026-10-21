@@ -123,3 +123,33 @@ export function useVariedades() {
 
 /** Texto de un número de corte: 0 = plantía. */
 export const nombreCorte = (k: number) => (k === 0 ? "plantía" : `soca ${k}`);
+
+/**
+ * Corre `alAsomar` una sola vez, cuando el elemento entra (o está por entrar) en pantalla. Lo usan las herramientas que
+ * no consultan solas al cargar (auditoría y caldera) para mostrar un ejemplo en lugar de una columna vacía, sin gastar
+ * consultas de quien nunca baja hasta ellas.
+ */
+export function useAlAsomar<E extends Element>(alAsomar: () => void) {
+  const ref = useRef<E>(null);
+  const funcion = useRef(alAsomar);
+  const hecho = useRef(false);
+  useEffect(() => {
+    funcion.current = alAsomar;
+  });
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || hecho.current) return;
+    const obs = new IntersectionObserver(
+      (entradas) => {
+        if (hecho.current || !entradas.some((e) => e.isIntersecting)) return;
+        hecho.current = true;
+        obs.disconnect();
+        funcion.current();
+      },
+      { rootMargin: "100% 0px" },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  return ref;
+}

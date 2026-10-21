@@ -47,7 +47,7 @@ lo que hizo la IA, cómo lo verifiqué y qué sugerencias o errores suyos correg
 | Un ARIMA pronostica mejor que el ingenuo (H22) | solo contra el ingenuo equivocado; contra el último cierre es 28 % peor |
 | El área no responde al precio (H24) | sí, con 2-3 años de rezago, pero poco (~0.08) y con evidencia causal débil |
 
-**Uso de IA en números.** 84 decisiones (D1-D83 y D13b) y 24 hipótesis descartadas. Corregí 34 errores de fondo de la IA (método,
+**Uso de IA en números.** 85 decisiones (D1-D84 y D13b) y 24 hipótesis descartadas. Corregí 34 errores de fondo de la IA (método,
 cálculo o afirmaciones sin respaldo), agrupé por serie las correcciones menores de texto, redondeo y figuras, y descarté
 3 sugerencias suyas. Al cerrar cada serie de análisis pedí una revisión independiente de cifras a un agente separado y
 corregí todo lo que encontró. Cada serie se volvió a correr desde cero en Windows antes de su commit, y sus cifras de
@@ -130,7 +130,8 @@ regresión con efectos fijos dan el mismo control del ambiente y son más fácil
 **H1 (descartada). "El costo de corte por tonelada cambia el ranking de variedades."**
 Los datos no la apoyan: Spearman entre ranking por azúcar y ranking por margen = 0.98. Con TRS típico de ~280 lb/t, una
 tonelada de caña genera ~US$56 de azúcar contra US$14 de corte; el corte solo deja de pagarse con TRS < 70 lb/t (mínimo
-observado en etapa 5: 142). TCA y TRS relativos no correlacionan (r ≈ −0.07).
+observado en etapa 5: 142). Entre todos los clones de etapa 5, TCA y TRS relativos casi no se relacionan (r ≈ −0.07);
+con las 23 variedades de la pregunta 3 y la caña de plantía sí hay un compromiso moderado (r = −0.44, notebook 04).
 Lo que sí queda: una libra extra que viene de tonelaje vale ~25 % menos que una que viene de TRS.
 
 **H2 (descartada). "La fibra puede ser criterio de selección por su valor para cogeneración."**
@@ -861,7 +862,7 @@ paseo aleatorio, y a 1 y 3 meses nada le gana al último cierre.
 **H23. "La cosecha de Brasil sirve como instrumento para la causalidad precio → oferta."** No con datos anuales: la
 primera etapa tiene F = 0.2.
 
-**H24. "El área no responde al precio."** Hay una asociación robusta con el precio de 2-3 años antes, pequeña
+**H24. "El área no responde al precio."** Hay una asociación estable en magnitud y signo con el precio de 2-3 años antes, pequeña
 (elasticidad acumulada de ~0.08). La evidencia causal es débil:
 - la permutación da p = 0.05-0.08 a una cola, y 0.11 con 4 rezagos;
 - el placebo del año siguiente falla en algunas muestras (la oferta también mueve el precio);
@@ -1098,8 +1099,27 @@ interno bajo, para responder rápido.
 inicio, una página por serie, la API (con consultas en vivo), herramientas, presentación y el asistente con su diagrama.
 Hice un sistema de diseño desde cero (`web/DESIGN.md`) en lugar de reutilizar el de mi sitio personal. Las cifras no
 se copian a mano: un script copia los JSON y tablas de `outputs/` antes de cada build, y los gráficos (Observable Plot)
-se dibujan con esos datos. Es un proyecto aparte en Vercel; mi sitio principal solo redirige esa ruta.
+se dibujan con esos datos. Es un proyecto aparte en Vercel; mi sitio principal sirve esa ruta con un rewrite.
 *Verificación:* `npm run build` sin errores y revisión visual de cada página en escritorio y celular.
+
+**D84. Rediseño del sitio con criterio de lectura** (`web/DESIGN.md`). Con el sitio publicado, la información se veía
+amontonada: entre 11 y 13 tamaños de letra, texto de 15 px en gris, rótulos en mayúsculas monoespaciadas sobre cada título,
+numeración 01/02, decenas de líneas finas y media pantalla vacía en muchas secciones. Todo pesaba igual y nada guiaba la
+vista. Lo audité con una skill de diseño (taste-skill), que mide cada página en un navegador real a 1440, 768 y 390 px, y
+critiqué las capturas con su rúbrica. Decidí:
+- fondo blanco para analizar, y un color vivo por serie (campo verde, caldera naranja, mercado azul) con contraste de 4.5:1
+  o más en todo el texto;
+- dos familias y pocos tamaños, con títulos cortos que dicen el hallazgo;
+- que la estructura salga del espacio, del tono y de barras de color, no de rótulos ni de líneas finas;
+- el índice interno como barra de navegación, y tablas con cabecera en banda y filas alternas para distinguir columnas;
+- el mismo orden en cada pregunta: hallazgo, decisión, figura, cifras, detalle técnico plegado y evaluación gerencial.
+
+Rehíce la presentación ejecutiva con el mismo sistema y un relato que empieza por las respuestas (una decisión por gerencia)
+y termina en un pedido concreto; el detalle técnico quedó en un anexo para las preguntas.
+*Verificación:* errores del inspector por página, antes y después: inicio 13 → 2, campo 12 → 1, caldera 13 → 1,
+mercado 12 → 1, API 14 → 0, herramientas 13 → 0 y asistente 14 → 1. Los que quedan los acepto: el sitio no usa fotografías
+porque sus imágenes son gráficas de datos, y el título de inicio es moderado a propósito. `npm run build` sin errores y la
+presentación imprime 24 páginas (16 diapositivas y 8 de anexo).
 
 ### Uso de IA
 
@@ -1122,4 +1142,5 @@ se dibujan con esos datos. Es un proyecto aparte en Vercel; mi sitio principal s
   del asistente y el sitio: la marca de "respuesta recortada" del asistente usaba la clave `aviso`, que ya traen el
   pronóstico y el precio (lo detectaron las pruebas); `docs/api.md` decía que las bandas −6 %/+7 % del precio estaban
   en el README (están en el notebook 12); los mensajes del límite mezclaban "tú" y "usted"; y un borrador del sitio
-  decía que la API tenía 15 consultas (eran 12).
+  decía que la API tenía 15 consultas (eran 12). En el rediseño (D84), un agente dejó tres textos invisibles al volver
+  transparente el color de las líneas; el revisor los encontró en las capturas y los corregí.

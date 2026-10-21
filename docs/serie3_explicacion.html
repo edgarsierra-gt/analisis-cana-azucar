@@ -682,7 +682,7 @@ safe("p1 stats", () => {
   $("p1Stats").innerHTML = stat(D.p1.paises_panel, "países productores en el panel", "desde 1976 o antes y ≥ 5,000 ha") +
     stat(fmt(D.cal.A[i23]) + " %", "de los datos de producción de 2023 son oficiales", "73 % en 1961-2009") +
     stat("×" + fmt(m(gt.area, 2019, 2023) / m(gt.area, 1961, 1965), 1), "creció el área de Guatemala", "1961-1965 → 2019-2023") +
-    stat(`${top} de ${D.paises.length}`, "países en el cuartil superior de crecimiento de área y de rendimiento", "Guatemala es uno");
+    stat(`${top} de ${D.paises.length}`, "países en el cuartil superior de crecimiento del área y de nivel de rendimiento", "Guatemala es uno");
 });
 safe("banderas", () => {
   const c = $("chCal"); c.innerHTML = "";

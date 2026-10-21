@@ -1,55 +1,97 @@
 /* ─────────────────────────────────────────────────────────────────────────────
    Sistema de diseño · Caña de azúcar: campo, fábrica y mercado
-   Papel, tinta y un color por serie. Las reglas completas están en web/DESIGN.md.
+   Un informe de datos sobre fondo blanco: una tinta, un gris, superficies por tono (no por líneas) y un color vivo por
+   página, el de su serie. Las reglas completas están en web/DESIGN.md.
+   PlotFigura.COLORES (components/graficos) es espejo de estos valores: si cambia uno, cambia el otro.
+   Contrastes WCAG calculados con la fórmula de luminancia relativa (blanco = #ffffff, tinta = #16181b).
    ───────────────────────────────────────────────────────────────────────────── */
 
 :root {
-  /* Superficies y tinta */
-  --papel: #f4f1e8;
-  --hoja: #fbf9f3;
-  --tinta: #1c1b18;
-  --tinta-2: #45423b;
-  --tinta-3: #6f6a60;
-  --linea: #d6cfbf;
-  --linea-suave: #e6e0d2;
+  /* Fondo y superficies. Una superficie se distingue por su tono, nunca por un borde. */
+  --fondo: #ffffff;
+  --superficie: #f3f4f6;     /* 1.10:1 contra blanco: Nota, Desplegable, paneles, botón secundario */
+  --superficie-2: #e7eaee;   /* 1.21:1: hover de filas, código en línea, estado activo neutro */
+  --cebra: #f2f4f7;          /* 1.10:1: filas alternas de las tablas */
 
-  /* Un color por serie. Siempre acompañado de texto: el color nunca es la única señal. */
-  --campo: #2f6b45;
-  --campo-fondo: #e3ebe2;
-  --caldera: #b04a1c;
-  --caldera-fondo: #f3e2d6;
-  --mercado: #2b5585;
-  --mercado-fondo: #dfe6ee;
+  /* Una tinta y un gris de apoyo. No hay más grises entre los dos. */
+  --tinta: #16181b;          /* 17.8:1 sobre blanco; ≥ 12.5:1 sobre cualquier tinte o superficie del sistema */
+  --apagado: #585e66;        /* 6.6:1 sobre blanco, 6.0 sobre superficie, ≥ 4.6 sobre los tintes medios */
+  --sobre-tinta: #ffffff;    /* texto sobre campos de tinta (pie, <pre>, portada sin serie) */
+  --sobre-tinta-2: #c4c8ce;  /* secundario sobre tinta, 10.6:1 */
+  --borde-control: #80868e;  /* inputs y select: 3.7:1 sobre blanco y ≥ 3.0:1 sobre cualquier tinte o superficie, porque los
+                                controles de las herramientas viven sobre el tinte (WCAG 1.4.11). La única línea de 1 px */
 
-  /* Acentos de apoyo */
-  --enlace: #1f4f7a;
-  --resalte: #e3a92f;          /* marca de "lo que importa" en gráficas; usar poco */
-  --alerta: #9e3a12;
+  /* Series. Cada una tiene cuatro pasos:
+     base  → texto, botones, pestaña activa, campo de la portada, cifras y serie principal de las gráficas.
+             ≥ 5.4:1 sobre blanco, blanco sobre ella ≥ 5.4:1, y ≥ 4.7:1 sobre su propio tinte.
+     vivo  → solo rellenos grandes de gráficas (áreas, barras) y marcas gruesas; nunca texto. ≥ 3.3:1 sobre blanco.
+     fondo → tinte claro: barra del índice, banda de la Evaluación, cabecera de tabla, selección. Tinta encima ≥ 15:1.
+     medio → tinte medio: hover de pestañas, fila destacada, segmentos vacíos de Certeza. Tinta encima ≥ 12.5:1. */
+  --campo: #137a3c;          /* 5.42:1 · sobre su fondo 4.74:1 */
+  --campo-vivo: #1c9b4c;     /* 3.59:1 */
+  --campo-fondo: #e3f4e8;
+  --campo-medio: #c3e6cd;
+  --caldera: #bb3e0b;        /* 5.52:1 · sobre su fondo 4.77:1 (óxido encendido; s 0.89 y l 0.39: fuera de "terracota") */
+  --caldera-vivo: #f4570f;   /* 3.38:1 */
+  --caldera-fondo: #fdebe3;  /* tono 18°: fuera de la familia "crema" (22-62°) */
+  --caldera-medio: #f9d0bd;
+  --mercado: #2160e0;        /* 5.51:1 · sobre su fondo 4.77:1 */
+  --mercado-vivo: #3b7cf5;   /* 3.90:1 */
+  --mercado-fondo: #e8effd;
+  --mercado-medio: #c9dafa;
 
-  /* Certeza (con etiqueta escrita siempre) */
-  --certeza-alta: #2f6b45;
-  --certeza-media: #8a6410;
-  --certeza-baja: #a6401a;
+  /* Gráficas */
+  --contexto: #878d95;       /* 3.35:1: líneas y barras de contexto */
+  --contexto-suave: #d3d7dc; /* rellenos y comparadores de fondo */
+  --rejilla: #e7e9ec;
+  --resalte: #e3a92f;        /* ámbar: solo relleno de franjas al 25-30 %; nunca línea ni texto (2.1:1) */
 
-  /* Tipografía (las familias las carga next/font en layout.tsx) */
+  /* Estado (siempre con texto al lado). La Certeza usa el color de la serie; estos quedan para estados de la API. */
+  --certeza-alta: #137a3c;
+  --certeza-media: #8a6410;  /* 5.4:1 */
+  --certeza-baja: #a8380c;   /* 6.5:1 */
+  --alerta: #a8380c;
+  --en-linea: #137a3c;
+
+  /* El color de la página. Sin data-serie, la página es neutra: manda la tinta. data-serie lo cambia. */
+  --serie: var(--tinta);
+  --serie-vivo: #4a5058;
+  --serie-fondo: var(--superficie-2);
+  --serie-medio: #d9dde3;    /* tinta encima 13:1, apagado 4.8:1 */
+  --sobre-serie: #ffffff;
+  --acento: var(--serie);
+
+  /* Tipografía: dos familias (las carga next/font en layout.tsx) y el monoespaciado del sistema solo para código */
   --fuente-titulo: var(--font-newsreader), "Iowan Old Style", Georgia, serif;
   --fuente-texto: var(--font-public-sans), "Segoe UI", system-ui, sans-serif;
-  --fuente-dato: var(--font-jetbrains), ui-monospace, "Cascadia Mono", monospace;
+  --fuente-codigo: ui-monospace, "Cascadia Mono", Consolas, Menlo, monospace;
 
-  --t-etiqueta: 0.8125rem;   /* 13 px */
-  --t-chico: 0.9375rem;      /* 15 px */
-  --t-texto: 1.0625rem;      /* 17 px */
-  --t-entrada: 1.25rem;      /* 20 px */
-  --t-h3: 1.5rem;            /* 24 px */
-  --t-h2: clamp(1.75rem, 3.2vw, 2.25rem);
-  --t-h1: clamp(2.4rem, 5.2vw, 3.9rem);
-  --t-cifra: clamp(2.1rem, 3.6vw, 3rem);
+  /* Escala. Valores a 390 → 1440 px. La jerarquía la dan el peso, el color y el espacio, no solo el tamaño. */
+  --t-pequeno: 0.875rem;                                       /* 14: fuentes, ejes, cabecera de tabla, meta */
+  --t-texto: clamp(1rem, 0.96rem + 0.18vw, 1.0625rem);         /* 16 → 17: párrafos, celdas, controles */
+  --t-entrada: clamp(1.125rem, 1.02rem + 0.4vw, 1.3125rem);    /* 18 → 21: entradas, h3, decisión, marca */
+  --t-titulo: clamp(1.625rem, 1.25rem + 1.2vw, 2.125rem);      /* 26 → 34: h2 */
+  --t-cifra: clamp(2rem, 1.55rem + 1.1vw, 2.5rem);             /* 32 → 40: valores de Cifra */
+  --t-portada: clamp(2rem, 1.45rem + 2.2vw, 3.5rem);           /* 32 → 55: h1 */
+  --t-pieza: clamp(2.75rem, 1.5rem + 3.9vw, 4.5rem);           /* 44 → 72: la cifra que responde, en la portada */
 
-  /* Medidas */
-  --ancho-texto: 42rem;
-  --ancho-medio: 60rem;
-  --ancho-total: 76rem;
-  --margen: clamp(1.25rem, 4vw, 2.5rem);
+  /* Marco: rejilla de 12 columnas con márgenes iguales */
+  --margen: clamp(1rem, 0.4rem + 2.5vw, 2.5rem);   /* 16 px a 390, 40 px a 1440 */
+  --medianil: clamp(1rem, 0.6rem + 1vw, 1.5rem);   /* 16 → 24 px */
+  --ancho-max: 90rem;
+  --alto-encabezado: 4rem;                          /* 64 px; 56 en el teléfono */
+  --alto-indice: 3.5rem;                            /* 56 px; 52 en el teléfono */
+  /* Anchos de columna medidos sobre el marco. Se resuelven contra <main> (container-type), así sirven a cualquier
+     profundidad: max-width: var(--span-8) es "ocho columnas del marco". */
+  --marco: min(100cqw - 2 * var(--margen), var(--ancho-max));
+  --columna: calc((var(--marco) - 11 * var(--medianil)) / 12);
+  --span-4: calc(4 * var(--columna) + 3 * var(--medianil));
+  --span-5: calc(5 * var(--columna) + 4 * var(--medianil));
+  --span-6: calc(6 * var(--columna) + 5 * var(--medianil));
+  --span-7: calc(7 * var(--columna) + 6 * var(--medianil));
+  --span-8: calc(8 * var(--columna) + 7 * var(--medianil));
+
+  /* Espaciado (base 4): 4, 8, 12, 16, 24, 32, 48, 64, 96, 128, 160 */
   --e-1: 0.25rem;
   --e-2: 0.5rem;
   --e-3: 0.75rem;
@@ -57,20 +99,74 @@
   --e-5: 1.5rem;
   --e-6: 2rem;
   --e-7: 3rem;
-  --e-8: 4.5rem;
+  --e-8: 4rem;
   --e-9: 6rem;
-  --radio: 3px;
+  --e-10: 8rem;
+  --e-11: 10rem;
+  --ritmo-seccion: clamp(5rem, 1.5rem + 9vw, 10rem);   /* ≈150 px en escritorio, 80 en teléfono */
+  --ritmo-bloque: clamp(2.5rem, 1.5rem + 3vw, 4rem);   /* ≈64 px en escritorio, 40 en teléfono */
+  --sep-columnas: clamp(2rem, 1.4rem + 1.6vw, 3rem);   /* 32 → 48 px entre columnas que se leen por separado */
+  --barra: 4px;                                         /* barra superior de una columna: gruesa, nunca de 1 px */
+  --radio: 0;
+
+  /* Movimiento */
+  --curva: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ── Alias de migración: nombres viejos que las páginas todavía usan. Se borran cuando un grep no los encuentre. ── */
+  --papel: var(--fondo);
+  --hoja: var(--superficie);
+  --tinta-2: var(--tinta);          /* el texto que era gris pasa a tinta */
+  --tinta-3: var(--apagado);
+  --enlace: var(--tinta);
+  --linea: transparent;             /* apaga las líneas decorativas sin mover la maqueta */
+  --linea-suave: transparent;
+  --regla: transparent;
+  --regla-fuerte: transparent;
+  --fuente-dato: var(--fuente-texto); /* quita el monoespaciado de etiquetas y cifras */
+  --t-etiqueta: var(--t-pequeno);
+  --t-chico: var(--t-texto);
+  --t-h3: var(--t-entrada);
+  --t-h2: var(--t-titulo);
+  --t-h1: var(--t-portada);
+  --ancho-texto: 42rem;
+  --ancho-medio: 60rem;
+  --ancho-total: var(--ancho-max);
+}
+
+/* El color de la página: data-serie en el contenedor de la página (o en cualquier bloque) lo hereda todo lo de adentro:
+   pestañas, botones, cifras, tablas, Evaluación, Certeza y gráficas (PlotFigura lo lee de --serie). */
+[data-serie="campo"] {
+  --serie: var(--campo); --serie-vivo: var(--campo-vivo); --serie-fondo: var(--campo-fondo); --serie-medio: var(--campo-medio);
+  --acento: var(--campo);
+}
+[data-serie="caldera"] {
+  --serie: var(--caldera); --serie-vivo: var(--caldera-vivo); --serie-fondo: var(--caldera-fondo); --serie-medio: var(--caldera-medio);
+  --acento: var(--caldera);
+}
+[data-serie="mercado"] {
+  --serie: var(--mercado); --serie-vivo: var(--mercado-vivo); --serie-fondo: var(--mercado-fondo); --serie-medio: var(--mercado-medio);
+  --acento: var(--mercado);
 }
 
 /* ── Base ─────────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; }
 
-html { -webkit-text-size-adjust: 100%; scroll-padding-top: 5.5rem; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--alto-encabezado) + var(--alto-indice) + var(--e-4));
+}
+@media (max-width: 860px) {
+  :root { --alto-encabezado: 3.5rem; --alto-indice: 3.25rem; }
+}
+/* Bajo 900 px no hay columnas al lado: todo bloque usa el ancho completo del marco. */
+@media (max-width: 899px) {
+  :root { --span-4: 100%; --span-5: 100%; --span-6: 100%; --span-7: 100%; --span-8: 100%; }
+}
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 
 body {
-  background: var(--papel);
+  background: var(--fondo);
   color: var(--tinta);
   font-family: var(--fuente-texto);
   font-size: var(--t-texto);
@@ -80,124 +176,217 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, h4 {
-  font-family: var(--fuente-titulo);
-  font-weight: 500;
-  line-height: 1.12;
-  letter-spacing: -0.012em;
-  text-wrap: balance;
+/* <main> es el contenedor de consulta del marco: --span-N y el ancho completo de Evaluacion se miden contra él. */
+main { container-type: inline-size; }
+
+h1, h2, h3, h4 { text-wrap: balance; hyphens: none; }
+h1, h2 { font-family: var(--fuente-titulo); font-weight: 500; }
+h1 { font-size: var(--t-portada); line-height: 1.08; letter-spacing: -0.018em; }
+h2 { font-size: var(--t-titulo); line-height: 1.15; letter-spacing: -0.01em; }
+h3 {
+  font-family: var(--fuente-texto);
+  font-size: var(--t-entrada);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
 }
-h1 { font-size: var(--t-h1); }
-h2 { font-size: var(--t-h2); }
-h3 { font-size: var(--t-h3); line-height: 1.2; }
-h4 { font-family: var(--fuente-texto); font-size: var(--t-texto); font-weight: 650; letter-spacing: 0; }
+h4 {
+  font-family: var(--fuente-texto);
+  font-size: var(--t-texto);
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
 
 p, li { text-wrap: pretty; }
 p + p { margin-top: var(--e-4); }
+/* Medida de lectura en el sitio (la presentación no tiene <main> y conserva la suya). Sin especificidad: cualquier
+   clase de un componente la cambia. */
+:where(main) :where(p) { max-width: 64ch; }
 
-a { color: var(--enlace); text-decoration-thickness: 1px; text-underline-offset: 0.18em; }
+/* Enlaces en tinta; el subrayado lleva el color de la página. */
+a {
+  color: var(--enlace);
+  text-decoration-line: underline;
+  text-decoration-color: var(--serie);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
 a:hover { text-decoration-thickness: 2px; }
 
 img, svg { display: block; max-width: 100%; height: auto; }
-strong { font-weight: 650; }
-small { font-size: var(--t-chico); }
+strong, b { font-weight: 600; }
+small { font-size: var(--t-pequeno); }
 
-code, kbd {
-  font-family: var(--fuente-dato);
-  font-size: 0.86em;
-  background: var(--linea-suave);
+code, kbd, samp {
+  font-family: var(--fuente-codigo);
+  font-size: max(0.875em, 0.8125rem);   /* nunca bajo 13 px, ni dentro de una nota de 14 */
+  background: var(--superficie-2);
   padding: 0.08em 0.32em;
   border-radius: var(--radio);
 }
 pre {
-  font-family: var(--fuente-dato);
-  font-size: var(--t-chico);
+  font-family: var(--fuente-codigo);
+  font-size: var(--t-pequeno);
   line-height: 1.55;
   background: var(--tinta);
-  color: #ece8dd;
+  color: var(--sobre-tinta);
   padding: var(--e-4) var(--e-5);
   border-radius: var(--radio);
   overflow-x: auto;
 }
-code, pre, kbd { font-variant-ligatures: none; }
+code, pre, kbd, samp { font-variant-ligatures: none; }
 pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
 
 ul, ol { padding-left: 1.2em; }
 li + li { margin-top: var(--e-2); }
+li::marker { color: var(--serie); }
 
-::selection { background: #f1d48f; color: var(--tinta); }
+::selection { background: var(--serie-medio); color: var(--tinta); }
 
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 2px solid var(--tinta);
   outline-offset: 2px;
 }
+/* Todo lo demás que reciba foco (Chrome enfoca solas las zonas con desplazamiento: tablas anchas, <pre>) lleva el mismo
+   anillo de 2 px, no el de 1 px del navegador. Sin especificidad: cualquier regla propia lo cambia. */
+:where(:focus-visible) { outline: 2px solid var(--tinta); outline-offset: 2px; }
 
-/* ── Utilidades de maqueta ────────────────────────────────────────────────── */
-.contenedor { width: min(100% - 2 * var(--margen), var(--ancho-total)); margin-inline: auto; }
-.contenedor-medio { width: min(100% - 2 * var(--margen), var(--ancho-medio)); margin-inline: auto; }
-.contenedor-texto { width: min(100% - 2 * var(--margen), var(--ancho-texto)); margin-inline: auto; }
-.texto { max-width: var(--ancho-texto); }
-.texto > * + * { margin-top: var(--e-4); }
-.texto > h3 { margin-top: var(--e-6); }
-.pila > * + * { margin-top: var(--e-5); }
-.pila-grande > * + * { margin-top: var(--e-7); }
-
-/* Etiqueta en mayúsculas pequeñas: la voz del "informe técnico" */
-.etiqueta {
-  font-family: var(--fuente-dato);
-  font-size: var(--t-etiqueta);
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--tinta-3);
+/* ── Escala tipográfica como clases ───────────────────────────────────────── */
+.pequeno { font-size: var(--t-pequeno); line-height: 1.45; }
+.entrada {
+  font-size: var(--t-entrada);
+  line-height: 1.45;
+  color: var(--tinta);
+  max-width: 46ch;
 }
-.entrada { font-size: var(--t-entrada); line-height: 1.5; color: var(--tinta-2); max-width: 40rem; }
-.apagado { color: var(--tinta-3); }
-.dato { font-family: var(--fuente-dato); font-variant-numeric: tabular-nums; }
-.num { font-variant-numeric: tabular-nums; }
+.entrada > * + * { margin-top: var(--e-3); }
+.apagado { color: var(--apagado); }
+/* El color de la página en un texto (cifras sueltas, rótulos de gráficas). Pasa 4.5:1 sobre blanco y sobre su tinte. */
+.en-serie { color: var(--serie); }
+/* Cifras en la letra del texto, alineadas en columna */
+.num, .dato { font-variant-numeric: tabular-nums lining-nums; }
+/* Rótulo viejo neutralizado: ya no es mayúscula ni monoespaciado. Se borra de las páginas en el punto 2. */
+.etiqueta {
+  font-family: var(--fuente-texto);
+  font-size: var(--t-pequeno);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--apagado);
+}
 
-/* Color de la serie: se hereda con data-serie en cualquier contenedor */
-[data-serie="campo"] { --serie: var(--campo); --serie-fondo: var(--campo-fondo); }
-[data-serie="caldera"] { --serie: var(--caldera); --serie-fondo: var(--caldera-fondo); }
-[data-serie="mercado"] { --serie: var(--mercado); --serie-fondo: var(--mercado-fondo); }
-:root { --serie: var(--tinta); --serie-fondo: var(--linea-suave); }
+/* ── Marco y maqueta ──────────────────────────────────────────────────────── */
+.contenedor { width: min(100% - 2 * var(--margen), var(--ancho-max)); margin-inline: auto; }
+/* Los dos contenedores angostos se quedan por compatibilidad; ya no se centran: arrancan en el borde del marco. */
+.contenedor-medio, .contenedor-texto { width: min(100% - 2 * var(--margen), var(--ancho-max)); margin-inline: auto; }
+.contenedor-medio > * { max-width: var(--span-8); }
+.contenedor-texto > * { max-width: var(--span-7); }
+
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--medianil);
+}
+
+/* Lectura con margen: el texto en las columnas 1-7 y, en las 9-12, sus fuentes, la nota de límite y los enlaces al
+   notebook. Dos hijos: el primero es la narrativa y el segundo el margen. En pantallas angostas el margen va debajo. */
+.lectura { display: grid; gap: var(--ritmo-bloque) var(--medianil); }
+.lectura > :nth-child(2) { font-size: var(--t-pequeno); line-height: 1.45; color: var(--apagado); }
+.lectura > :nth-child(2) > * + * { margin-top: var(--e-5); }
+@media (min-width: 900px) {
+  .lectura { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .lectura > :first-child { grid-column: 1 / 8; }
+  .lectura > :nth-child(2) { grid-column: 9 / 13; align-self: start; }
+}
+
+/* Columnas que se leen cada una por separado (comparaciones, listas en columnas, "qué hice / qué descarté").
+   .columnas: cada hijo abre con una barra de 4 px del color de la página y su propio título; 32-48 px entre columnas.
+   .paneles: cada hijo es un panel de superficie. Dos o tres por fila según el ancho; una en el teléfono. */
+.columnas, .paneles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--e-7) var(--sep-columnas);
+  align-items: start;
+}
+.columnas > * { position: relative; padding-top: calc(var(--barra) + var(--e-4)); min-width: 0; }
+.columnas > *::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: var(--barra);
+  background: var(--serie);
+}
+.paneles { gap: var(--sep-columnas); align-items: stretch; }
+.paneles > * { background: var(--superficie); padding: var(--e-5); min-width: 0; }
+.columnas > * > * + *, .paneles > * > * + * { margin-top: var(--e-3); }
+/* Un bloque sobre el tinte de la página (por ejemplo, la cosa viva de una sección) */
+.tinte { background: var(--serie-fondo); padding: var(--e-5); --boton-sec-fondo: var(--fondo); }
+
+.texto { max-width: var(--span-7); }
+.texto > * + * { margin-top: 1em; }
+.texto > h3 { margin-top: var(--e-7); }
+.texto > h3 + * { margin-top: var(--e-3); }
+.pila > * + * { margin-top: var(--e-5); }
+.pila-grande > * + * { margin-top: var(--ritmo-bloque); }
 
 .solo-lectores {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; /* taste-skill-ignore: solo lectores */
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
 
-/* Botones y controles básicos (las herramientas los usan) */
+/* ── Botones y controles ──────────────────────────────────────────────────── */
+/* Botón primario en el color de la página (tinta en las páginas sin serie). Esquinas rectas, sin sombra. */
 .boton {
-  display: inline-flex; align-items: center; gap: var(--e-2);
-  font: 600 var(--t-chico) / 1 var(--fuente-texto);
-  padding: 0.7rem 1rem;
-  border: 1px solid var(--tinta);
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--e-2);
+  min-height: 2.75rem;
+  padding: 0.6rem 1.15rem;
+  font: 600 var(--t-texto) / 1.2 var(--fuente-texto);
+  border: 0;
   border-radius: var(--radio);
-  background: var(--tinta);
-  color: var(--papel);
+  background: var(--serie);
+  color: var(--sobre-serie);
   text-decoration: none;
   cursor: pointer;
+  transition: background-color 120ms var(--curva), transform 120ms var(--curva);
 }
-.boton:hover { background: var(--tinta-2); text-decoration: none; }
+.boton:hover { background: color-mix(in srgb, var(--serie) 82%, #000); text-decoration: none; }
+.boton:active { transform: translateY(1px); }
 .boton[disabled] { opacity: 0.5; cursor: not-allowed; }
-.boton-sec { background: transparent; color: var(--tinta); }
-.boton-sec:hover { background: var(--hoja); }
+/* Secundario: el tinte de la página sobre blanco. Sobre un panel que ya es del tinte (.tinte, los controles de una
+   herramienta) se volvería invisible: ese panel define --boton-sec-fondo y el botón pasa a blanco. */
+.boton-sec { background: var(--boton-sec-fondo, var(--serie-fondo)); color: var(--tinta); }
+.boton-sec:hover { background: var(--serie-medio); }
 
 .campo-form { display: grid; gap: var(--e-1); }
-.campo-form label { font-size: var(--t-chico); font-weight: 600; color: var(--tinta-2); }
-.campo-form .ayuda { font-size: var(--t-etiqueta); color: var(--tinta-3); }
-input[type="text"], input[type="number"], select, textarea {
+.campo-form label { font-size: var(--t-texto); font-weight: 600; color: var(--tinta); }
+.campo-form .ayuda { font-size: var(--t-pequeno); color: var(--apagado); }
+input[type="text"], input[type="number"], input[type="search"], input[type="email"], select, textarea {
   font: 400 var(--t-texto) / 1.3 var(--fuente-texto);
-  padding: 0.55rem 0.7rem;
-  border: 1px solid var(--linea);
+  min-height: 2.75rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--borde-control);
   border-radius: var(--radio);
-  background: var(--hoja);
+  background: var(--fondo);
   color: var(--tinta);
   width: 100%;
 }
-input[type="number"] { font-family: var(--fuente-dato); font-variant-numeric: tabular-nums; }
-input[type="range"] { width: 100%; accent-color: var(--serie); }
+input[type="number"] { font-variant-numeric: tabular-nums lining-nums; }
+:where(input, select, textarea):focus-visible { outline: 2px solid var(--serie); outline-offset: 0; border-color: var(--serie); }
+input[type="range"], input[type="checkbox"], input[type="radio"] { accent-color: var(--serie); }
+input[type="range"] { width: 100%; }
+
+/* Entrada de los bloques con data-entrada (la dispara components/Movimiento.tsx al asomar en pantalla, una vez) */
+@media (prefers-reduced-motion: no-preference) {
+  .entrando { animation: entrar 300ms var(--curva) var(--retraso, 0ms) backwards; }
+}
+@keyframes entrar { from { opacity: 0; transform: translateY(12px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
 
 @media print {
   body { background: #fff; }

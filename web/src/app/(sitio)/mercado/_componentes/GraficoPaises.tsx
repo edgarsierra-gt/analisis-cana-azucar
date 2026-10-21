@@ -43,7 +43,10 @@ export function GraficoPaises({
           x: "crecArea",
           y: "rend",
           text: "nombre",
-          fontSize: 11.5,
+          fontSize: 13,
+          // Halo blanco: el rótulo se lee aunque caiga sobre otro punto o sobre la línea del cuartil (Zambia, Sudán)
+          stroke: COLORES.fondo,
+          strokeWidth: 3,
           ...(angosto && p.crecArea > 3.9
             ? { dx: -9, dy: p.pais === "Guatemala" ? -9 : -7, textAnchor: "end" as const }
             : (ROTULO[p.pais] ?? { dx: 7, dy: 0, textAnchor: "start" as const })),
@@ -64,7 +67,7 @@ export function GraficoPaises({
           Plot.ruleX([corteArea], { stroke: COLORES.tinta2, strokeDasharray: "3 4", strokeOpacity: 0.6 }),
           Plot.ruleY([corteRend], { stroke: COLORES.tinta2, strokeDasharray: "3 4", strokeOpacity: 0.6 }),
           Plot.text(["Cuartil superior en los dos ejes ↗"], {
-            frameAnchor: "top-right", dx: -2, dy: 2, fill: COLORES.tinta2, fontSize: 11, textAnchor: "end",
+            frameAnchor: "top-right", dx: -2, dy: 2, fill: COLORES.tinta2, fontSize: 13, textAnchor: "end",
           }),
           Plot.dot(de("otro"), { x: "crecArea", y: "rend", r: 3.6, fill: COLORES.contexto }),
           Plot.dot(de("cuadrante"), { x: "crecArea", y: "rend", r: 3.6, fill: COLORES.contexto, stroke: COLORES.tinta2, strokeWidth: 1.2 }),

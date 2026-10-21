@@ -1,67 +1,63 @@
-/* Chat del asistente: barra de estado, sugerencias, registro de la conversación y formulario. Solo tokens de globals.css. */
+/* Chat del asistente: línea de estado, sugerencias, conversación y formulario. Vive en el panel blanco de la portada,
+   que ya le da el marco y el relleno: aquí no hay bordes ni fondo propio. Solo tokens de globals.css. */
 
-.chat {
-  max-width: var(--ancho-medio);
-  background: var(--hoja);
-  border: 1px solid var(--linea);
-  border-top: 3px solid var(--tinta);
-  border-radius: var(--radio);
-}
+.chat { display: flex; flex-direction: column; gap: var(--e-5); min-width: 0; }
 /* Dentro del chat los párrafos seguidos no llevan el margen del texto corrido (el Markdown lo recupera abajo). */
 .chat p + p { margin-top: 0; }
 
-/* ── Barra de estado ──────────────────────────────────────────────────── */
+/* ── Línea de estado ──────────────────────────────────────────────────── */
 .barra {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--e-3) var(--e-5);
-  padding: var(--e-4) var(--e-5);
-  border-bottom: 1px solid var(--linea);
 }
 .barraTexto { display: grid; gap: var(--e-1); min-width: 0; }
 .estado {
   display: flex;
   align-items: center;
   gap: var(--e-2);
-  font-weight: 650;
-  font-size: var(--t-chico);
+  font-weight: 600;
+  font-size: var(--t-texto);
   color: var(--tinta);
 }
-.marca { flex: none; width: 0.65rem; height: 0.65rem; border: 1.5px solid var(--tinta-3); }
+.marca { flex: none; width: 0.65rem; height: 0.65rem; border: 2px solid var(--apagado); }
 .estado[data-tono="ok"] .marca { background: var(--certeza-alta); border-color: var(--certeza-alta); }
 .estado[data-tono="error"] { color: var(--alerta); }
-.estado[data-tono="error"] .marca { background: transparent; border: 2px solid var(--alerta); }
+.estado[data-tono="error"] .marca { background: transparent; border-color: var(--alerta); }
 
-.botonChico { padding: 0.45rem 0.7rem; font-size: var(--t-etiqueta); }
+.botonChico { padding: 0.45rem 0.85rem; font-size: var(--t-pequeno); }
 
 .aviso {
-  margin: var(--e-4) var(--e-5) 0;
-  padding: var(--e-3) var(--e-4);
-  border-left: 3px solid var(--alerta);
-  background: var(--papel);
-  font-size: var(--t-chico);
-  color: var(--tinta-2);
+  padding: var(--e-4) var(--e-5);
+  border-left: var(--barra) solid var(--alerta);
+  background: var(--superficie);
+  font-size: var(--t-texto);
+  color: var(--tinta);
   display: grid;
   gap: var(--e-2);
   justify-items: start;
 }
-.avisoTitulo { font-weight: 650; color: var(--tinta); }
+.avisoTitulo { font-weight: 600; }
 .aviso code { overflow-wrap: anywhere; }
+/* Sobre la superficie, el botón secundario va en blanco para no perderse */
+.aviso :global(.boton-sec), .error :global(.boton-sec) { background: var(--fondo); }
+.aviso :global(.boton-sec):hover, .error :global(.boton-sec):hover { background: var(--superficie-2); }
 
-/* ── Preguntas sugeridas ──────────────────────────────────────────────── */
-.sugerencias { padding: var(--e-5) var(--e-5) var(--e-4); }
+/* ── Preguntas sugeridas: tres por fila en pantalla ancha, una por serie en cada columna ── */
+.sugerencias { display: grid; gap: var(--e-3); }
+.tituloSugerencias { font-size: var(--t-texto); font-weight: 600; color: var(--tinta); }
 .listaSugerencias {
   list-style: none;
   padding: 0;
-  margin-top: var(--e-3);
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--e-3);
 }
 .listaSugerencias > li { margin: 0; }
-@media (max-width: 640px) { .listaSugerencias { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 1099px) { .listaSugerencias { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 699px) { .listaSugerencias { grid-template-columns: minmax(0, 1fr); gap: var(--e-2); } }
 
 .sugerencia {
   display: grid;
@@ -69,41 +65,39 @@
   gap: var(--e-1);
   width: 100%;
   height: 100%;
+  min-height: 2.75rem;
   padding: var(--e-3) var(--e-4);
   text-align: left;
-  font: 400 var(--t-chico) / 1.45 var(--fuente-texto);
+  font: 400 var(--t-texto) / 1.45 var(--fuente-texto);
   color: var(--tinta);
-  background: transparent;
-  border: 1px solid var(--linea);
-  border-left: 3px solid var(--serie);
+  background: var(--superficie);
+  border: 0;
+  border-left: var(--barra) solid var(--serie);
   border-radius: var(--radio);
   cursor: pointer;
+  transition: background-color 120ms var(--curva), transform 120ms var(--curva);
 }
-.sugerencia:hover:not(:disabled) { background: var(--serie-fondo); border-color: var(--serie); }
-.sugerencia:disabled { cursor: not-allowed; color: var(--tinta-3); }
-.rotuloSerie {
-  font-family: var(--fuente-dato);
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--serie);
-}
+.sugerencia:hover:not(:disabled) { background: var(--serie-fondo); }
+.sugerencia:active:not(:disabled) { transform: translateY(1px); }
+.sugerencia:disabled { cursor: not-allowed; color: var(--apagado); }
+.rotuloSerie { font-size: var(--t-pequeno); font-weight: 600; color: var(--serie); }
 
-/* ── Registro de la conversación ──────────────────────────────────────── */
+/* ── Conversación ─────────────────────────────────────────────────────── */
 .registro { position: relative; /* offsetTop de cada turno se mide contra el registro */ }
+/* Vacío sigue en la página (es la región que anuncia las respuestas), pero no suma un segundo espacio entre bloques */
+.registro:empty { margin-top: calc(-1 * var(--e-5)); }
 .registro:focus-visible { outline-offset: -2px; }
-/* En pantalla ancha la conversación se desplaza dentro del recuadro. En un teléfono se desplaza la página: un recuadro
+/* En pantalla ancha la conversación se desplaza dentro del panel. En un teléfono se desplaza la página: un recuadro
    con su propio desplazamiento atraparía el dedo en el 70 % de la pantalla. */
 @media (min-width: 700px) {
   .registro { max-height: min(42rem, 70vh); overflow-y: auto; overscroll-behavior: contain; }
 }
 
-.turno { padding: var(--e-5); }
-.turno + .turno { border-top: 1px solid var(--linea); }
-.quien { font-size: 0.75rem; }
+.turno + .turno { margin-top: var(--e-7); }
+.quien { font-size: var(--t-pequeno); font-weight: 600; color: var(--apagado); }
 
-.pregunta { display: grid; gap: var(--e-1); }
+/* La pregunta, en un panel de superficie; la respuesta, sobre blanco debajo */
+.pregunta { display: grid; gap: var(--e-1); padding: var(--e-3) var(--e-4); background: var(--superficie); }
 .textoPregunta {
   font-weight: 600;
   color: var(--tinta);
@@ -117,18 +111,31 @@
   gap: var(--e-3);
   min-width: 0;
   margin-top: var(--e-4);
-  padding-left: var(--e-4);
-  border-left: 2px solid var(--linea);
+  padding-inline: var(--e-4);
+}
+/* Pantalla ancha: el texto a la izquierda y, en el margen derecho, qué consultó y dónde se verifica cada cifra. */
+@media (min-width: 1100px) {
+  .respuesta {
+    grid-template-columns: minmax(0, 46rem) minmax(15rem, 1fr);
+    grid-template-rows: auto auto 1fr;
+    column-gap: var(--e-7);
+    align-items: start;
+  }
+  .respuesta > * { grid-column: 1; }
+  .respuesta > .md { grid-row: 2 / span 2; }
+  .respuesta > .pieRespuesta { grid-column: 2; grid-row: 2; }
+  .respuesta > .argumentos { grid-column: 2; grid-row: 3; }
+  .pieRespuesta { flex-direction: column; align-items: flex-start; }
 }
 
-.espera { font-size: var(--t-chico); color: var(--tinta-2); }
+.espera { font-size: var(--t-texto); color: var(--tinta); }
 .espera::before {
   content: "";
   display: inline-block;
   width: 0.6rem;
   height: 0.6rem;
   margin-right: var(--e-2);
-  border: 1.5px solid var(--tinta-2);
+  border: 2px solid var(--tinta);
   border-radius: 50%;
   vertical-align: 0.02em;
 }
@@ -138,103 +145,95 @@
 @keyframes girar { to { transform: rotate(360deg); } }
 
 /* ── Markdown de la respuesta ─────────────────────────────────────────── */
-.md { min-width: 0; max-width: 46rem; font-size: 1rem; line-height: 1.6; color: var(--tinta); }
+.md { min-width: 0; max-width: 46rem; font-size: var(--t-texto); line-height: 1.6; color: var(--tinta); }
 .md > * + * { margin-top: var(--e-3); }
 .md p + p { margin-top: var(--e-3); }
 .md ul, .md ol { padding-left: 1.3em; }
 .md li + li { margin-top: var(--e-1); }
 .md li > p + p, .md li > ul, .md li > ol { margin-top: var(--e-1); }
-.md li::marker { color: var(--tinta-3); }
-.md strong { color: var(--tinta); }
+.md li::marker { color: var(--apagado); }
 .md a { overflow-wrap: anywhere; }
-.md blockquote { padding-left: var(--e-4); border-left: 3px solid var(--linea); color: var(--tinta-2); }
-.md hr { border: 0; border-top: 1px solid var(--linea); }
-.md pre { font-size: 0.8125rem; }
+.md blockquote { padding-left: var(--e-4); border-left: var(--barra) solid var(--superficie-2); }
+.md hr { height: var(--e-2); border: 0; background: var(--superficie); }
+.md pre { font-size: var(--t-pequeno); }
 .md code { overflow-wrap: anywhere; }
-.tituloMd { font-family: var(--fuente-texto); font-size: 1rem; font-weight: 650; line-height: 1.35; }
+.tituloMd { font-family: var(--fuente-texto); font-size: var(--t-texto); font-weight: 600; line-height: 1.35; }
 .md > .tituloMd:not(:first-child) { margin-top: var(--e-5); }
 
-/* Tablas: se desplazan a lo ancho; encabezado en la fuente de datos y cifras tabulares a la derecha. */
+/* Tablas: se desplazan a lo ancho. Como Tabla: cabecera en 600 sobre una banda de tono, filas alternas (cebra), cifras
+   tabulares a la derecha y ninguna línea de 1 px. */
 .tablaMd { overflow-x: auto; max-width: 100%; }
 .tablaMd:focus-visible { outline: 2px solid var(--tinta); outline-offset: 2px; }
-.tablaMd table { min-width: min(100%, 28rem); border-collapse: collapse; font-size: var(--t-chico); }
+.tablaMd table { min-width: min(100%, 28rem); border-collapse: collapse; font-size: var(--t-texto); }
 .tablaMd th {
   padding: var(--e-2) var(--e-3);
-  font-family: var(--fuente-dato);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: var(--t-pequeno);
+  font-weight: 600;
   text-align: left;
   vertical-align: bottom;
-  color: var(--tinta-3);
-  border-bottom: 1px solid var(--tinta);
+  color: var(--tinta);
+  background: var(--superficie-2);
 }
 .tablaMd td {
   min-width: 5.5rem;
-  padding: 0.45rem var(--e-3);
+  padding: 0.5rem var(--e-3);
   vertical-align: top;
-  color: var(--tinta-2);
+  color: var(--tinta);
   font-variant-numeric: tabular-nums;
-  border-bottom: 1px solid var(--linea-suave);
 }
-.tablaMd td:first-child { color: var(--tinta); font-weight: 600; }
-.tablaMd th:first-child, .tablaMd td:first-child { padding-left: 0; }
-.tablaMd .num { text-align: right; font-family: var(--fuente-dato); white-space: nowrap; }
+.tablaMd tbody tr:nth-child(even) td { background: var(--cebra); }
+.tablaMd td:first-child { font-weight: 600; }
+.tablaMd .num { text-align: right; white-space: nowrap; }
 /* Como en Tabla: el encabezado de una columna de cifras sí se parte, para que la tabla no se ensanche de más. */
 .tablaMd th.num { white-space: normal; }
 
-/* ── Pie de cada respuesta: qué consultó, modelo, copiar ──────────────── */
+/* ── Pie de cada respuesta: qué consultó (con enlace a su caso), modelo y copiar ── */
 .pieRespuesta {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--e-2) var(--e-5);
-  padding-top: var(--e-3);
-  border-top: 1px solid var(--linea-suave);
-  font-size: var(--t-etiqueta);
-  color: var(--tinta-3);
+  gap: var(--e-3) var(--e-5);
+  padding: var(--e-3) var(--e-4);
+  background: var(--superficie);
+  font-size: var(--t-pequeno);
+  color: var(--apagado);
 }
-.consulto { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--e-1) var(--e-2); min-width: 0; }
-.rotuloPie { font-family: var(--fuente-dato); letter-spacing: 0.06em; text-transform: uppercase; }
-.chips { display: flex; flex-wrap: wrap; gap: var(--e-1); list-style: none; padding: 0; }
+.consulto { display: grid; gap: var(--e-2); min-width: 0; }
+.rotuloPie { font-weight: 600; color: var(--tinta); }
+.chips { display: flex; flex-wrap: wrap; gap: var(--e-2); list-style: none; padding: 0; }
 .chips > li { margin: 0; }
-.chip {
-  padding: 0.05rem 0.45rem;
-  border: 1px solid var(--linea);
-  border-radius: var(--radio);
-  background: var(--papel);
-  color: var(--tinta-2);
-  line-height: 1.5;
-}
+.chip { padding: 0.2rem 0.55rem; background: var(--fondo); color: var(--tinta); line-height: 1.45; }
+.chip a { color: var(--tinta); font-weight: 600; }
+.fuenteChip { font-weight: 400; color: var(--apagado); }
 .accionesRespuesta { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--e-1) var(--e-4); }
-.meta { font-family: var(--fuente-dato); }
+/* Modelo que respondió y pasos (Chat.tsx la usaba sin regla) */
+.meta { color: var(--apagado); font-variant-numeric: tabular-nums; }
 .botonTexto {
   padding: 0.15rem 0;
-  font: 600 var(--t-etiqueta) / 1.3 var(--fuente-texto);
-  color: var(--enlace);
+  font: 600 var(--t-pequeno) / 1.3 var(--fuente-texto);
+  color: var(--tinta);
   background: none;
   border: 0;
   text-decoration: underline;
+  text-decoration-color: var(--serie);
   text-decoration-thickness: 1px;
   text-underline-offset: 0.18em;
   cursor: pointer;
 }
 .botonTexto:hover { text-decoration-thickness: 2px; }
 
-.argumentos { font-size: var(--t-etiqueta); color: var(--tinta-2); }
-.argumentos summary { width: fit-content; cursor: pointer; color: var(--tinta-3); }
+.argumentos { font-size: var(--t-pequeno); color: var(--tinta); }
+.argumentos summary { width: fit-content; cursor: pointer; color: var(--apagado); }
 .argumentos ol { margin-top: var(--e-2); padding-left: 1.4em; }
 .argumentos li + li { margin-top: var(--e-1); }
-.argumentos strong { color: var(--tinta); }
 .argumentos code { overflow-wrap: anywhere; }
 
 .error {
   padding: var(--e-3) var(--e-4);
-  border-left: 3px solid var(--alerta);
-  background: var(--papel);
-  font-size: var(--t-chico);
+  border-left: var(--barra) solid var(--alerta);
+  background: var(--superficie);
+  font-size: var(--t-texto);
   color: var(--tinta);
   display: grid;
   gap: var(--e-2);
@@ -244,30 +243,34 @@
 .accionesError { display: flex; flex-wrap: wrap; gap: var(--e-2); }
 
 /* ── Formulario ───────────────────────────────────────────────────────── */
-.formulario {
-  display: grid;
-  gap: var(--e-2);
-  padding: var(--e-4) var(--e-5) var(--e-5);
-  border-top: 1px solid var(--linea);
-}
-.rotuloArea { font-size: var(--t-chico); font-weight: 600; color: var(--tinta-2); }
+.formulario { display: grid; gap: var(--e-2); }
+.rotuloArea { font-size: var(--t-texto); font-weight: 600; color: var(--tinta); }
 .formulario textarea {
   min-height: 5.5rem;
   max-height: 16rem;
   resize: vertical;
   line-height: 1.5;
-  border-color: var(--tinta-3); /* 3:1 contra la hoja (WCAG 1.4.11) */
 }
-.formulario textarea::placeholder { color: var(--tinta-3); }
-.formulario textarea:disabled { background: var(--papel); color: var(--tinta-3); cursor: not-allowed; }
-.pieForm { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-2) var(--e-4); }
-.ayuda { margin-right: auto; font-size: var(--t-etiqueta); color: var(--tinta-3); }
-.ayuda kbd { font-size: 0.75rem; }
-.contador { font-family: var(--fuente-dato); font-size: var(--t-etiqueta); font-variant-numeric: tabular-nums; color: var(--tinta-3); }
+.formulario textarea::placeholder { color: var(--apagado); }
+.formulario textarea:disabled { background: var(--superficie); color: var(--apagado); cursor: not-allowed; }
+.pieForm { display: flex; flex-wrap: wrap; align-items: flex-start; gap: var(--e-3) var(--e-5); }
+.ayuda { flex: 1 1 24rem; max-width: 64ch; font-size: var(--t-pequeno); line-height: 1.45; color: var(--apagado); }
+.ayuda kbd { font-size: 0.8125rem; }
+/* Los atajos de teclado no aplican en una pantalla táctil */
+@media (hover: none) { .teclas { display: none; } }
+/* El contador y "Enviar" van contra el borde derecho del área de texto, donde termina lo que se escribe */
+.contador { margin-left: auto; padding-top: 0.15rem; font-size: var(--t-pequeno); font-variant-numeric: tabular-nums; color: var(--apagado); }
 .contador[data-cerca] { color: var(--alerta); font-weight: 600; }
+/* Deshabilitado: un gris que se lee como "todavía no", no un botón lavado */
+.formulario :global(.boton):disabled { opacity: 1; background: var(--superficie-2); color: var(--apagado); }
 
-@media (max-width: 560px) {
-  .barra, .sugerencias, .turno, .formulario { padding-left: var(--e-4); padding-right: var(--e-4); }
-  .aviso { margin-left: var(--e-4); margin-right: var(--e-4); }
-  .respuesta { padding-left: var(--e-3); }
+/* Sin conversación, el área de texto va antes que las sugerencias: es lo primero que se ve al llegar, también en el
+   primer pantallazo de escritorio. Con conversación, las sugerencias se van y la conversación queda sobre el área. */
+.barra { order: 0; }
+.aviso { order: 1; }
+.registro { order: 2; }
+.formulario { order: 3; }
+.sugerencias { order: 4; }
+@media (max-width: 699px) {
+  .respuesta { padding-inline: 0; }
 }

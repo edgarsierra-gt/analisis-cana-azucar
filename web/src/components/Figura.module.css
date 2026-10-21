@@ -1,12 +1,13 @@
 .figura { margin: 0; }
-.texto { max-width: var(--ancho-texto); }
-.medio { max-width: var(--ancho-medio); }
+.texto { max-width: var(--span-7); }
+.medio { max-width: var(--span-8); }
 .total { max-width: none; }
-.cabeza { display: grid; gap: var(--e-1); padding-bottom: var(--e-3); border-bottom: 1px solid var(--linea); }
-.numero { font-family: var(--fuente-dato); font-size: var(--t-etiqueta); letter-spacing: 0.06em; text-transform: uppercase; color: var(--serie); font-weight: 600; }
-.titulo { font-family: var(--fuente-texto); font-weight: 650; font-size: var(--t-texto); line-height: 1.35; color: var(--tinta); }
-.cuerpo { padding-top: var(--e-4); }
-.pie { margin-top: var(--e-3); padding-top: var(--e-3); border-top: 1px solid var(--linea-suave); display: grid; gap: var(--e-1); }
-.nota { font-size: var(--t-chico); color: var(--tinta-2); max-width: 46rem; }
-.fuente { overflow-wrap: anywhere; font-family: var(--fuente-dato); font-size: 0.75rem; color: var(--tinta-3); }
-.imagen { width: 100%; height: auto; background: #fff; border: 1px solid var(--linea-suave); }
+
+/* Pie de figura en un solo renglón de texto: "Figura 3. La conclusión". Sin líneas. */
+.titulo { font-size: var(--t-texto); font-weight: 600; line-height: 1.4; color: var(--tinta); max-width: 64ch; text-wrap: balance; }
+.cuerpo { margin-top: var(--e-4); }
+.nota { margin-top: var(--e-4); font-size: var(--t-texto); line-height: 1.55; color: var(--apagado); max-width: 64ch; }
+.fuente { margin-top: var(--e-2); font-size: var(--t-pequeno); line-height: 1.45; color: var(--apagado); max-width: 64ch; overflow-wrap: anywhere; }
+.fuente :global(code) { background: none; padding: 0; font-size: 0.95em; }
+
+.imagen { width: 100%; height: auto; background: #fff; }

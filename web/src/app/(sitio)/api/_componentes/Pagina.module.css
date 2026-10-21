@@ -1,34 +1,102 @@
-.medio { max-width: var(--ancho-medio); }
 .ruta { white-space: nowrap; }
 
-/* Dos columnas que pasan a una en teléfono (comandos) */
-.par { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-5) var(--e-6); max-width: var(--ancho-medio); }
-.par > * { min-width: 0; }
-.par > * > * + * { margin-top: var(--e-2); }
-@media (max-width: 760px) { .par { grid-template-columns: minmax(0, 1fr); } }
+/* Bloque principal en las columnas 1-8 y, en las 9-12, lo que lo acompaña (nota de límite, registro de pruebas).
+   La columna derecha no queda vacía; en pantallas angostas lo de la derecha va debajo. */
+.conLado { display: grid; gap: var(--ritmo-bloque) var(--medianil); }
+.conLado > * { min-width: 0; }
+@media (min-width: 1100px) {
+  .conLado { grid-template-columns: repeat(12, minmax(0, 1fr)); align-items: start; }
+  .conLado > :first-child { grid-column: 1 / 8; }
+  .conLado > .lado { grid-column: 9 / 13; }
+}
+.lado > * + * { margin-top: var(--e-6); }
+/* Al lado de una tabla larga, lo de la derecha se queda a la vista mientras se lee la tabla: sin hueco a la derecha.
+   Solo si cabe entero en la pantalla, bajo el encabezado y el índice: la nota corta (ladoFijo) desde 700 px de alto; el
+   registro con las pruebas por archivo (ladoFijoAlto, ≈ 890 px) desde 1,060, para que la fila Total nunca quede oculta. */
+@media (min-width: 1100px) and (min-height: 700px) {
+  .ladoFijo { position: sticky; top: calc(var(--alto-encabezado) + var(--alto-indice) + var(--e-6)); }
+}
+@media (min-width: 1100px) and (min-height: 1060px) {
+  .ladoFijoAlto { position: sticky; top: calc(var(--alto-encabezado) + var(--alto-indice) + var(--e-6)); }
+}
 
-.subtitulo { font-size: var(--t-h3); margin-top: var(--e-7); }
-.texto { max-width: var(--ancho-texto); color: var(--tinta-2); }
-.texto > * + * { margin-top: var(--e-3); }
+/* Tres cifras al lado del encabezado: más angostas que FilaCifras para que quepan las tres en seis columnas */
+.tresCifras { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 10.5rem), 1fr)); gap: var(--e-6) var(--e-6); }
 
-.paso { font-size: var(--t-chico); color: var(--tinta-2); }
+/* Primera columna de la tabla de pruebas: el tema con su enlace y, debajo, de qué pregunta de la prueba es */
+.deSerie { display: block; margin-top: var(--e-1); font-size: var(--t-pequeno); font-weight: 400; color: var(--apagado); }
+
+/* Registro real de pytest: fragmento de la terminal */
+.registro > * + * { margin-top: var(--e-2); }
+.registroTitulo { font-size: var(--t-texto); font-weight: 600; }
+.registro pre { font-size: var(--t-pequeno); white-space: pre-wrap; overflow-wrap: anywhere; }
+.notaLado { font-size: var(--t-pequeno); line-height: 1.5; color: var(--apagado); }
+.notaLado a { color: var(--tinta); }
+
+/* Dos columnas que pasan a una en teléfono (comandos y ejemplos de error) */
+.par, .ejemplos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-6) var(--sep-columnas); }
+.par > *, .ejemplos > * { min-width: 0; }
+.par > * > * + *, .ejemplos > * > * + * { margin-top: var(--e-2); }
+@media (max-width: 760px) { .par, .ejemplos { grid-template-columns: minmax(0, 1fr); } }
+/* El JSON de los errores se parte en renglones: nada se esconde a la derecha */
+.ejemplos pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.bloque > * + * { margin-top: var(--e-5); }
+.subtitulo { font-size: var(--t-entrada); }
+.texto { max-width: 64ch; color: var(--tinta); }
+
+.paso { color: var(--tinta); }
 .paso strong { color: var(--tinta); }
 
-/* Ejemplos de respuesta, uno debajo del otro */
-.ejemplos { display: grid; gap: var(--e-5); max-width: var(--ancho-medio); }
-.ejemplos > * { min-width: 0; }
-.ejemplos > * > * + * { margin-top: var(--e-2); }
+/* Título de una columna (.columnas) o de un bloque corto */
+.tituloColumna { font-size: var(--t-texto); line-height: 1.4; }
+:global(.columnas) p { color: var(--tinta); }
 
-/* Lista con reglas finas: clave a la izquierda, explicación a la derecha */
-.reglas { max-width: var(--ancho-medio); border-top: 1px solid var(--tinta); }
-.reglas > div { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: var(--e-5); padding: var(--e-4) 0; border-bottom: 1px solid var(--linea); }
-.reglas dt { font-weight: 650; color: var(--tinta); }
-.reglas dd { margin: 0; color: var(--tinta-2); }
-.reglas dd > * + * { margin-top: var(--e-2); }
-@media (max-width: 680px) { .reglas > div { grid-template-columns: minmax(0, 1fr); gap: var(--e-1); } }
+/* Archivos del repositorio, en tres columnas de texto */
+.enlaces {
+  margin-top: var(--e-3);
+  list-style: none;
+  padding: 0;
+  columns: 3 16rem;
+  column-gap: var(--sep-columnas);
+}
+.enlaces li { break-inside: avoid; margin-top: 0; padding-block: var(--e-1); overflow-wrap: anywhere; }
 
-.puntos { max-width: var(--ancho-medio); color: var(--tinta-2); font-size: var(--t-chico); }
-.puntos li::marker { color: var(--tinta-3); }
+/* Pieza de la portada: la cifra que responde y, debajo, con qué está hecha la API. Sobre el campo de tinta, en blanco. */
+.pieza { max-width: 36rem; }
+/* En tableta y teléfono la pieza baja bajo los botones: más aire para que la cifra no se lea como rótulo del botón */
+@media (max-width: 899px) { .pieza { margin-top: var(--e-6); } }
+.tecnologias { margin-top: var(--e-7); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-5) var(--medianil); }
+.tecnologias dt { font-size: var(--t-pequeno); line-height: 1.45; }
+.tecnologias dd { margin: var(--e-1) 0 0; font-size: var(--t-texto); font-weight: 600; line-height: 1.4; }
 
-.enlaces { display: flex; flex-wrap: wrap; gap: var(--e-2) var(--e-5); list-style: none; padding: 0; font-size: var(--t-chico); }
-.enlaces li + li { margin-top: 0; }
+/* Cierre: la Evaluación es lo único de su sección. La sección entera va sobre el tinte desde el título y la banda pierde
+   el aire que la separaba de lo anterior: título y evaluación se leen como un solo bloque, sin un título suelto en blanco. */
+:global(section):has(> :global(.contenedor) > * > .cierre) {
+  margin-top: var(--ritmo-seccion);   /* el aire en blanco antes del campo de tinte, como entre secciones */
+  background: var(--serie-fondo);
+  padding-top: clamp(3.5rem, 2rem + 4vw, 6rem);
+}
+.cierre > aside[data-evaluacion] { margin-top: 0; padding-top: 0; }
+
+/* Lo que no está: una lista de cuatro filas. La pieza a la izquierda (columnas 1-4) y el porqué con su salida a la
+   derecha (5-12); en tableta y teléfono, una debajo de la otra. Filas separadas por espacio y un tono de cebra. */
+.fuera { display: grid; }
+.fuera > div { display: grid; gap: var(--e-2) var(--medianil); padding: var(--e-5) var(--e-4); }
+.fuera > div:nth-child(odd) { background: var(--cebra); }
+.fuera h3 { margin: 0; }
+.fuera p { margin: 0; max-width: 64ch; color: var(--tinta); }
+@media (min-width: 900px) {
+  .fuera > div { grid-template-columns: repeat(12, minmax(0, 1fr)); padding-inline: var(--e-4); margin-inline: calc(-1 * var(--e-4)); }
+  .fuera h3 { grid-column: 1 / 5; }
+  .fuera p { grid-column: 5 / 13; }
+}
+
+/* Un Desplegable cerrado cuya tabla larga queda fuera del cálculo de posiciones mientras está cerrado (lo que se ve no
+   cambia: cerrado no se pinta). Abierto, vuelve a ocupar su lugar. */
+.plegado :global(details:not([open])) > :global(div) { display: none; }
+
+/* Captura de la documentación interactiva: la imagen real sobre un panel de superficie que la separa del fondo blanco */
+.captura { background: var(--superficie); padding: var(--e-4); }
+.captura img { display: block; width: 100%; height: auto; }
+@media (max-width: 560px) { .captura { padding: var(--e-2); } }

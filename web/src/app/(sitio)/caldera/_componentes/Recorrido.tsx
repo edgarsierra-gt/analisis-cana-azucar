@@ -72,23 +72,31 @@ const PASOS: Paso[] = [
 
 export const SENSORES_EN_RECORRIDO = PASOS.reduce((n, p) => n + p.sensores.length, 0);
 
-/** Recorrido de la caldera, paso a paso, con los sensores de cada parte. */
+/** "Presión de hogar A", "… B" … "… F" seguidos se escriben "Presión de hogar A a F": la lista se lee de un vistazo. */
+function enLinea(tags: string[]): string {
+  const nombres = tags.map((t) => NOMBRE_CORTO[t] ?? t);
+  const salida: string[] = [];
+  for (let i = 0; i < nombres.length; ) {
+    const m = nombres[i].match(/^(.*) ([A-F])$/);
+    let j = i + 1;
+    while (m && j < nombres.length && nombres[j] === `${m[1]} ${String.fromCharCode(m[2].charCodeAt(0) + (j - i))}`) j++;
+    salida.push(m && j - i >= 3 ? `${m[1]} ${m[2]} a ${nombres[j - 1].slice(-1)}` : nombres[i]);
+    i = m && j - i >= 3 ? j : i + 1;
+  }
+  return salida.join(", ");
+}
+
+/** Recorrido de la caldera, parte por parte, con los sensores de cada una. El hogar, con 13 de los 30, va más alto. */
 export function Recorrido() {
   return (
     <ol className={s.pasos}>
-      {PASOS.map((p, i) => (
+      {PASOS.map((p) => (
         <li key={p.nombre} className={s.paso}>
-          <p className={s.numero}>Paso {i + 1}</p>
           <h3 className={s.nombre}>{p.nombre}</h3>
           <p className={s.texto}>{p.texto}</p>
-          <p className={s.rotulo}>
-            {p.sensores.length === 1 ? "1 sensor" : `${p.sensores.length} sensores`}
+          <p className={s.sensores}>
+            <strong>{p.sensores.length === 1 ? "1 sensor" : `${p.sensores.length} sensores`}:</strong> {enLinea(p.sensores)}.
           </p>
-          <ul className={s.sensores}>
-            {p.sensores.map((t) => (
-              <li key={t}>{NOMBRE_CORTO[t] ?? t}</li>
-            ))}
-          </ul>
         </li>
       ))}
     </ol>

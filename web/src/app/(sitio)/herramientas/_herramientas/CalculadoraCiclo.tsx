@@ -2,13 +2,14 @@
 
 import * as Plot from "@observablehq/plot";
 import { useEffect, useId, useMemo, useState } from "react";
+import { Certeza, type NivelCerteza } from "@/components/Certeza";
 import { Cifra, FilaCifras } from "@/components/Cifra";
 import { Figura } from "@/components/Figura";
 import { COLORES, PlotFigura } from "@/components/graficos/PlotFigura";
 import { Desplegable } from "@/components/Nota";
 import { conSigno, num, pctFraccion, usd } from "@/lib/formato";
 import { nombreCorte, useConsulta, useVariedades, type Supuestos } from "./consulta";
-import { Respuesta, RespuestaJson } from "./Respuesta";
+import { BloqueDetalle, DetalleTecnico, Respuesta, Secundarias } from "./Respuesta";
 import s from "./herramientas.module.css";
 
 type RespuestaCiclo = {
@@ -45,7 +46,18 @@ const COSTOS_VACIOS: Record<ClaveCosto, string> = { corte: "", mantenimiento: ""
 /** Cifra sin ceros de más: 14 → "14", 14.5 → "14.50". */
 const monto = (x: number) => usd(x, Number.isInteger(x) ? 0 : 2);
 
-export function CalculadoraCiclo() {
+export function CalculadoraCiclo({
+  metodo, contexto, certezas, umbrales,
+}: {
+  /** Cómo calcula la API (texto de la página), para el detalle técnico. */
+  metodo?: React.ReactNode;
+  /** "Cómo lo sé" y el límite: van entre la herramienta y su detalle técnico. */
+  contexto?: React.ReactNode;
+  /** Nivel de certeza de quedar entre las 3 mejores, por variedad (serie1_certeza.json, notebook 02). */
+  certezas?: Record<string, NivelCerteza>;
+  /** Precios del notebook 02 en que el testigo promedio cambia de ciclo: 3 cortes desde `corto`, 5 hasta `largo`. */
+  umbrales?: { corto: number; largo: number };
+}) {
   const id = useId();
   const catalogo = useVariedades();
   const { ejecutar, ...consulta } = useConsulta<RespuestaCiclo>();
@@ -91,106 +103,120 @@ export function CalculadoraCiclo() {
   const errorCatalogo = catalogo.error;
 
   return (
-    <div className={s.herramienta}>
-      <form className={s.controles} onSubmit={(e) => e.preventDefault()} aria-label="Datos del escenario">
-        <p className={`etiqueta ${s.tituloPanel}`}>Escenario</p>
-        <div className="campo-form">
-          <label htmlFor={`${id}-variedad`}>Variedad</label>
-          <select
-            id={`${id}-variedad`}
-            value={v ?? ""}
-            disabled={!cat}
-            onChange={(e) => setVariedad(e.target.value)}
-          >
-            {!cat && <option value="">Cargando variedades…</option>}
-            {cat?.variedades_ciclo.map((x) => (
-              <option key={x} value={x}>
-                {cat.testigos_nucleo.includes(x) ? `${x} (testigo)` : x}
-              </option>
-            ))}
-          </select>
-          {cat && <span className="ayuda">Las {cat.variedades_ciclo.length} variedades con evidencia suficiente.</span>}
-        </div>
-
-        <div className="campo-form">
-          <div className={s.filaEtiqueta}>
-            <label htmlFor={`${id}-precio`}>Precio del azúcar</label>
-            <output htmlFor={`${id}-precio`} className={s.valorControl}>
-              {p !== undefined ? `${usd(p, 2)}/lb` : "…"}
-            </output>
-          </div>
-          <input
-            id={`${id}-precio`}
-            type="range"
-            min={PRECIO_MIN}
-            max={PRECIO_MAX}
-            step={0.01}
-            value={p ?? PRECIO_MIN}
-            disabled={p === undefined}
-            aria-valuetext={p !== undefined ? `${usd(p, 2)} por libra` : undefined}
-            onChange={(e) => setPrecio(Math.round(Number(e.target.value) * 100) / 100)}
-          />
-          <div className={s.rangoExtremos} aria-hidden="true">
-            <span>{usd(PRECIO_MIN, 2)}</span>
-            <span>{usd(PRECIO_MAX, 2)}</span>
-          </div>
-        </div>
-
-        <Desplegable titulo="Costos y barbecho (opcional)">
-          <p className={s.ayuda}>Vacío = supuesto de la prueba.</p>
-          {COSTOS.map((c) => (
-            <div className="campo-form" key={c.clave}>
-              <label htmlFor={`${id}-${c.clave}`}>{c.etiqueta}</label>
-              <input
-                id={`${id}-${c.clave}`}
-                type="number"
-                inputMode="decimal"
-                min={0}
-                max={c.max}
-                step={c.paso}
-                placeholder={base ? num(base[c.clave], Number.isInteger(base[c.clave]) ? 0 : 2) : ""}
-                value={costos[c.clave]}
-                onChange={(e) => setCostos((x) => ({ ...x, [c.clave]: e.target.value }))}
-              />
-              <span className="ayuda">
-                {c.unidad}. La API acepta de 0 a {num(c.max)}.
-              </span>
-            </div>
-          ))}
+    <>
+      <div className={s.herramienta}>
+        <form className={s.controles} onSubmit={(e) => e.preventDefault()} aria-label="Datos del escenario" data-ui="">
+          <p className={s.tituloPanel}>Escenario</p>
           <div className="campo-form">
-            <label htmlFor={`${id}-barbecho`}>Barbecho antes de resembrar</label>
-            <select id={`${id}-barbecho`} value={b ?? 0} onChange={(e) => setBarbecho(Number(e.target.value))}>
-              <option value={0}>Sin barbecho</option>
-              <option value={1}>1 año sin caña</option>
-              <option value={2}>2 años sin caña</option>
+            <label htmlFor={`${id}-variedad`}>Variedad</label>
+            <select
+              id={`${id}-variedad`}
+              value={v ?? ""}
+              disabled={!cat}
+              onChange={(e) => setVariedad(e.target.value)}
+            >
+              {!cat && <option value="">Cargando variedades…</option>}
+              {cat?.variedades_ciclo.map((x) => (
+                <option key={x} value={x}>
+                  {cat.testigos_nucleo.includes(x) ? `${x} (testigo)` : x}
+                </option>
+              ))}
             </select>
+            {cat && <span className="ayuda">Las {cat.variedades_ciclo.length} variedades con evidencia suficiente.</span>}
           </div>
-          <label className={s.casilla}>
-            <input type="checkbox" checked={extrapolar} onChange={(e) => setExtrapolar(e.target.checked)} />
-            Extender la ventaja de la variedad más allá del último corte medido (sensibilidad)
-          </label>
-        </Desplegable>
 
-        <div className={s.acciones}>
-          <button type="button" className={`boton boton-sec ${s.botonChico}`} onClick={restablecer}>
-            Volver a los supuestos de la prueba
-          </button>
+          <div className="campo-form">
+            <div className={s.filaEtiqueta}>
+              <label htmlFor={`${id}-precio`}>Precio del azúcar</label>
+              <output htmlFor={`${id}-precio`} className={s.valorControl}>
+                {p !== undefined ? `${usd(p, 2)}/lb` : "…"}
+              </output>
+            </div>
+            <input
+              id={`${id}-precio`}
+              type="range"
+              min={PRECIO_MIN}
+              max={PRECIO_MAX}
+              step={0.01}
+              value={p ?? PRECIO_MIN}
+              disabled={p === undefined}
+              aria-valuetext={p !== undefined ? `${usd(p, 2)} por libra` : undefined}
+              aria-describedby={umbrales ? `${id}-umbrales` : undefined}
+              onChange={(e) => setPrecio(Math.round(Number(e.target.value) * 100) / 100)}
+            />
+            <div className={s.rangoExtremos} aria-hidden="true">
+              <span>{usd(PRECIO_MIN, 2)}</span>
+              <span>{usd(PRECIO_MAX, 2)}</span>
+            </div>
+            {umbrales && (
+              <span className="ayuda" id={`${id}-umbrales`}>
+                El testigo promedio renueva cada 5 cortes con {usd(umbrales.largo, 2)}/lb o menos y cada 3 desde{" "}
+                {usd(umbrales.corto, 2)}/lb.
+              </span>
+            )}
+          </div>
+
+          <Desplegable titulo="Costos y barbecho (opcional)">
+            <p className={s.ayuda}>Vacío = supuesto de la prueba.</p>
+            {COSTOS.map((c) => (
+              <div className="campo-form" key={c.clave}>
+                <label htmlFor={`${id}-${c.clave}`}>{c.etiqueta}</label>
+                <input
+                  id={`${id}-${c.clave}`}
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  max={c.max}
+                  step={c.paso}
+                  placeholder={base ? num(base[c.clave], Number.isInteger(base[c.clave]) ? 0 : 2) : ""}
+                  value={costos[c.clave]}
+                  onChange={(e) => setCostos((x) => ({ ...x, [c.clave]: e.target.value }))}
+                />
+                <span className="ayuda">
+                  {c.unidad}. La API acepta de 0 a {num(c.max)}.
+                </span>
+              </div>
+            ))}
+            <div className="campo-form">
+              <label htmlFor={`${id}-barbecho`}>Barbecho antes de resembrar</label>
+              <select id={`${id}-barbecho`} value={b ?? 0} onChange={(e) => setBarbecho(Number(e.target.value))}>
+                <option value={0}>Sin barbecho</option>
+                <option value={1}>1 año sin caña</option>
+                <option value={2}>2 años sin caña</option>
+              </select>
+            </div>
+            <label className={s.casilla}>
+              <input type="checkbox" checked={extrapolar} onChange={(e) => setExtrapolar(e.target.checked)} />
+              Extender la ventaja de la variedad más allá del último corte medido (sensibilidad)
+            </label>
+          </Desplegable>
+
+          <div className={s.acciones}>
+            <button type="button" className={`boton boton-sec ${s.botonChico}`} onClick={restablecer}>
+              Volver a los supuestos de la prueba
+            </button>
+          </div>
+        </form>
+
+        <div className={s.salida}>
+          <Respuesta
+            fase={errorCatalogo ? "error" : catalogo.cargando ? "cargando" : consulta.fase}
+            ruta={errorCatalogo || catalogo.cargando ? "GET /campo/variedades" : consulta.ruta}
+            ms={consulta.ms}
+            error={errorCatalogo ?? consulta.error}
+            onReintentar={errorCatalogo ? catalogo.reintentar : () => cuerpo && void ejecutar("/campo/ciclo", cuerpo)}
+            titular={d && <TitularCiclo d={d} />}
+            cabeza={d && <CifrasCiclo d={d} />}
+          >
+            {d && <FiguraCiclo d={d} nivel={certezas?.[d.variedad]} />}
+          </Respuesta>
         </div>
-      </form>
-
-      <div className={s.salida}>
-        <Respuesta
-          fase={errorCatalogo ? "error" : catalogo.cargando ? "cargando" : consulta.fase}
-          ruta={errorCatalogo || catalogo.cargando ? "GET /campo/variedades" : consulta.ruta}
-          ms={consulta.ms}
-          error={errorCatalogo ?? consulta.error}
-          onReintentar={errorCatalogo ? catalogo.reintentar : () => cuerpo && void ejecutar("/campo/ciclo", cuerpo)}
-          titular={d && <TitularCiclo d={d} />}
-        >
-          {d && <DetalleCiclo d={d} />}
-        </Respuesta>
       </div>
-    </div>
+      {contexto}
+      <DetalleTecnico metodo={metodo} respuestas={d ? [{ titulo: "Respuesta completa de la API (JSON)", datos: d }] : []}>
+        {d && <SupuestosCiclo d={d} />}
+      </DetalleTecnico>
+    </>
   );
 }
 
@@ -212,84 +238,109 @@ function TitularCiclo({ d }: { d: RespuestaCiclo }) {
   );
 }
 
-function DetalleCiclo({ d }: { d: RespuestaCiclo }) {
+function CifrasCiclo({ d }: { d: RespuestaCiclo }) {
   const n = d.ciclo_optimo_cortes;
   const t = d.testigo_promedio;
-  const ev = d.evidencia;
-  const cert = d.certeza_con_supuestos_base;
-  const sp = d.supuestos;
   return (
     <>
-      <div className={s.pilaCifras}>
-        <FilaCifras columnas={2}>
-          <Cifra
-            serie="campo"
-            valor={n}
-            unidad="cortes"
-            etiqueta="Ciclo óptimo"
-            detalle={`${n === 1 ? "Solo la plantía" : `Plantía y ${n - 1} ${n - 1 === 1 ? "soca" : "socas"}`}. Testigo promedio: ${t.ciclo_optimo_cortes} cortes.`}
-          />
-          <Cifra
-            serie="campo"
-            valor={num(d.margen_anual_usd_acre, 1)}
-            unidad="US$/acre/año"
-            etiqueta="Margen anual en ese ciclo"
-            detalle={`${usd(d.margen_anual_usd_ha, 1)} por hectárea al año.`}
-          />
-        </FilaCifras>
-        <FilaCifras columnas={2}>
-          <Cifra
-            serie="campo"
-            valor={conSigno(d.ganancia_vs_testigos_usd_acre, 1)}
-            unidad="US$/acre/año"
-            etiqueta="Contra el testigo promedio"
-            detalle={`El testigo deja ${usd(t.margen_anual_usd_acre, 1)} por acre al año.`}
-          />
-          <Cifra
-            serie="campo"
-            valor={d.precio_equilibrio_usd_lb === null ? "—" : num(d.precio_equilibrio_usd_lb, 3)}
-            unidad="US$/lb"
-            etiqueta="Precio de equilibrio"
-            detalle={
-              d.precio_equilibrio_usd_lb === null
-                ? `Ni con ${usd(PRECIO_BUSQUEDA, 2)}/lb el mejor ciclo cubre los costos.`
-                : "Debajo de este precio, ningún ciclo cubre los costos."
-            }
-          />
-        </FilaCifras>
-      </div>
+      <FilaCifras columnas={2}>
+        <Cifra
+          serie="campo"
+          valor={n}
+          unidad="cortes"
+          etiqueta="Ciclo óptimo"
+          detalle={`${n === 1 ? "Solo la plantía" : `Plantía y ${n - 1} ${n - 1 === 1 ? "soca" : "socas"}`}. Testigo promedio: ${t.ciclo_optimo_cortes} cortes.`}
+        />
+        <Cifra
+          serie="campo"
+          valor={num(d.margen_anual_usd_acre, 1)}
+          unidad="US$/acre/año"
+          etiqueta="Margen anual en ese ciclo"
+          detalle={`${usd(d.margen_anual_usd_ha, 1)} por hectárea al año.`}
+        />
+      </FilaCifras>
+      <Secundarias>
+        <li>
+          <strong className="num">{conSigno(d.ganancia_vs_testigos_usd_acre, 1)} US$/acre/año</strong> contra el testigo
+          promedio, que deja {usd(t.margen_anual_usd_acre, 1)}.
+        </li>
+        <li>
+          {d.precio_equilibrio_usd_lb === null ? (
+            <>
+              <strong>Sin precio de equilibrio:</strong> ni con {usd(PRECIO_BUSQUEDA, 2)}/lb el mejor ciclo cubre los
+              costos.
+            </>
+          ) : (
+            <>
+              <strong className="num">{num(d.precio_equilibrio_usd_lb, 3)} US$/lb</strong> es el precio de equilibrio:
+              debajo de él, ningún ciclo cubre los costos.
+            </>
+          )}
+        </li>
+      </Secundarias>
+    </>
+  );
+}
 
+/** Título de la figura: cómo leerla, sin repetir la cifra de la respuesta. */
+function tituloFigura(d: RespuestaCiclo) {
+  const cortes = d.margen_por_ciclo.map((f) => f.cortes);
+  const n = d.ciclo_optimo_cortes;
+  if (n === Math.min(...cortes)) return `Cualquier ciclo más largo que ${n} ${n === 1 ? "corte" : "cortes"} deja menos margen por año`;
+  if (n === Math.max(...cortes)) return `Cualquier ciclo más corto que ${n} cortes deja menos margen por año`;
+  return `Renovar antes o después de ${n} cortes deja menos margen por año`;
+}
+
+function FiguraCiclo({ d, nivel }: { d: RespuestaCiclo; nivel?: NivelCerteza }) {
+  const t = d.testigo_promedio;
+  const cert = d.certeza_con_supuestos_base;
+  const motivo = (
+    <>
+      Con los supuestos base, quedó entre las 3 mejores en el {pctFraccion(cert.P_top3, 1)} de las réplicas del remuestreo
+      de ensayos. Ganancia contra el testigo, con 90 % de confianza: de {usd(cert.ganancia_ic90_usd_acre[0], 1)} a{" "}
+      {usd(cert.ganancia_ic90_usd_acre[1], 1)} por acre al año. No se recalcula al mover el precio.
+    </>
+  );
+  return (
+    <>
       <Figura
-        numero={1}
-        titulo={`Con ${usd(sp.precio, 2)}/lb, el margen anual de ${d.variedad} es máximo si el ciclo dura ${n} cortes`}
+        titulo={tituloFigura(d)}
         nota={`Cada barra es el margen promedio por año si se renueva después de ese número de cortes. En verde y rotulado, el ciclo óptimo. La línea punteada es el testigo promedio en su propio ciclo óptimo (${usd(t.margen_anual_usd_acre, 1)} por acre al año con ${t.ciclo_optimo_cortes} cortes).`}
         fuente="API, POST /campo/ciclo · curvas del notebook 02 (outputs/models/serie1_curvas.json)"
       >
         <GraficoCiclo d={d} />
       </Figura>
-
-      <div>
-        <p className={s.lineaDato}>
-          Evidencia: {ev.ensayos} ensayos en {ev.anios} años; último corte medido: {nombreCorte(ev.ultimo_corte_medido)}.{" "}
-          {ev.ventaja_extrapolada
-            ? "Con la ventaja extendida más allá de ese corte (sensibilidad)."
-            : n - 1 > ev.ultimo_corte_medido
-              ? "Después de ese corte, el cálculo supone que la variedad cae al ritmo de los testigos."
-              : ""}
-        </p>
-        <p className={s.lineaDato}>
-          Certeza con los supuestos base: quedó entre las 3 mejores en el {pctFraccion(cert.P_top3, 1)} de las réplicas del
-          remuestreo de ensayos; ganancia contra el testigo con IC90 de {usd(cert.ganancia_ic90_usd_acre[0], 1)} a{" "}
-          {usd(cert.ganancia_ic90_usd_acre[1], 1)} por acre al año.
-        </p>
-        <p className={s.lineaDato}>
-          Supuestos de esta respuesta: azúcar {usd(sp.precio, 2)}/lb · corte, alce y transporte {monto(sp.corte)}/t corta ·
-          mantenimiento {monto(sp.mantenimiento)}/acre/año · renovación {monto(sp.renovacion)}/acre · barbecho{" "}
-          {sp.barbecho === 0 ? "ninguno" : `${sp.barbecho} ${sp.barbecho === 1 ? "año" : "años"}`}.
-        </p>
-      </div>
-      <RespuestaJson datos={d} />
+      {nivel ? (
+        <div className={s.certeza}>
+          <Certeza nivel={nivel}>{motivo}</Certeza>
+        </div>
+      ) : (
+        <p className={s.lineaDato}>{motivo}</p>
+      )}
     </>
+  );
+}
+
+function SupuestosCiclo({ d }: { d: RespuestaCiclo }) {
+  const n = d.ciclo_optimo_cortes;
+  const ev = d.evidencia;
+  const sp = d.supuestos;
+  return (
+    <BloqueDetalle titulo="Esta respuesta">
+      <p>
+        Evidencia: {ev.ensayos} ensayos en {ev.anios} años; último corte medido: {nombreCorte(ev.ultimo_corte_medido)}.{" "}
+        {ev.ventaja_extrapolada
+          ? "Con la ventaja extendida más allá de ese corte (sensibilidad)."
+          : n - 1 > ev.ultimo_corte_medido
+            ? "Después de ese corte, el cálculo supone que la variedad cae al ritmo de los testigos."
+            : ""}
+      </p>
+      <p>
+        Supuestos: azúcar {usd(sp.precio, 2)}/lb · corte, alce y transporte {monto(sp.corte)}/t corta · mantenimiento{" "}
+        {monto(sp.mantenimiento)}/acre/año · renovación {monto(sp.renovacion)}/acre · barbecho{" "}
+        {sp.barbecho === 0 ? "ninguno" : `${sp.barbecho} ${sp.barbecho === 1 ? "año" : "años"}`}.
+      </p>
+    </BloqueDetalle>
   );
 }
 
@@ -304,7 +355,7 @@ function GraficoCiclo({ d }: { d: RespuestaCiclo }) {
       dependencias={[d]}
       crear={(ancho) => {
         const angosto = ancho < 560;
-        const textoRef = `Testigo promedio: ${num(ref.margen_anual_usd_acre, 1)} (${ref.ciclo_optimo_cortes} cortes)`;
+        const textoRef = `Testigo: ${num(ref.margen_anual_usd_acre, 1)} (${ref.ciclo_optimo_cortes} cortes)`;
         return {
           marginTop: 44, // espacio para el rótulo de dos líneas del ciclo óptimo
           marginLeft: 56,

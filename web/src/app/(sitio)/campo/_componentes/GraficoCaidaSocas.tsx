@@ -24,9 +24,9 @@ export function GraficoCaidaSocas({ filas }: { filas: Fila[] }) {
           Plot.areaY(filas, { x: "corte", y1: "inf", y2: "sup", fill: COLORES.campo, fillOpacity: 0.14 }),
           Plot.lineY(filas, { x: "corte", y: "cruda", stroke: COLORES.contexto, strokeWidth: 2 }),
           Plot.lineY(filas, { x: "corte", y: "ajustada", stroke: COLORES.campo, strokeWidth: 2 }),
-          Plot.dot(filas, { x: "corte", y: "cruda", r: 4, fill: COLORES.contexto, stroke: "var(--papel)", strokeWidth: 1.5 }),
+          Plot.dot(filas, { x: "corte", y: "cruda", r: 4, fill: COLORES.contexto, stroke: "var(--fondo)", strokeWidth: 1.5 }),
           Plot.dot(filas, {
-            x: "corte", y: "ajustada", r: 4.5, fill: COLORES.campo, stroke: "var(--papel)", strokeWidth: 1.5,
+            x: "corte", y: "ajustada", r: 4.5, fill: COLORES.campo, stroke: "var(--fondo)", strokeWidth: 1.5,
             tip: true,
             title: (d: Fila) =>
               `${nombreCorte(d.corte)}\nAjustada: ${pctFraccion(d.ajustada)} (IC95 ${pctFraccion(d.inf)} a ${pctFraccion(d.sup)})\nCruda: ${pctFraccion(d.cruda)}\nParcelas: ${num(d.parcelas)}`,
@@ -34,20 +34,20 @@ export function GraficoCaidaSocas({ filas }: { filas: Fila[] }) {
           // Valores de la curva ajustada sobre cada soca
           Plot.text(socas, {
             x: "corte", y: "ajustada", text: (d: Fila) => pctFraccion(d.ajustada), dy: -14,
-            fill: COLORES.tinta, fontWeight: 600, stroke: "var(--papel)", strokeWidth: 3,
+            fill: COLORES.tinta, fontWeight: 600, stroke: "var(--fondo)", strokeWidth: 3,
           }),
           // Rótulos directos de las dos series, en la última soca
           Plot.text([ultima], {
             x: "corte", y: "ajustada", text: () => (ancho < 560 ? "Ajustada" : "Ajustada por lugar y año"), dy: 30, textAnchor: "end", dx: 4,
-            fill: COLORES.tinta, stroke: "var(--papel)", strokeWidth: 3,
+            fill: COLORES.tinta, stroke: "var(--fondo)", strokeWidth: 3,
           }),
           Plot.text([ultima], {
             x: "corte", y: "cruda", text: (d: Fila) => `${ancho < 560 ? "Crudo" : "Promedio crudo"}: ${pctFraccion(d.cruda)}`, dy: ancho < 560 ? -32 : -14, textAnchor: "end", dx: 4,
-            fill: COLORES.tinta2, stroke: "var(--papel)", strokeWidth: 3,
+            fill: COLORES.tinta2, stroke: "var(--fondo)", strokeWidth: 3,
           }),
           Plot.text([ultima], {
             x: "corte", y: 0.55, text: (d: Fila) => `solo ${num(d.parcelas)} parcelas`, dy: -8, textAnchor: "end", dx: 4,
-            fill: COLORES.tinta2, fontSize: 11,
+            fill: COLORES.tinta2, fontSize: 13,
           }),
         ],
       })}

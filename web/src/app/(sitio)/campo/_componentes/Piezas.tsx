@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Fragment } from "react";
 import { ImagenNotebook } from "@/components/Figura";
 import { Desplegable } from "@/components/Nota";
@@ -15,19 +16,21 @@ export function conCortes(texto: string): React.ReactNode {
   ));
 }
 
-/** Hipótesis que descarté: qué creía y qué dato la descartó. */
+/**
+ * Hipótesis que descarté: qué creía y qué dato la descartó. El código de la bitácora (H1…H11) va al final, como cita,
+ * no como rótulo: así se puede buscar en bitacora.md sin numerar la página.
+ */
 export function Descartadas({ items }: { items: { id: string; hipotesis: React.ReactNode; motivo: React.ReactNode }[] }) {
   return (
     <div className={s.descartadas}>
-      <p className="etiqueta">Hipótesis que descarté</p>
+      <h4>Hipótesis que descarté</h4>
       <ul>
         {items.map((h) => (
           <li key={h.id}>
-            <span className={s.id}>{h.id}</span>
-            <div>
-              <p className={s.hipotesis}>{h.hipotesis}</p>
-              <p className={s.motivo}>{h.motivo}</p>
-            </div>
+            <p className={s.hipotesis}>{h.hipotesis}</p>
+            <p className={s.motivo}>
+              {h.motivo} <span className={s.cita}>(bitácora {h.id})</span>
+            </p>
           </li>
         ))}
       </ul>
@@ -35,30 +38,91 @@ export function Descartadas({ items }: { items: { id: string; hipotesis: React.R
   );
 }
 
-/** Figuras PNG exportadas por un notebook, plegadas: son la referencia, no la gráfica principal. */
+/** Figuras PNG exportadas por un notebook, en cuadrícula de dos: son la referencia, no la gráfica principal. */
 export function FigurasNotebook({ notebook, figuras }: { notebook: string; figuras: { nombre: string; alt: string }[] }) {
   return (
-    <Desplegable titulo={`Figuras originales del notebook ${notebook}`}>
+    <div>
+      <h4>Figuras originales del notebook {notebook}</h4>
       <div className={s.galeria}>
         {figuras.map((f) => (
           <figure key={f.nombre}>
             <ImagenNotebook nombre={f.nombre} alt={f.alt} />
-            <figcaption>outputs/figures/{f.nombre}.png</figcaption>
+            <figcaption>{conCortes(`outputs/figures/${f.nombre}.png`)}</figcaption>
           </figure>
         ))}
       </div>
-    </Desplegable>
+    </div>
   );
 }
 
-/** Línea final de una sección: notebook en GitHub y archivos de salida que respaldan las cifras. */
-export function Fuentes({ notebook, archivo, salidas }: { notebook: string; archivo: string; salidas: string[] }) {
+/** Archivos de salida que respaldan las cifras de una sección (dentro del detalle técnico). */
+export function Salidas({ archivos }: { archivos: string[] }) {
   return (
-    <p className={s.fuentes}>
-      <a href={archivoRepo(`notebooks/${archivo}`)}>Notebook {notebook} en GitHub</a>
-      {" · "}
-      {salidas.join(" · ")}
+    <p className={s.salidas}>
+      Archivos que respaldan estas cifras: {conCortes(archivos.join(" · "))}.
     </p>
+  );
+}
+
+/**
+ * Un solo desplegable por sección con todo lo que sirve para verificar: método, tablas largas, hipótesis descartadas
+ * y figuras del notebook. Va a todo el ancho del marco porque adentro hay tablas anchas y una galería de dos columnas.
+ */
+export function DetalleTecnico({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+  return (
+    <div className={s.detalle}>
+      <Desplegable titulo={`Detalle técnico: ${titulo}`}>
+        <div className={s.bloques}>{children}</div>
+      </Desplegable>
+    </div>
+  );
+}
+
+/**
+ * De punta a punta: cada análisis lleva a donde se puede usar (la herramienta del sitio que consulta la API), a la
+ * consulta de la API que lo sirve y al notebook que lo produce.
+ */
+export function Verificar({
+  titulo = "Para probarlo", herramienta, consultas, notebook, extra = [],
+}: {
+  titulo?: string;
+  herramienta?: { href: string; texto: string };
+  consultas?: string[];
+  notebook: { numero: string; archivo: string };
+  extra?: { href: string; texto: React.ReactNode }[];
+}) {
+  return (
+    <div className={s.verificar}>
+      <h3>{titulo}</h3>
+      {herramienta && (
+        <Link className="boton boton-sec" href={herramienta.href}>
+          {herramienta.texto}
+        </Link>
+      )}
+      <ul>
+        {consultas && consultas.length > 0 && (
+          <li>
+            En la API:{" "}
+            <Link href="/api#grupo-campo">
+              {consultas.map((c, i) => (
+                <Fragment key={c}>
+                  {i > 0 && " y "}
+                  <code>{c}</code>
+                </Fragment>
+              ))}
+            </Link>
+          </li>
+        )}
+        <li>
+          <a href={archivoRepo(`notebooks/${notebook.archivo}`)}>Notebook {notebook.numero} en GitHub</a>
+        </li>
+        {extra.map((x) => (
+          <li key={x.href}>
+            <a href={x.href}>{x.texto}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

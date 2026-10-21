@@ -56,19 +56,26 @@ export const nombreModelo = (id: string) =>
     .replace(/ Lite$/, "-Lite");
 
 /** Las herramientas que el modelo puede pedir. Nombre, etiqueta y fuente son los de api/asistente.py (HERRAMIENTAS). */
-export const HERRAMIENTAS: {
+export type Herramienta = {
   nombre: string;
   etiqueta: string;
   serie: Serie | null;
   devuelve: string;
   origen: string;
-}[] = [
+  /** Sección del caso donde se verifica la cifra. null en "hallazgos": depende de la serie que se pida. */
+  caso: string | null;
+  /** La herramienta del sitio que hace la misma consulta con controles en lugar de preguntas, si la hay. */
+  probar?: string;
+};
+
+export const HERRAMIENTAS: Herramienta[] = [
   {
     nombre: "ranking_variedades",
     etiqueta: "Ranking de variedades",
     serie: "campo",
     devuelve: "Las variedades ordenadas por margen anual en su ciclo óptimo, con su ganancia contra el testigo y su certeza. Acepta otro precio o costos.",
     origen: "Notebook 02",
+    caso: "/campo#variedades",
   },
   {
     nombre: "ciclo_renovacion",
@@ -76,6 +83,8 @@ export const HERRAMIENTAS: {
     serie: "campo",
     devuelve: "Cada cuántos cortes renovar una variedad, su margen y su precio de equilibrio, con el precio y los costos que se pidan.",
     origen: "Notebook 02",
+    caso: "/campo#variedades",
+    probar: "/herramientas#ciclo",
   },
   {
     nombre: "pronostico_azucar",
@@ -83,6 +92,8 @@ export const HERRAMIENTAS: {
     serie: "campo",
     devuelve: "El azúcar esperado de una variedad en una finca y corte, con su banda de error.",
     origen: "Notebook 03",
+    caso: "/campo#pronostico",
+    probar: "/herramientas#pronostico",
   },
   {
     nombre: "catalogo",
@@ -90,6 +101,7 @@ export const HERRAMIENTAS: {
     serie: "campo",
     devuelve: "Las variedades, fincas, testigos y grupos que aceptan las demás herramientas, y los supuestos base.",
     origen: "Notebooks 02 y 03",
+    caso: "/campo#variedades",
   },
   {
     nombre: "grupos_variedades",
@@ -97,6 +109,7 @@ export const HERRAMIENTAS: {
     serie: "campo",
     devuelve: "El grupo de comportamiento de cada variedad, con su certeza y la estabilidad de cada grupo.",
     origen: "Notebook 04",
+    caso: "/campo#perfiles",
   },
   {
     nombre: "sensores_caldera",
@@ -104,6 +117,7 @@ export const HERRAMIENTAS: {
     serie: "caldera",
     devuelve: "Qué mide cada sensor, su unidad, su estado y su tratamiento, y cuáles quedan fuera de los modelos.",
     origen: "Notebook 06",
+    caso: "/caldera#datos",
   },
   {
     nombre: "modelos_vapor",
@@ -111,6 +125,8 @@ export const HERRAMIENTAS: {
     serie: "caldera",
     devuelve: "El error de cada modelo que estima el vapor sin el medidor, la cobertura de su banda y la fórmula de dos variables.",
     origen: "Notebook 08",
+    caso: "/caldera#vapor",
+    probar: "/herramientas#caldera",
   },
   {
     nombre: "pronostico_precio",
@@ -118,6 +134,8 @@ export const HERRAMIENTAS: {
     serie: "mercado",
     devuelve: "El rango del precio No. 11 a 1 y 3 meses y el ingreso de las toneladas sin fijar.",
     origen: "Notebook 12",
+    caso: "/mercado#pronostico",
+    probar: "/herramientas#mercado",
   },
   {
     nombre: "hallazgos",
@@ -125,10 +143,25 @@ export const HERRAMIENTAS: {
     serie: null,
     devuelve: "El resumen gerencial de la serie que se pida: hallazgos, decisiones recomendadas y límites.",
     origen: "README, resumen de cada serie",
+    caso: null,
   },
 ];
 
-/** Preguntas sugeridas: dos por serie, con cifras que el visitante puede verificar en los casos. */
+const PAGINA_SERIE: Record<Serie, string> = { campo: "/campo", caldera: "/caldera", mercado: "/mercado" };
+
+/**
+ * Dónde verificar lo que devolvió una herramienta: la sección de su caso y su notebook. "hallazgos" lleva a la página de
+ * la serie que pidió el modelo. Si el nombre no está en el contrato (una versión nueva de la API), no hay enlace.
+ */
+export function dondeVerificar(nombre: string, argumentos?: Record<string, unknown>): { href: string; fuente: string } | null {
+  const h = HERRAMIENTAS.find((x) => x.nombre === nombre);
+  if (!h) return null;
+  if (h.caso) return { href: h.caso, fuente: h.origen.toLowerCase() };
+  const serie = String(argumentos?.serie ?? "").toLowerCase();
+  return serie in PAGINA_SERIE ? { href: PAGINA_SERIE[serie as Serie], fuente: "resumen de la serie" } : null;
+}
+
+/** Preguntas sugeridas de las tres series, con cifras que el visitante puede verificar en los casos. */
 export const SUGERENCIAS: { serie: Serie; rotulo: string; pregunta: string }[] = [
   {
     serie: "campo",

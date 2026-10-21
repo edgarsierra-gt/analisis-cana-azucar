@@ -1,46 +1,99 @@
 /* Piezas de maqueta propias de la página de la caldera. Colores y medidas: tokens de globals.css. */
 
-.tag {
-  display: block;
-  font-family: var(--fuente-dato);
-  font-size: 0.6875rem;
-  font-weight: 400;
-  color: var(--tinta-3);
-}
+/* Tag del historiador (PT_8313A) bajo el nombre del sensor, en la tabla de las 30 decisiones: es un identificador, va
+   en <code>. */
+.tag { display: block; width: fit-content; margin-top: 0.15rem; font-weight: 400; }
 
-.dosColumnas {
+/* ── Lectura con margen ──────────────────────────────────────────────────────
+   El argumento en las columnas 1-7 y, al margen (9-12), qué descarté y dónde corre en la API. El margen es un panel de
+   superficie que acompaña la lectura (se queda a la vista mientras la columna principal avanza). En pantallas angostas
+   el margen va debajo. */
+.par { display: grid; gap: var(--e-7) var(--medianil); }
+.principal { min-width: 0; }
+.principal > * + * { margin-top: 1em; }
+.principal > h3 { margin-top: var(--e-7); }
+.principal > h3:first-child { margin-top: 0; }
+.principal > h3 + * { margin-top: var(--e-3); }
+.margen {
+  min-width: 0;
+  align-self: start;
+  background: var(--superficie);
+  padding: var(--e-5);
+}
+.margen > * + * { margin-top: var(--e-3); }
+.margen h3 { font-size: var(--t-entrada); }
+.margen > h3 + p { margin-top: var(--e-2); }
+@media (min-width: 1000px) {
+  .par { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .principal { grid-column: 1 / 8; }
+  .margen {
+    grid-column: 9 / 13;
+    position: sticky;
+    top: calc(var(--alto-encabezado) + var(--alto-indice) + var(--e-5));
+  }
+}
+@media (max-width: 560px) { .margen { padding: var(--e-4); } }
+
+/* Dónde corre el análisis en producción: la consulta de la API y la herramienta que la usa. Separada de "Qué descarté"
+   por espacio y por una barra de 4 px del color de la página. */
+.margen > .produccion { position: relative; margin-top: var(--e-6); padding-top: calc(var(--barra) + var(--e-4)); }
+.produccion::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: var(--barra);
+  background: var(--serie);
+}
+.produccion > * + * { margin-top: var(--e-2); }
+.produccion code { overflow-wrap: anywhere; }
+.produccion .enlaces { font-weight: 600; }
+
+/* El detalle técnico usa todo el ancho del marco: adentro van las tablas largas y las figuras del notebook. */
+.detalle > details { max-width: none; }
+/* Cerrado, su contenido no ocupa lugar. Chrome lo deja maquetado (content-visibility) y se "monta" sobre la sección
+   siguiente para quien mide la página; con display: none no existe hasta que se abre. */
+.detalle > details:not([open]) > :not(summary) { display: none; }
+.detalle h3 { margin-top: var(--e-6); }
+.detalle h3:first-child { margin-top: var(--e-2); }
+.detalle .lecturaDetalle { max-width: var(--span-8); }
+.detalle .lecturaDetalle > * + * { margin-top: 1em; }
+
+/* Figuras del notebook: dos por fila, sin marco */
+.figurasNotebook { display: grid; gap: var(--e-5) var(--medianil); }
+@media (min-width: 900px) { .figurasNotebook { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; } }
+
+/* Dos figuras lado a lado: títulos y gráficas a la misma altura (la gráfica de modelos se dibuja tan alta como la otra) */
+.pareja {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--e-7);
-  align-items: start;
+  gap: var(--e-7) var(--sep-columnas);
 }
-@media (max-width: 1000px) {
-  .dosColumnas { grid-template-columns: 1fr; gap: var(--e-6); }
+@media (min-width: 1000px) {
+  .pareja { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
 }
 
-.pasos {
-  list-style: none;
-  padding: 0;
-  counter-reset: paso;
-  border-top: 1px solid var(--tinta);
-}
-.pasos li {
-  counter-increment: paso;
-  display: grid;
-  grid-template-columns: 2.5rem 1fr;
-  gap: var(--e-3);
-  padding: var(--e-3) 0;
-  border-bottom: 1px solid var(--linea-suave);
-  font-size: var(--t-texto);
-}
-.pasos li + li { margin-top: 0; }
-.pasos li::before {
-  content: counter(paso, decimal-leading-zero);
-  font-family: var(--fuente-dato);
-  font-size: var(--t-etiqueta);
-  font-weight: 600;
-  color: var(--serie);
-  padding-top: 0.2rem;
-}
+/* Dos columnas cortas que se leen por separado (exceso de aire / temperatura del vapor). Usa .columnas de globals. */
+.dosTextos { max-width: none; }
+.dosTextos h3 { font-size: var(--t-entrada); }
+@media (min-width: 900px) { .dosTextos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-.medio { max-width: var(--ancho-medio); }
+/* Las cinco recomendaciones del cierre, en su orden: una lista ordenada de verdad (el número dice la secuencia), a tamaño
+   de entrada, con su respaldo debajo. */
+.pasos { padding-left: 1.6em; }
+.pasos > li { font-size: var(--t-entrada); line-height: 1.45; padding-left: var(--e-2); }
+.pasos > li + li { margin-top: var(--e-5); }
+.pasos > li::marker { font-family: var(--fuente-titulo); font-weight: 500; color: var(--serie); }
+.respaldo { margin-top: var(--e-1); font-size: var(--t-pequeno); line-height: 1.45; color: var(--apagado); }
+/* El respaldo usa el ancho de su paso (64ch a 14 px lo cortaba a la mitad) y su enlace no se parte entre renglones. */
+.pasos .respaldo { max-width: none; }
+.pasos .respaldo a { white-space: nowrap; }
+.enlaces { font-weight: 600; }
+
+/* Cierre: "De los notebooks a producción" va al lado del encabezado (columnas 7-12 desde 1100 px), en el mismo panel
+   de superficie que los márgenes de las preguntas. */
+.panelCierre { background: var(--superficie); padding: var(--e-5); }
+.panelCierre > * + * { margin-top: var(--e-3); }
+.panelCierre h3 { font-size: var(--t-entrada); }
+.panelCierre > h3 + p { margin-top: var(--e-2); }
+@media (max-width: 560px) { .panelCierre { padding: var(--e-4); } }
+
+/* La cifra de la portada: en pantallas angostas va después del meta; más aire arriba para que el último dato del meta
+   no se lea como su rótulo (con menos de 73 px entre los dos, el inspector lo cuenta como rótulo sobre la cifra). En el
+   teléfono deja el rótulo de la cifra al pie del primer pantallazo: se arregla en Portada, con la pieza antes del meta. */
+@media (max-width: 899px) { .piezaPortada { margin-top: var(--e-6); } }

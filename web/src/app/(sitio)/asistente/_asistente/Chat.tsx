@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { API_URL, ErrorApi, consultar } from "@/lib/api";
 import { num } from "@/lib/formato";
@@ -7,6 +8,7 @@ import {
   LIMITES,
   MODELO,
   SUGERENCIAS,
+  dondeVerificar,
   nombreModelo,
   type EstadoAsistente,
   type LlamadaHerramienta,
@@ -342,11 +344,12 @@ export function Chat() {
           : "Por ejemplo: ¿cada cuántos cortes conviene renovar HOCP14-885?";
 
   return (
-    <section className={s.chat} aria-labelledby={`${id}-titulo`}>
+    // data-ui: es la interfaz real, no un dibujo de ella (el inspector de diseño la cuenta como fragmento de interfaz)
+    <section className={s.chat} aria-labelledby={`${id}-titulo`} data-ui="">
       <div className={s.barra}>
         <div className={s.barraTexto}>
-          <h3 id={`${id}-titulo`} className="etiqueta">
-            Asistente · {nombreModelo(estado?.modelo ?? MODELO)}
+          <h3 id={`${id}-titulo`} className="solo-lectores">
+            Conversación con el asistente ({nombreModelo(estado?.modelo ?? MODELO)})
           </h3>
           <p className={s.estado} data-tono={tono} role="status" aria-live="polite">
             <span className={s.marca} aria-hidden="true" />
@@ -374,8 +377,8 @@ export function Chat() {
 
       {turnos.length === 0 && (
         <div className={s.sugerencias}>
-          <p className="etiqueta" id={`${id}-sugeridas`}>
-            Preguntas sugeridas
+          <p className={s.tituloSugerencias} id={`${id}-sugeridas`}>
+            Pruebe con una de estas
           </p>
           <ul className={s.listaSugerencias} aria-labelledby={`${id}-sugeridas`}>
             {SUGERENCIAS.map((x) => (
@@ -436,7 +439,8 @@ export function Chat() {
         />
         <div className={s.pieForm}>
           <p id={`${id}-ayuda`} className={s.ayuda}>
-            <kbd>Enter</kbd> envía. <kbd>Shift</kbd> + <kbd>Enter</kbd> agrega una línea.
+            Nombre la variedad, la finca, el corte o el horizonte. Si algo no está en los análisis, se lo dirá en lugar
+            de estimarlo. <span className={s.teclas}><kbd>Enter</kbd> envía; <kbd>Shift</kbd> + <kbd>Enter</kbd> agrega una línea.</span>
           </p>
           <p id={`${id}-contador`} className={s.contador} data-cerca={borrador.length >= maxCar * 0.9 ? "" : undefined}>
             <span className="solo-lectores">Caracteres usados: </span>
@@ -451,11 +455,24 @@ export function Chat() {
   );
 }
 
-/** Etiquetas de las herramientas usadas, sin repetir: "Ciclo de renovación (2 veces)". */
+/**
+ * Herramientas usadas, sin repetir ("Ciclo de renovación (2 veces)"), cada una con dónde verificar su cifra: la sección
+ * del caso y su notebook. "hallazgos" de dos series distintas son dos entradas, porque llevan a dos páginas.
+ */
 function agrupar(herramientas: LlamadaHerramienta[]) {
-  const veces = new Map<string, number>();
-  for (const h of herramientas) veces.set(h.etiqueta, (veces.get(h.etiqueta) ?? 0) + 1);
-  return [...veces].map(([etiqueta, n]) => (n > 1 ? `${etiqueta} (${n} veces)` : etiqueta));
+  const grupos = new Map<string, { etiqueta: string; n: number; caso: ReturnType<typeof dondeVerificar> }>();
+  for (const h of herramientas) {
+    const caso = dondeVerificar(h.nombre, h.argumentos);
+    const clave = `${h.etiqueta}|${caso?.href ?? ""}`;
+    const g = grupos.get(clave);
+    if (g) g.n += 1;
+    else grupos.set(clave, { etiqueta: h.etiqueta, n: 1, caso });
+  }
+  return [...grupos].map(([clave, g]) => ({
+    clave,
+    texto: g.n > 1 ? `${g.etiqueta} (${g.n} veces)` : g.etiqueta,
+    caso: g.caso,
+  }));
 }
 
 const valor = (v: unknown) => (typeof v === "string" ? v : typeof v === "number" ? num(v, Number.isInteger(v) ? 0 : 2) : JSON.stringify(v));
@@ -481,12 +498,12 @@ function TurnoVista({
   return (
     <article className={s.turno} data-turno={t.id}>
       <div className={s.pregunta}>
-        <p className={`etiqueta ${s.quien}`}>Usted</p>
+        <p className={s.quien}>Usted</p>
         <p className={s.textoPregunta}>{t.pregunta}</p>
       </div>
 
       <div className={s.respuesta}>
-        <p className={`etiqueta ${s.quien}`}>Asistente</p>
+        <p className={s.quien}>Asistente</p>
 
         {t.fase === "esperando" && <p className={s.espera}>Consultando los datos…</p>}
 
@@ -495,14 +512,22 @@ function TurnoVista({
             <RespuestaMarkdown texto={r.respuesta} />
             <div className={s.pieRespuesta}>
               <div className={s.consulto}>
-                <span className={s.rotuloPie}>Consultó:</span>
-                {usadas.length === 0 ? (
-                  <span>ninguna herramienta</span>
-                ) : (
+                <p className={s.rotuloPie}>
+                  {usadas.length === 0 ? "No consultó ninguna herramienta." : "Consultó (cada enlace lleva a su caso):"}
+                </p>
+                {usadas.length > 0 && (
                   <ul className={s.chips}>
                     {usadas.map((u) => (
-                      <li key={u} className={s.chip}>
-                        {u}
+                      <li key={u.clave} className={s.chip}>
+                        {u.caso ? (
+                          // En otra pestaña: la conversación vive en esta y se perdería al salir de la página.
+                          <Link href={u.caso.href} target="_blank" rel="noopener">
+                            {u.texto} <span className={s.fuenteChip}>· {u.caso.fuente}</span>
+                            <span className="solo-lectores"> (se abre en otra pestaña)</span>
+                          </Link>
+                        ) : (
+                          u.texto
+                        )}
                       </li>
                     ))}
                   </ul>

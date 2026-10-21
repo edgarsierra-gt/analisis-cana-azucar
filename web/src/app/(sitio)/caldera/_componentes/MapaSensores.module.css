@@ -1,40 +1,38 @@
+/* Cuatro grupos de sensores en una rejilla de 2 × 2. Cada grupo abre con su barra de 4 px (el de "fuera", en el color de
+   la serie y sobre su tinte) y 32-48 px de separación. Los grupos largos reparten sus nombres en dos columnas. */
 .mapa {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid var(--tinta);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e-7) var(--sep-columnas);
+  align-items: start;
 }
-.grupo { padding: var(--e-4) var(--e-4) var(--e-4) 0; }
-.grupo + .grupo { border-left: 1px solid var(--linea); padding-left: var(--e-4); }
-.destacado { align-self: start; background: var(--serie-fondo); padding-left: var(--e-4); box-shadow: inset 0 3px 0 var(--serie); }
+.grupo { padding: var(--e-4) 0; border-top: var(--barra) solid var(--serie-medio); min-width: 0; }
+.destacado { background: var(--serie-fondo); padding-inline: var(--e-5); border-top-color: var(--serie); }
 
-.cabeza { display: flex; align-items: baseline; gap: var(--e-2); }
+.cabeza { display: flex; align-items: baseline; gap: var(--e-3); }
 .cuenta {
   font-family: var(--fuente-titulo);
   font-size: var(--t-cifra);
   line-height: 1;
-  color: var(--tinta-3);
-  font-variant-numeric: tabular-nums;
+  color: var(--apagado);
+  font-variant-numeric: tabular-nums lining-nums;
 }
 .destacado .cuenta { color: var(--serie); }
-.titulo { font-weight: 650; font-size: var(--t-chico); line-height: 1.25; }
-.explica { margin-top: var(--e-2); font-size: var(--t-etiqueta); color: var(--tinta-2); line-height: 1.45; }
+.titulo { font-weight: 600; font-size: var(--t-entrada); line-height: 1.25; }
+.explica { margin-top: var(--e-2); font-size: var(--t-texto); line-height: 1.5; max-width: 52ch; }
 
-.lista { list-style: none; padding: 0; margin-top: var(--e-3); }
+.lista { list-style: none; padding: 0; margin-top: var(--e-4); display: grid; gap: var(--e-3) var(--sep-columnas); }
 .lista li + li { margin-top: 0; }
-.lista li { padding: 0.4rem 0; border-top: 1px solid var(--linea-suave); line-height: 1.3; }
-.destacado .lista li { border-top-color: var(--linea); }
-.nombre { display: block; font-size: var(--t-chico); color: var(--tinta); }
-.tag { display: block; font-family: var(--fuente-dato); font-size: 0.6875rem; color: var(--tinta-3); margin-top: 0.1rem; }
-.nota { display: block; font-size: var(--t-etiqueta); color: var(--tinta-2); margin-top: 0.15rem; }
+.lista li { line-height: 1.35; break-inside: avoid; }
+.larga { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.nombre { display: block; font-size: var(--t-texto); color: var(--tinta); }
+.nota { display: block; font-size: var(--t-pequeno); color: var(--apagado); margin-top: 0.15rem; }
 .destacado .nota { color: var(--alerta); }
 
-@media (max-width: 1000px) {
-  .mapa { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .grupo:nth-child(3) { border-left: 0; padding-left: 0; }
-  .grupo:nth-child(n + 3) { border-top: 1px solid var(--linea); }
+@media (max-width: 899px) {
+  .mapa { grid-template-columns: 1fr; }
 }
 @media (max-width: 560px) {
-  .mapa { grid-template-columns: 1fr; }
-  .grupo + .grupo { border-left: 0; padding-left: 0; border-top: 1px solid var(--linea); }
-  .destacado { padding-left: var(--e-3); padding-right: var(--e-3); }
+  .destacado { padding-inline: var(--e-4); }
+  .larga { grid-template-columns: 1fr; }
 }

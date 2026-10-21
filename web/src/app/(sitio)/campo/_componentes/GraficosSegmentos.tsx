@@ -5,7 +5,7 @@ import { COLORES, PlotFigura } from "@/components/graficos/PlotFigura";
 import { conSigno, num, pct } from "@/lib/formato";
 import s from "./campo.module.css";
 
-const halo = { stroke: "var(--papel)", strokeWidth: 3 } as const;
+const halo = { stroke: "var(--fondo)", strokeWidth: 3 } as const;
 
 /* ── Mapa caña contra calidad, un panel por grupo ─────────────────────────── */
 type Variedad = { variedad: string; cana: number; trs: number; grupo: string; certeza: number; testigo: boolean };
@@ -28,13 +28,13 @@ function colocarRotulos(miembros: Variedad[], texto: (p: Variedad) => string, an
     x0: px(p.cana) - 6, x1: px(p.cana) + 6, y0: py(p.trs) - 6, y1: py(p.trs) + 6,
   }));
   const choca = (c: { x0: number; x1: number; y0: number; y1: number }) =>
-    cajas.some((b) => c.x0 < b.x1 && c.x1 > b.x0 && c.y0 < b.y1 && c.y1 > b.y0) || c.x0 < margen.izq || c.x1 > ancho;
+    cajas.some((b) => c.x0 < b.x1 && c.x1 > b.x0 && c.y0 < b.y1 && c.y1 > b.y0) || c.x0 < margen.izq || c.x1 > ancho - 8;
   const salida: Rotulo[] = [];
   for (const p of [...miembros].sort((a, b) => b.trs - a.trs)) {
-    const largo = texto(p).length * 7;
+    const largo = texto(p).length * 7.6; // 13 px: los códigos en mayúscula miden cerca de 7.6 px por carácter
     const x = px(p.cana);
     const y = py(p.trs);
-    const lados: ("start" | "end")[] = x + 8 + largo < ancho ? ["start", "end"] : ["end", "start"];
+    const lados: ("start" | "end")[] = x + 8 + largo < ancho - 8 ? ["start", "end"] : ["end", "start"];
     let elegido: Rotulo | null = null;
     for (const desplazamiento of [0, -12, 12, -24, 24, -36, 36]) {
       for (const ancla of lados) {
@@ -44,7 +44,7 @@ function colocarRotulos(miembros: Variedad[], texto: (p: Variedad) => string, an
       }
       if (elegido) break;
     }
-    salida.push(elegido ?? { p, dx: 7, dy: 0, ancla: "start" });
+    salida.push(elegido ?? (lados[0] === "start" ? { p, dx: 7, dy: 0, ancla: "start" } : { p, dx: -7, dy: 0, ancla: "end" }));
   }
   return salida;
 }
@@ -77,10 +77,10 @@ function PanelGrupo({ grupo, puntos, dominioX, dominioY }: { grupo: Grupo; punto
             Plot.ruleX([0], { stroke: COLORES.contextoSuave }),
             Plot.ruleY([0], { stroke: COLORES.contextoSuave }),
             Plot.dot(puntos.filter((p) => p.grupo !== grupo.nombre), { x: "cana", y: "trs", r: 3, fill: COLORES.contextoSuave }),
-            Plot.dot(firmes, { x: "cana", y: "trs", r: 5, fill: COLORES.campo, stroke: "var(--papel)", strokeWidth: 1.5 }),
-            Plot.dot(dudosas, { x: "cana", y: "trs", r: 4.5, fill: "var(--papel)", stroke: COLORES.campo, strokeWidth: 2 }),
+            Plot.dot(firmes, { x: "cana", y: "trs", r: 5, fill: COLORES.campo, stroke: "var(--fondo)", strokeWidth: 1.5 }),
+            Plot.dot(dudosas, { x: "cana", y: "trs", r: 4.5, fill: "var(--fondo)", stroke: COLORES.campo, strokeWidth: 2 }),
             ...colocarRotulos(miembros, rotulo, ancho, ALTO_PANEL, MARGEN_PANEL, dominioX, dominioY).map((r) =>
-              Plot.text([r.p], { x: "cana", y: "trs", text: rotulo, dx: r.dx, dy: r.dy, textAnchor: r.ancla, fontSize: 11, fill: COLORES.tinta, ...halo }),
+              Plot.text([r.p], { x: "cana", y: "trs", text: rotulo, dx: r.dx, dy: r.dy, textAnchor: r.ancla, fontSize: 13, fill: COLORES.tinta, ...halo }),
             ),
             Plot.tip(miembros, Plot.pointer({
               x: "cana", y: "trs",
@@ -124,10 +124,10 @@ export function GraficoSilueta({ filas }: { filas: FilaSilueta[] }) {
           Plot.barY(filas, { x: "k", y1: "p50", y2: "p95", fill: COLORES.contextoSuave }),
           Plot.tickY(filas, { x: "k", y: "p95", stroke: COLORES.tinta2, strokeWidth: 1.5 }),
           Plot.dot(filas, {
-            x: "k", y: "silueta", r: 5, fill: COLORES.campo, stroke: "var(--papel)", strokeWidth: 1.5,
+            x: "k", y: "silueta", r: 5, fill: COLORES.campo, stroke: "var(--fondo)", strokeWidth: 1.5,
             tip: true, title: (d: FilaSilueta) => `k = ${d.k}\nSilueta ${num(d.silueta, 3)}\nAzar: mediana ${num(d.p50, 3)}, percentil 95 ${num(d.p95, 3)}\np = ${num(d.p, 3)}`,
           }),
-          Plot.text(filas, { x: "k", frameAnchor: "top", text: (d: FilaSilueta) => num(d.p, 3), dy: 2, fill: COLORES.tinta2, fontSize: 11 }),
+          Plot.text(filas, { x: "k", frameAnchor: "top", text: (d: FilaSilueta) => num(d.p, 3), dy: 2, fill: COLORES.tinta2, fontSize: 13 }),
         ],
       })}
     />
@@ -150,7 +150,7 @@ export function GraficoReproducibilidad({ filas }: { filas: FilaAri[] }) {
         marks: [
           Plot.ruleX(filas, { x: "k", y1: "p10", y2: "p90", stroke: (d: FilaAri) => (d.elegido ? COLORES.campo : COLORES.contexto), strokeWidth: 2.5 }),
           Plot.dot(filas, {
-            x: "k", y: "ari", r: 5, fill: (d: FilaAri) => (d.elegido ? COLORES.campo : COLORES.contexto), stroke: "var(--papel)", strokeWidth: 1.5,
+            x: "k", y: "ari", r: 5, fill: (d: FilaAri) => (d.elegido ? COLORES.campo : COLORES.contexto), stroke: "var(--fondo)", strokeWidth: 1.5,
             tip: true, title: (d: FilaAri) => `k = ${d.k}\nARI mediano ${num(d.ari, 2)}\nRango 10-90 %: ${num(d.p10, 2)} a ${num(d.p90, 2)}`,
           }),
           Plot.text(elegido ? [elegido] : [], { x: "k", y: "ari", text: (d: FilaAri) => `k = ${d.k} · ${num(d.ari, 2)}`, dx: 10, textAnchor: "start", fill: COLORES.tinta, fontWeight: 650, ...halo }),

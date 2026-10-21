@@ -4,7 +4,7 @@ import * as Plot from "@observablehq/plot";
 import { COLORES, PlotFigura } from "@/components/graficos/PlotFigura";
 import { conSigno, num, usd } from "@/lib/formato";
 
-const halo = { stroke: "var(--papel)", strokeWidth: 3 } as const;
+const halo = { stroke: "var(--fondo)", strokeWidth: 3 } as const;
 
 /* ── Ganancia contra el testigo, con IC90 del bootstrap ─────────────────────── */
 type FilaGanancia = { variedad: string; punto: number; p05: number; p95: number; top3: boolean; testigo: boolean };
@@ -30,7 +30,7 @@ export function GraficoGanancia({ filas }: { filas: FilaGanancia[] }) {
           Plot.ruleY(filas, { y: "variedad", x1: "p05", x2: "p95", stroke: (d: FilaGanancia) => (d.top3 ? COLORES.campo : COLORES.contexto), strokeWidth: 2 }),
           Plot.dot(filas, {
             y: "variedad", x: "punto", r: 4.5,
-            fill: (d: FilaGanancia) => (d.top3 ? COLORES.campo : d.testigo ? "var(--papel)" : COLORES.contexto),
+            fill: (d: FilaGanancia) => (d.top3 ? COLORES.campo : d.testigo ? "var(--fondo)" : COLORES.contexto),
             stroke: (d: FilaGanancia) => (d.top3 ? COLORES.campo : COLORES.contexto),
             strokeWidth: 1.5,
             tip: true,
@@ -65,7 +65,7 @@ export function GraficoCiclo({ puntos }: { puntos: PuntoCiclo[] }) {
           Plot.lineY(puntos, { x: "cortes", y: "margen", z: "serie", stroke: (d: PuntoCiclo) => (d.destacada ? COLORES.campo : COLORES.contexto), strokeWidth: 2 }),
           Plot.dot(puntos, {
             x: "cortes", y: "margen", r: (d: PuntoCiclo) => (d.optimo ? 6 : 3.5),
-            fill: (d: PuntoCiclo) => (d.destacada ? COLORES.campo : COLORES.contexto), stroke: "var(--papel)", strokeWidth: 1.5,
+            fill: (d: PuntoCiclo) => (d.destacada ? COLORES.campo : COLORES.contexto), stroke: "var(--fondo)", strokeWidth: 1.5,
             tip: true,
             title: (d: PuntoCiclo) => `${d.serie}\nRenovar después de ${d.cortes} cortes: ${usd(d.margen, 1)}/acre/año`,
           }),
@@ -101,23 +101,24 @@ export function GraficoPrecio({ puntos, equilibrios, precioCaso }: { puntos: Pun
         marks: [
           Plot.ruleY([0], { stroke: COLORES.tinta }),
           Plot.ruleX([precioCaso], { stroke: COLORES.contexto }),
-          Plot.text([precioCaso], { x: (d: number) => d, frameAnchor: "top", text: () => `${ancho < 560 ? "supuesto" : "supuesto del caso"}: US$${precioCaso.toFixed(2)}`, dy: 4, dx: -4, textAnchor: "end", fill: COLORES.tinta2, fontSize: 11 }),
+          Plot.text([precioCaso], { x: (d: number) => d, frameAnchor: "top", text: () => `${ancho < 560 ? "supuesto" : "supuesto del caso"}: US$${precioCaso.toFixed(2)}`, dy: 4, dx: -4, textAnchor: "end", fill: COLORES.tinta2, fontSize: 13 }),
           Plot.lineY(puntos, { x: "precio", y: "margen", z: "serie", stroke: (d: PuntoPrecio) => (d.recomendada ? COLORES.campo : COLORES.contexto), strokeWidth: 2 }),
           Plot.dot(puntos, {
             x: "precio", y: "margen", r: 2.5, fill: (d: PuntoPrecio) => (d.recomendada ? COLORES.campo : COLORES.contexto),
             tip: true, title: (d: PuntoPrecio) => `${d.serie}\nPrecio US$${d.precio.toFixed(2)}/lb\nMargen ${usd(d.margen)}/acre/año`,
           }),
-          Plot.dot(equilibrios, { x: "precio", y: 0, r: 5, fill: "var(--papel)", stroke: (d: Equilibrio) => (d.recomendada ? COLORES.campo : COLORES.tinta2), strokeWidth: 2 }),
+          Plot.dot(equilibrios, { x: "precio", y: 0, r: 5, fill: "var(--fondo)", stroke: (d: Equilibrio) => (d.recomendada ? COLORES.campo : COLORES.tinta2), strokeWidth: 2 }),
           // Rótulos de equilibrio bajo la línea de cero, donde a la derecha no pasa ninguna serie
           Plot.text(eqRec.length ? [Math.min(...eqRec)] : [], {
-            x: (d: number) => d, y: 0, text: () => `Equilibrio de las tres: ${formatoPrecio(Math.min(...eqRec))} a ${formatoPrecio(Math.max(...eqRec))}`,
+            x: (d: number) => d, y: 0, text: () => `${ancho < 560 ? "Equilibrio" : "Equilibrio de las tres"}: ${formatoPrecio(Math.min(...eqRec))} a ${formatoPrecio(Math.max(...eqRec))}`,
             dy: 32, dx: -6, textAnchor: "start", fill: COLORES.tinta, fontWeight: 600, ...halo,
           }),
           Plot.text(eqTestigo ? [eqTestigo] : [], {
             x: "precio", y: 0, text: (d: Equilibrio) => `Equilibrio del testigo: ${formatoPrecio(d.precio)}`, dy: 50, dx: -6, textAnchor: "start", fill: COLORES.tinta2, ...halo,
           }),
-          Plot.text(finRecomendadas ? [finRecomendadas] : [], { x: "precio", y: "margen", text: () => "Las tres recomendadas", dy: -14, textAnchor: "end", fill: COLORES.tinta, fontWeight: 600, ...halo }),
-          Plot.text(finTestigo ? [finTestigo] : [], { x: "precio", y: "margen", text: () => (ancho < 560 ? "Testigo" : "Testigo núcleo promedio"), dy: 16, textAnchor: "end", fill: COLORES.tinta2, ...halo }),
+          Plot.text(finRecomendadas ? [finRecomendadas] : [], { x: "precio", y: "margen", text: () => (ancho < 560 ? "Recomendadas" : "Las tres recomendadas"), dy: -14, textAnchor: "end", fill: COLORES.tinta, fontWeight: 600, ...halo }),
+          // En media pantalla (dos figuras lado a lado) el rótulo largo cruzaría las líneas verdes: queda "Testigo"
+          Plot.text(finTestigo ? [finTestigo] : [], { x: "precio", y: "margen", text: () => (ancho < 760 ? "Testigo" : "Testigo núcleo promedio"), dy: 16, textAnchor: "end", fill: COLORES.tinta2, ...halo }),
         ],
       })}
     />
@@ -134,7 +135,7 @@ export function GraficoCicloPrecio({ celdas, series, precioCaso }: { celdas: Cel
       alto={series.length * 40 + 64}
       etiqueta="Ciclo óptimo (cortes antes de renovar) de cada variedad a cada precio. Con precios altos conviene renovar antes y con precios bajos estirar a 5 cortes. Las celdas sin relleno y con asterisco marcan precios con los que ni el mejor ciclo cubre costos."
       crear={(ancho) => ({
-        marginLeft: ancho < 560 ? 92 : 150,
+        marginLeft: ancho < 560 ? 104 : 176,   // rótulos del eje a 14 px: "Testigo núcleo promedio" y "HOCP14-885" caben sin salirse
         marginBottom: 40,
         x: {
           label: "Precio del azúcar (US$/lb)", tickFormat: (d: number) => d.toFixed(2), type: "band", padding: 0.08,
@@ -144,7 +145,7 @@ export function GraficoCicloPrecio({ celdas, series, precioCaso }: { celdas: Cel
         marks: [
           Plot.cell(celdas, {
             x: "precio", y: "serie",
-            fill: (d: Celda) => (d.pierde ? "var(--papel)" : COLORES.campo),
+            fill: (d: Celda) => (d.pierde ? "var(--fondo)" : COLORES.campo),
             fillOpacity: (d: Celda) => (d.pierde ? 1 : opacidad[d.ciclo] ?? 0.4),
             stroke: (d: Celda) => (d.pierde ? COLORES.contexto : d.precio === precioCaso ? COLORES.tinta : "none"),
             strokeWidth: 1.5,
@@ -162,26 +163,37 @@ export function GraficoCicloPrecio({ celdas, series, precioCaso }: { celdas: Cel
 type PuntoAmbiente = { variedad: string; potencial: string; ventaja: number; papel: "mantiene" | "pierde" | "contexto" };
 
 export function GraficoAmbientes({ puntos, orden }: { puntos: PuntoAmbiente[]; orden: string[] }) {
-  const color = (p: PuntoAmbiente["papel"]) => (p === "mantiene" ? COLORES.campo : p === "pierde" ? COLORES.resalte : COLORES.contexto);
+  // Un color por gráfica: la que mantiene su ventaja va en el verde de la serie, con trazo lleno; las que la pierden, en
+  // el mismo verde con trazo discontinuo y punto hueco (nunca en ámbar). El resto, en gris de contexto.
+  const color = (p: PuntoAmbiente["papel"]) => (p === "contexto" ? COLORES.contexto : COLORES.campo);
   const finales = puntos.filter((p) => p.potencial === orden[orden.length - 1] && p.papel !== "contexto");
   return (
     <PlotFigura
       alto={360}
       etiqueta={`Ventaja de ${new Set(puntos.map((p) => p.variedad)).size} variedades sobre los testigos núcleo en ambientes de potencial bajo, medio y alto. ${[...new Set(puntos.filter((p) => p.papel === "mantiene").map((p) => p.variedad))].join(", ")} mantiene o aumenta su ventaja en los de potencial alto; ${[...new Set(puntos.filter((p) => p.papel === "pierde").map((p) => p.variedad))].join(" y ")} la reducen.`}
+      // En el teléfono el rótulo final va en dos renglones (variedad y ventaja): con uno solo ocupaba 136 px y los tres
+      // potenciales quedaban apretados en unos 120 px.
       crear={(ancho) => ({
-        marginLeft: 52,
-        marginRight: 136,
-        x: { type: "point", domain: orden, label: "Potencial del ambiente (finca y año)", inset: 24, tickFormat: (d: string) => (ancho < 560 ? d : `Potencial ${d}`) },
-        y: { label: "Ventaja sobre los testigos núcleo (%)", grid: true, tickFormat: (d: number) => conSigno(d) },
+        marginLeft: ancho < 560 ? 44 : 52,
+        marginRight: ancho < 560 ? 92 : 136,
+        x: { type: "point", domain: orden, label: "Potencial del ambiente (finca y año)", inset: ancho < 560 ? 14 : 24, tickFormat: (d: string) => (ancho < 560 ? d : `Potencial ${d}`) },
+        // En el teléfono el rótulo de dos renglones de la línea más alta subía hasta el título del eje: margen arriba
+        y: { label: "Ventaja sobre los testigos núcleo (%)", grid: true, tickFormat: (d: number) => conSigno(d), insetTop: ancho < 560 ? 18 : 0 },
         marks: [
           Plot.ruleY([0], { stroke: COLORES.tinta }),
           Plot.lineY(puntos.filter((p) => p.papel === "contexto"), { x: "potencial", y: "ventaja", z: "variedad", stroke: COLORES.contexto, strokeWidth: 1.5 }),
-          Plot.lineY(puntos.filter((p) => p.papel !== "contexto"), { x: "potencial", y: "ventaja", z: "variedad", stroke: (d: PuntoAmbiente) => color(d.papel), strokeWidth: 2.5 }),
+          Plot.lineY(puntos.filter((p) => p.papel === "mantiene"), { x: "potencial", y: "ventaja", z: "variedad", stroke: COLORES.campo, strokeWidth: 2.5 }),
+          Plot.lineY(puntos.filter((p) => p.papel === "pierde"), { x: "potencial", y: "ventaja", z: "variedad", stroke: COLORES.campo, strokeWidth: 2, strokeDasharray: "6 4" }),
           Plot.dot(puntos, {
-            x: "potencial", y: "ventaja", r: 3.5, fill: (d: PuntoAmbiente) => color(d.papel),
+            x: "potencial", y: "ventaja", r: 3.5,
+            fill: (d: PuntoAmbiente) => (d.papel === "pierde" ? COLORES.fondo : color(d.papel)),
+            stroke: (d: PuntoAmbiente) => color(d.papel), strokeWidth: 1.5,
             tip: true, title: (d: PuntoAmbiente) => `${d.variedad}\nPotencial ${d.potencial}: ${conSigno(d.ventaja, 1)} %`,
           }),
-          Plot.text(finales, { x: "potencial", y: "ventaja", text: (d: PuntoAmbiente) => `${d.variedad} ${conSigno(d.ventaja, 1)} %`, dx: 8, textAnchor: "start", fill: COLORES.tinta, ...halo }),
+          Plot.text(finales, {
+            x: "potencial", y: "ventaja", text: (d: PuntoAmbiente) => `${d.variedad}${ancho < 560 ? "\n" : " "}${conSigno(d.ventaja, 1)} %`,
+            dx: 8, textAnchor: "start", lineHeight: 1.1, fill: COLORES.tinta, ...halo,
+          }),
         ],
       })}
     />

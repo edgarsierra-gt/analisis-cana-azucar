@@ -1,8 +1,25 @@
-.seccion { padding-top: var(--e-8); }
-.cabeza { border-top: 1px solid var(--tinta); padding-top: var(--e-4); max-width: 48rem; }
-.etiqueta { display: flex; gap: var(--e-3); align-items: baseline; }
-.numero { color: var(--serie); font-weight: 600; }
-.titulo { margin-top: var(--e-3); }
+/* Una sección empieza por espacio (≈150 px en escritorio), no por una línea. */
+.seccion { padding-top: var(--ritmo-seccion); }
+/* Tras una Evaluación (banda de tinte a todo el ancho) el cambio de fondo ya separa: la siguiente arranca más cerca. */
+.seccion:has(> :global(.contenedor) > .cuerpo > [data-evaluacion]:last-child) + .seccion { padding-top: var(--e-10); }
+
+.cabeza { display: grid; }
+.titulo { max-width: 26ch; }
 .entrada { margin-top: var(--e-4); }
-.cuerpo { margin-top: var(--e-6); }
-.cuerpo > * + * { margin-top: var(--e-6); }
+.cifras { margin-top: var(--e-7); }
+
+@media (min-width: 1100px) {
+  .conCifras {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--medianil);
+    align-items: start;
+  }
+  .conCifras > .textoCabeza { grid-column: 1 / 7; }
+  .conCifras > .cifras { grid-column: 7 / 13; margin-top: 0.4rem; }
+}
+
+.cuerpo { margin-top: var(--ritmo-bloque); }
+.cuerpo > * + * { margin-top: var(--ritmo-bloque); }
+.texto { max-width: var(--span-7); }
+.medio { max-width: var(--span-8); }
+.total { max-width: none; }

@@ -1,18 +1,45 @@
-.nota { display: grid; grid-template-columns: 5.5rem 1fr; gap: var(--e-4); padding: var(--e-4) 0; border-top: 1px solid var(--linea); border-bottom: 1px solid var(--linea); max-width: var(--ancho-medio); }
-.rotulo { font-family: var(--fuente-dato); font-size: var(--t-etiqueta); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; padding-top: 0.15rem; }
-.limite .rotulo { color: var(--alerta); }
-.dato .rotulo { color: var(--tinta-3); }
-.metodo .rotulo { color: var(--enlace); }
-.cuerpo { font-size: var(--t-chico); color: var(--tinta-2); }
-.cuerpo > * + * { margin-top: var(--e-2); }
-.titulo { font-weight: 650; color: var(--tinta); font-size: var(--t-texto); }
-@media (max-width: 560px) { .nota { grid-template-columns: 1fr; gap: var(--e-1); } }
+/* Nota: panel de superficie, sin borde. El tipo va en el título; el cuerpo en tinta, a tamaño de texto. */
+.nota {
+  background: var(--superficie);
+  padding: var(--e-5) 1.75rem;
+  max-width: calc(64ch + 3.5rem);
+}
+.titulo { font-size: var(--t-texto); font-weight: 600; line-height: 1.4; color: var(--tinta); }
+.cuerpo { margin-top: var(--e-2); font-size: var(--t-texto); line-height: 1.6; color: var(--tinta); }
+.cuerpo > * + * { margin-top: var(--e-3); }
+@media (max-width: 560px) { .nota { padding: var(--e-4) var(--e-4); } }
 
-.desplegable { border-top: 1px solid var(--linea); border-bottom: 1px solid var(--linea); max-width: var(--ancho-medio); }
-.desplegable + .desplegable { border-top: 0; }
-.desplegable summary { cursor: pointer; padding: var(--e-3) 0; font-weight: 600; font-size: var(--t-chico); list-style: none; display: flex; justify-content: space-between; gap: var(--e-4); }
+/* Desplegable: barra de superficie de 52 px con el resumen y un signo +/− en el color de la página; abierto, el
+   contenido sigue en el mismo panel. */
+.desplegable { background: var(--superficie); max-width: var(--span-8); }
+.desplegable + .desplegable { margin-top: var(--e-2) !important; }
+.desplegable summary {
+  min-height: 3.25rem;
+  padding: var(--e-3) var(--e-5);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--e-4);
+  font-size: var(--t-texto); font-weight: 600; line-height: 1.35; color: var(--tinta);
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 120ms var(--curva);
+}
 .desplegable summary::-webkit-details-marker { display: none; }
-.desplegable summary::after { content: "+"; font-family: var(--fuente-dato); color: var(--tinta-3); }
-.desplegable[open] summary::after { content: "−"; }
-.contenido { padding: 0 0 var(--e-4); font-size: var(--t-chico); color: var(--tinta-2); }
-.contenido > * + * { margin-top: var(--e-3); }
+.desplegable summary:hover, .desplegable[open] > summary { background: var(--superficie-2); }
+
+/* El signo: dos barras; la vertical gira y se acuesta sobre la horizontal al abrir (+ → −) */
+.signo { position: relative; flex: none; width: 1rem; height: 1rem; }
+.signo::before, .signo::after {
+  content: ""; position: absolute; left: 0; top: calc(50% - 1px);
+  width: 100%; height: 2px; background: var(--serie);
+  transition: transform 150ms var(--curva);
+}
+.signo::after { transform: rotate(90deg); }
+.desplegable[open] .signo::after { transform: rotate(0deg); }
+
+.contenido { padding: var(--e-2) var(--e-5) var(--e-5); font-size: var(--t-texto); color: var(--tinta); }
+.contenido > * + * { margin-top: var(--e-4); }
+.desplegable[open] > .contenido { animation: abrir 150ms var(--curva); }
+@keyframes abrir { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 560px) {
+  .desplegable summary { padding-inline: var(--e-4); }
+  .contenido { padding-inline: var(--e-4); }
+}

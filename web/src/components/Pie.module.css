@@ -1,9 +1,32 @@
-.pie { margin-top: var(--e-9); border-top: 1px solid var(--tinta); padding: var(--e-7) 0 var(--e-8); background: var(--papel); }
-.columnas { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--e-7); }
-.titulo { font-family: var(--fuente-dato); font-size: var(--t-etiqueta); letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-3); margin-bottom: var(--e-3); }
-.texto { font-size: var(--t-chico); color: var(--tinta-2); max-width: 34rem; }
-.nota { margin-top: var(--e-3); color: var(--tinta-3); }
-.lista { list-style: none; padding: 0; font-size: var(--t-chico); }
+/* Cierre diseñado: un campo de tinta a todo el ancho (el único oscuro fuera del código), sin líneas ni rótulos. */
+.pie {
+  margin-top: var(--ritmo-seccion);
+  padding: var(--e-9) 0 var(--e-8);
+  background: var(--tinta);
+  color: var(--sobre-tinta);
+}
+.pie a { color: var(--sobre-tinta); }
+.pie :focus-visible { outline-color: var(--sobre-tinta); }
+.pie ::selection { background: var(--sobre-tinta); color: var(--tinta); }
+
+.frase { font-size: var(--t-entrada); line-height: 1.4; max-width: 34ch; }
+
+.columnas {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--medianil);
+  row-gap: var(--e-7);
+  margin-top: var(--e-8);
+}
+.columnas > :first-child { grid-column: 1 / 7; }
+.columnas > :last-child { grid-column: 8 / 13; }
+.titulo { font-size: var(--t-texto); font-weight: 600; color: var(--sobre-tinta); }
+.texto { margin-top: var(--e-3); font-size: var(--t-texto); line-height: 1.6; color: var(--sobre-tinta-2); max-width: 56ch; }
+.lista { list-style: none; padding: 0; margin-top: var(--e-3); font-size: var(--t-texto); }
 .lista li + li { margin-top: var(--e-2); }
-@media (max-width: 760px) { .columnas { grid-template-columns: 1fr; gap: var(--e-6); } }
+.autor { margin-top: var(--e-8); font-size: var(--t-texto); color: var(--sobre-tinta-2); }
+
+@media (max-width: 760px) {
+  .columnas > :first-child, .columnas > :last-child { grid-column: 1 / -1; }
+}
 @media print { .pie { display: none; } }

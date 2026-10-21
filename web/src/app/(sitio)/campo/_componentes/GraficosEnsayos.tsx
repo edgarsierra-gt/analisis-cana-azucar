@@ -4,7 +4,7 @@ import * as Plot from "@observablehq/plot";
 import { COLORES, PlotFigura } from "@/components/graficos/PlotFigura";
 import { num } from "@/lib/formato";
 
-const halo = { stroke: "var(--papel)", strokeWidth: 3 } as const;
+const halo = { stroke: "var(--fondo)", strokeWidth: 3 } as const;
 
 /* ── Fincas necesarias para detectar una ventaja de 10 % ─────────────────── */
 type FilaFincas = { interaccion: string; anios: string; fincas: number; destacada: boolean };
@@ -55,7 +55,7 @@ export function GraficoDistancia({ filas, supuesto }: { filas: FilaDistancia[]; 
         .map((f) => `${f.serie}: US$${num(f.equilibrio, 1)}/t`)
         .join("; ")}. El supuesto del caso es US$${num(supuesto, 2)}/t.`}
       crear={(ancho) => ({
-        marginLeft: ancho < 560 ? 112 : 150,
+        marginLeft: ancho < 560 ? 124 : 150, // "Testigo promedio" a 14 px cabe sin salirse del marco en el teléfono
         marginRight: 80,
         marginTop: 30,
         x: { label: "US$ por tonelada métrica de caña", grid: true, domain: [0, Math.ceil(max / 10) * 10], tickFormat: (d: number) => num(d) },
@@ -68,7 +68,7 @@ export function GraficoDistancia({ filas, supuesto }: { filas: FilaDistancia[]; 
           Plot.ruleX([0], { stroke: COLORES.tinta }),
           Plot.text(filas, { y: "serie", x: "equilibrio", text: (d: FilaDistancia) => `US$${num(d.equilibrio, 1)}/t`, dx: 6, textAnchor: "start", fill: COLORES.tinta, fontWeight: 600 }),
           Plot.ruleX([supuesto], { stroke: COLORES.tinta2, strokeWidth: 1.5 }),
-          Plot.text([supuesto], { x: (d: number) => d, frameAnchor: "top", text: (d: number) => `supuesto del caso: US$${num(d, 2)}/t`, dy: -18, textAnchor: "start", dx: -4, fill: COLORES.tinta2, fontSize: 11 }),
+          Plot.text([supuesto], { x: (d: number) => d, frameAnchor: "top", text: (d: number) => `supuesto del caso: US$${num(d, 2)}/t`, dy: -18, textAnchor: "start", dx: -4, fill: COLORES.tinta2, fontSize: 13 }),
         ],
       })}
     />

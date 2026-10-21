@@ -7,8 +7,8 @@ import { Figura } from "@/components/Figura";
 import { COLORES, PlotFigura } from "@/components/graficos/PlotFigura";
 import { Tabla } from "@/components/Tabla";
 import { conSigno, num } from "@/lib/formato";
-import { useConsulta } from "./consulta";
-import { Respuesta, RespuestaJson } from "./Respuesta";
+import { useAlAsomar, useConsulta } from "./consulta";
+import { BloqueDetalle, DetalleTecnico, Respuesta, Secundarias } from "./Respuesta";
 import s from "./herramientas.module.css";
 
 export type MinutoMuestra = { hora: string; valores: Record<string, number> };
@@ -26,11 +26,12 @@ const CAMPOS_VERIF = [
 
 // Fallas simuladas: las mismas que comprueban tests/test_api_caldera_mercado.py y docs/api.md.
 const MINUTOS_FALLA = 6;
+// El botón dice la falla en palabras; los códigos de sensor quedan para el detalle técnico.
 const FALLAS = [
-  { id: "normal", texto: "Operación normal", detalle: "los datos reales, sin cambios", sensores: [] as string[], suma: 0 },
-  { id: "vapor", texto: "Deriva del medidor de vapor", detalle: "+3 t/h en ZZQBCHLL", sensores: ["ZZQBCHLL"], suma: 3 },
-  { id: "presion", texto: "Presión de hogar C desplazada", detalle: "+300 Pa en PT_8313C", sensores: ["PT_8313C"], suma: 300 },
-  { id: "hogar", texto: "Evento del hogar", detalle: "+300 Pa en PT_8313D, E y F", sensores: ["PT_8313D", "PT_8313E", "PT_8313F"], suma: 300 },
+  { id: "normal", texto: "Operación normal", detalle: "los datos reales, sin cambios", codigos: "", sensores: [] as string[], suma: 0 },
+  { id: "vapor", texto: "Deriva del medidor de vapor", detalle: "+3 t/h en el medidor", codigos: "+3 t/h en ZZQBCHLL", sensores: ["ZZQBCHLL"], suma: 3 },
+  { id: "presion", texto: "Presión de hogar C desplazada", detalle: "+300 Pa en esa presión", codigos: "+300 Pa en PT_8313C", sensores: ["PT_8313C"], suma: 300 },
+  { id: "hogar", texto: "Evento del hogar", detalle: "+300 Pa en las presiones D, E y F", codigos: "+300 Pa en PT_8313D, E y F", sensores: ["PT_8313D", "PT_8313E", "PT_8313F"], suma: 300 },
 ];
 type Falla = (typeof FALLAS)[number];
 
@@ -76,8 +77,12 @@ const fechaCorta = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}/${is
 const aFecha = (iso: string) => new Date(iso);
 
 export function SimuladorCaldera({
-  minutos, ventana, errorTipico, unidades, persistencia, nChequeos,
+  minutos, ventana, errorTipico, unidades, persistencia, nChequeos, metodo, contexto,
 }: {
+  /** Cómo calculan las consultas (texto de la página), para el detalle técnico. */
+  metodo?: React.ReactNode;
+  /** "Cómo lo sé" y el límite: van entre la herramienta y su detalle técnico. */
+  contexto?: React.ReactNode;
   minutos: MinutoMuestra[];
   /** Minutos que necesita el sensor virtual (media de 10 min, notebook 08). */
   ventana: number;
@@ -155,14 +160,20 @@ export function SimuladorCaldera({
     </div>
   );
 
+  // Al asomar la sección: la estimación del último minuto y la verificación con operación normal, una vez cada una.
+  const raiz = useAlAsomar<HTMLDivElement>(() => {
+    if (!vapor.datos && vapor.fase === "inactivo") estimar();
+    if (!verif.datos && verif.fase === "inactivo") verificar(FALLAS[0]);
+  });
+
   const dv = vapor.datos;
   const dz = verif.datos;
 
   return (
     <>
-      <div className={s.herramienta}>
-        <form className={s.controles} onSubmit={(e) => { e.preventDefault(); estimar(); }} aria-label="Sensor virtual">
-          <p className={`etiqueta ${s.tituloPanel}`}>Sensor virtual</p>
+      <div className={s.herramienta} ref={raiz}>
+        <form className={s.controles} onSubmit={(e) => { e.preventDefault(); estimar(); }} aria-label="Sensor virtual" data-ui="">
+          <p className={s.tituloPanel}>Sensor virtual</p>
           {controlMinuto("vapor")}
           <button type="submit" className="boton">
             Estimar el vapor en este minuto
@@ -197,48 +208,15 @@ export function SimuladorCaldera({
                 </>
               )
             }
+            cabeza={dv && <CifrasVapor d={dv} errorTipico={errorTipico} />}
           >
-            {dv && (
-              <>
-                <FilaCifras columnas={3}>
-                  <Cifra
-                    serie="caldera"
-                    valor={num(dv.vapor_t_h, 2)}
-                    unidad="t/h"
-                    etiqueta="Vapor estimado"
-                    detalle={`Banda de 90 %: ${num(dv.banda_90_t_h[0], 2)} a ${num(dv.banda_90_t_h[1], 2)} t/h.`}
-                  />
-                  <Cifra
-                    serie="caldera"
-                    valor={dv.vapor_medido_t_h === undefined ? "—" : num(dv.vapor_medido_t_h, 2)}
-                    unidad="t/h"
-                    etiqueta="Vapor medido"
-                    detalle="Medidor ZZQBCHLL. No entra al modelo."
-                  />
-                  <Cifra
-                    serie="caldera"
-                    valor={dv.medido_menos_estimado_t_h === undefined ? "—" : conSigno(dv.medido_menos_estimado_t_h, 2)}
-                    unidad="t/h"
-                    etiqueta="Medido menos estimado"
-                    detalle={`Error típico del modelo: ${num(errorTipico, 2)} t/h.`}
-                  />
-                </FilaCifras>
-                <p className={s.lineaDato}>
-                  Como comparación, las fórmulas que caben en una pizarra dan{" "}
-                  {num(dv.otras_estimaciones.hidraulico_una_variable, 2)} t/h con la caída de presión domo-colector sola y{" "}
-                  {num(dv.otras_estimaciones.formula_dos_variables, 2)} t/h si se agrega el agua de atemperación.
-                </p>
-              </>
-            )}
             <Figura
-              numero={3}
               titulo="El sensor virtual sigue al medidor sin usarlo"
               nota="Línea gris: vapor medido, promedios de 1 min. Sombreado: la ventana que se manda a la API. Círculo negro: el minuto elegido. Puntos con barra: cada estimación pedida, con su banda de 90 %."
               fuente="API, POST /caldera/vapor-virtual · Ridge final del notebook 08 · muestra outputs/tables/serie2_muestra_api_vapor.csv"
             >
               <GraficoVapor minutos={minutos} minuto={minuto} ventana={ventana} estimaciones={estimaciones} />
             </Figura>
-            {dv && <RespuestaJson datos={dv} />}
           </Respuesta>
         </div>
       </div>
@@ -255,8 +233,8 @@ export function SimuladorCaldera({
       </div>
 
       <div className={s.herramienta}>
-        <form className={s.controles} onSubmit={(e) => e.preventDefault()} aria-label="Verificación de sensores">
-          <p className={`etiqueta ${s.tituloPanel}`}>Verificación de sensores</p>
+        <form className={s.controles} onSubmit={(e) => e.preventDefault()} aria-label="Verificación de sensores" data-ui="">
+          <p className={s.tituloPanel}>Verificación de sensores</p>
           {controlMinuto("verif")}
           <fieldset>
             <legend>Simular</legend>
@@ -297,12 +275,62 @@ export function SimuladorCaldera({
                 d={dz}
                 falla={ultimaFalla.falla}
                 ventanaTexto={`${hhmm(minutos[ultimaFalla.minuto - ventana].hora)} a ${hhmm(minutos[ultimaFalla.minuto - 1].hora)} del ${fechaCorta(minutos[0].hora)}`}
-                unidades={unidades}
               />
             )}
           </Respuesta>
         </div>
       </div>
+      {contexto}
+      <DetalleTecnico
+        metodo={metodo}
+        respuestas={[
+          ...(dv ? [{ titulo: "Respuesta del sensor virtual (JSON)", datos: dv }] : []),
+          ...(dz ? [{ titulo: "Respuesta de la verificación (JSON)", datos: dz }] : []),
+        ]}
+      >
+        {dv && (
+          <BloqueDetalle titulo="Contra las fórmulas de pizarra">
+            <p>
+              Con la caída de presión domo-colector sola, la estimación es de{" "}
+              {num(dv.otras_estimaciones.hidraulico_una_variable, 2)} t/h; si se agrega el agua de atemperación, de{" "}
+              {num(dv.otras_estimaciones.formula_dos_variables, 2)} t/h. El medidor de vapor es <code>ZZQBCHLL</code>.
+            </p>
+          </BloqueDetalle>
+        )}
+        {dz && ultimaFalla && <TablaChequeos d={dz} falla={ultimaFalla.falla} unidades={unidades} />}
+      </DetalleTecnico>
+    </>
+  );
+}
+
+function CifrasVapor({ d, errorTipico }: { d: RespuestaVapor; errorTipico: number }) {
+  return (
+    <>
+      <FilaCifras columnas={2}>
+        <Cifra
+          serie="caldera"
+          valor={num(d.vapor_t_h, 2)}
+          unidad="t/h"
+          etiqueta="Vapor estimado"
+          detalle={`Banda de 90 %: ${num(d.banda_90_t_h[0], 2)} a ${num(d.banda_90_t_h[1], 2)} t/h.`}
+        />
+        <Cifra
+          serie="caldera"
+          tono="tinta"
+          valor={d.vapor_medido_t_h === undefined ? "—" : num(d.vapor_medido_t_h, 2)}
+          unidad="t/h"
+          etiqueta="Vapor medido"
+          detalle="El medidor real. No entra al modelo: solo se compara."
+        />
+      </FilaCifras>
+      <Secundarias>
+        <li>
+          <strong className="num">
+            {d.medido_menos_estimado_t_h === undefined ? "—" : conSigno(d.medido_menos_estimado_t_h, 2)} t/h
+          </strong>{" "}
+          de diferencia entre lo medido y lo estimado. El error típico del modelo es de {num(errorTipico, 2)} t/h.
+        </li>
+      </Secundarias>
     </>
   );
 }
@@ -329,12 +357,13 @@ function TitularVerificacion({ d }: { d: RespuestaVerificar }) {
   return <>Sin falla de sensor: ningún chequeo lleva {d.persistencia_min} minutos seguidos fuera de su umbral.</>;
 }
 
-function DetalleVerificacion({
-  d, falla, ventanaTexto, unidades,
-}: { d: RespuestaVerificar; falla: Falla; ventanaTexto: string; unidades: Record<string, string> }) {
-  const filas = Object.entries(d.chequeos)
+const ordenarChequeos = (d: RespuestaVerificar) =>
+  Object.entries(d.chequeos)
     .map(([clave, c]) => ({ clave, ...c, veces: Math.abs(c.z) / c.umbral_z }))
     .sort((a, b) => Number(b.alarma) - Number(a.alarma) || b.veces - a.veces);
+
+function DetalleVerificacion({ d, falla, ventanaTexto }: { d: RespuestaVerificar; falla: Falla; ventanaTexto: string }) {
+  const filas = ordenarChequeos(d);
   return (
     <>
       <p className={s.lineaDato}>
@@ -342,16 +371,27 @@ function DetalleVerificacion({
         ventana de {ventanaTexto}. Diagnóstico de la API: <code>{d.diagnostico}</code>.
       </p>
       <Figura
-        numero={4}
         titulo={tituloChequeos(d, filas.length)}
-        nota={`Cada barra es el último |z| dividido entre el umbral del chequeo: arriba de 1 está fuera de umbral. Hay alarma si dura ${d.persistencia_min} minutos seguidos: esas barras van en color y dicen «alarma».`}
+        nota={`Cada barra es la desviación del chequeo dividida entre su umbral: arriba de 1 está fuera de umbral. Hay alarma si dura ${d.persistencia_min} minutos seguidos: esas barras van en color y dicen «alarma».`}
         fuente="API, POST /caldera/verificar · chequeos del notebook 09 (outputs/models/serie2_verificacion.json)"
       >
         <GraficoChequeos filas={filas} />
       </Figura>
+    </>
+  );
+}
+
+/** La tabla de los chequeos, con los códigos de sensor y la escala z: va en el detalle técnico. */
+function TablaChequeos({ d, falla, unidades }: { d: RespuestaVerificar; falla: Falla; unidades: Record<string, string> }) {
+  const filas = ordenarChequeos(d);
+  return (
+    <BloqueDetalle titulo="Los chequeos, del más alto al más bajo">
+      <p>
+        {falla.id === "normal" ? "Sin falla simulada." : `Falla simulada: ${falla.codigos}, en los últimos ${MINUTOS_FALLA} minutos.`}{" "}
+        Cada chequeo mide su residuo en unidades de su escala normal (z).
+      </p>
       <div className={s.encabezadosPartidos}>
         <Tabla
-          titulo="Los chequeos, del más alto al más bajo"
           compacta
           columnas={[
             {
@@ -379,9 +419,8 @@ function DetalleVerificacion({
           destacar={(x) => x.alarma}
         />
       </div>
-      <p className={s.lineaDato}>{d.aviso}</p>
-      <RespuestaJson datos={d} />
-    </>
+      <p>{d.aviso}</p>
+    </BloqueDetalle>
   );
 }
 

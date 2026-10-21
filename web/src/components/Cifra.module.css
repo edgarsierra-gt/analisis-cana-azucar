@@ -1,17 +1,38 @@
+/* Fila de cifras: cada cifra es una columna con barra superior de 4 px y su propio título; 32-48 px entre columnas.
+   Máximo --cols por fila; nunca más angostas que 13rem (dos por fila en el teléfono). */
 .fila {
+  --min: 13rem;
+  --sep: var(--sep-columnas);
   display: grid;
-  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
-  border-top: 1px solid var(--linea);
-  border-bottom: 1px solid var(--linea);
+  grid-template-columns: repeat(auto-fit, minmax(max(var(--min), (100% - (var(--cols, 3) - 1) * var(--sep)) / var(--cols, 3)), 1fr));
+  gap: var(--e-7) var(--sep);
 }
-.fila > .cifra { padding: var(--e-5) var(--e-5) var(--e-5) 0; }
-.fila > .cifra + .cifra { border-left: 1px solid var(--linea); padding-left: var(--e-5); }
-.valor { font-family: var(--fuente-titulo); font-size: var(--t-cifra); line-height: 1; color: var(--serie); font-weight: 500; letter-spacing: -0.02em; }
-.unidad { font-family: var(--fuente-dato); font-size: var(--t-chico); color: var(--tinta-3); margin-left: 0.4rem; letter-spacing: 0; }
-.etiqueta { margin-top: var(--e-3); font-size: var(--t-chico); font-weight: 600; color: var(--tinta); }
-.detalle { margin-top: var(--e-1); font-size: var(--t-chico); color: var(--tinta-3); line-height: 1.45; }
-@media (max-width: 760px) {
-  .fila { grid-template-columns: 1fr; }
-  .fila > .cifra { padding: var(--e-4) 0; }
-  .fila > .cifra + .cifra { border-left: 0; border-top: 1px solid var(--linea); padding-left: 0; }
+@media (max-width: 600px) {
+  .fila { --sep: var(--e-6); row-gap: var(--e-6); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.cifra { position: relative; min-width: 0; padding-top: calc(var(--barra) + var(--e-4)); }
+.cifra::before {
+  content: ""; position: absolute; left: 0; right: 0; top: 0; height: var(--barra);
+  background: var(--serie);
+}
+.valor {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-cifra);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: var(--serie);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.valor > :global(.num) { white-space: nowrap; }
+.tinta .valor { color: var(--tinta); }
+.tinta::before { background: var(--tinta); }
+.serie .valor { color: var(--serie); }
+.unidad { font-family: var(--fuente-texto); font-size: var(--t-texto); font-weight: 400; letter-spacing: 0; color: var(--apagado); }
+.etiqueta { margin-top: var(--e-3); font-size: var(--t-texto); font-weight: 600; line-height: 1.4; color: var(--tinta); }
+/* Dos renglones como máximo: es regla de redacción, no se recorta */
+.detalle { margin-top: var(--e-2); font-size: var(--t-pequeno); line-height: 1.45; color: var(--apagado); max-width: 40ch; }
+@media (max-width: 600px) {
+  .valor > :global(.num) { white-space: normal; }
 }

@@ -1,37 +1,90 @@
 /* Página del asistente. Solo tokens de globals.css. */
 
-.medio { max-width: var(--ancho-medio); }
-.bloque > * + * { margin-top: var(--e-4); }
-.subtitulo { font-size: var(--t-h3); }
+.subtitulo { font-size: var(--t-entrada); }
+.subtitulo:not(:first-child) { margin-top: var(--e-7) !important; }
 
-/* Reglas del asistente: lista corta con viñetas finas */
-.reglas { max-width: var(--ancho-texto); color: var(--tinta-2); }
-.reglas li::marker { color: var(--tinta-3); }
-.reglas strong { color: var(--tinta); }
+/* Dos columnas: lo principal en las columnas 1-7 y su apoyo en las 9-12. Una sola en pantallas angostas. */
+.dosColumnas { display: grid; gap: var(--ritmo-bloque) var(--medianil); align-items: start; }
+.dosColumnas > * { min-width: 0; }
+.dosColumnas > * > * + * { margin-top: var(--e-4); }
+@media (min-width: 900px) {
+  .dosColumnas { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .dosColumnas > :first-child { grid-column: 1 / 8; }
+  .dosColumnas > :nth-child(2) { grid-column: 9 / 13; }
+}
+.panel { background: var(--superficie); padding: var(--e-5); }
+.panel > * + * { margin-top: var(--e-3) !important; }
 
-/* Decisiones de diseño: clave a la izquierda, explicación a la derecha */
-.decisiones { border-top: 1px solid var(--linea); }
-.decisiones > div { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: var(--e-4); padding: var(--e-3) 0; border-bottom: 1px solid var(--linea-suave); }
-.decisiones dt { font-weight: 650; color: var(--tinta); }
-.decisiones dd { margin: 0; }
-@media (max-width: 680px) { .decisiones > div { grid-template-columns: minmax(0, 1fr); gap: var(--e-1); } }
+/* Las instrucciones fijas del modelo: una lista en dos columnas desde 700 px */
+.reglas { padding-left: 1.2em; }
+.reglas > li { break-inside: avoid; }
+@media (min-width: 700px) {
+  .reglas { columns: 2; column-gap: var(--sep-columnas); }
+  .reglas > li + li { margin-top: 0; }
+  .reglas > li { padding-bottom: var(--e-3); }
+}
 
-/* Bloques de código con rótulo */
+/* Tabla de herramientas: el nombre y, debajo, cómo se llama en el código */
+.herramienta { display: grid; gap: var(--e-1); justify-items: start; }
+.nombre { font-size: 0.8125rem; font-weight: 400; white-space: nowrap; }
+
+/* Decisiones: tres columnas con su barra desde 1000 px, dos en tableta, una en el teléfono. Cada columna se estira a la
+   altura de su fila y lo que evita la decisión va al pie: las líneas "Evita" de una fila quedan alineadas. */
+.decisiones:global(.columnas) { grid-template-columns: minmax(0, 1fr); row-gap: var(--e-8); align-items: stretch; }
+@media (min-width: 640px) { .decisiones:global(.columnas) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .decisiones:global(.columnas) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.decisiones > div { display: flex; flex-direction: column; }
+.decisiones > div > .evita { margin-top: auto; padding-top: var(--e-4); }
+/* Lo que evita cada decisión es lo que le importa a la gerencia: en tinta, no en gris */
+.evita { font-size: var(--t-pequeno); line-height: 1.45; color: var(--tinta); }
+
+/* Lo que solo se muestra con espacio: en el teléfono se omite porque ya está más abajo en la página */
+@media (max-width: 699px) { .soloAncho { display: none; } }
+
+/* Bloques de código con su título */
 .codigo { min-width: 0; }
-.codigo > * + * { margin-top: var(--e-1); }
-.rotulo { font-family: var(--fuente-dato); font-size: var(--t-etiqueta); letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-3); }
-.codigo pre { font-size: 0.8125rem; white-space: pre; }
-.codigo pre, .codigo code { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+.codigo > * + * { margin-top: var(--e-2); }
+.rotuloCodigo { font-size: var(--t-texto); font-weight: 600; color: var(--tinta); }
+.codigo pre { white-space: pre; }
 .par { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-4) var(--e-5); }
 .par > * { min-width: 0; }
 @media (max-width: 860px) { .par { grid-template-columns: minmax(0, 1fr); } }
 
-/* Serie de cada herramienta: cuadro de color y nombre (el color nunca va solo) */
-.serie { display: inline-flex; align-items: center; gap: var(--e-2); white-space: nowrap; }
-.serie::before { content: ""; flex: none; width: 0.55rem; height: 0.55rem; background: var(--serie); }
-.nombre { white-space: nowrap; }
+/* Cierre: los tres casos, cada uno con la barra de su serie, y los enlaces al código */
+.casos, .enlaces { list-style: none; padding: 0; }
+.casos > li, .enlaces > li { margin: 0; }
+.casos:global(.columnas) { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 700px) { .casos:global(.columnas) { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.casos h3 { font-family: var(--fuente-titulo); font-size: var(--t-titulo); font-weight: 500; line-height: 1.15; }
+.casos h3 a { text-decoration-thickness: 2px; }
+.casos h3 a:hover { text-decoration-thickness: 3px; }
 
-.enlaces { list-style: none; padding: 0; display: grid; gap: var(--e-2); }
-.enlaces > li { margin: 0; }
+.enlaces:global(.paneles) { grid-template-columns: minmax(0, 1fr); gap: var(--medianil); }
+@media (min-width: 640px) { .enlaces:global(.paneles) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .enlaces:global(.paneles) { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.enlaces > li > a { font-weight: 600; }
+.enlaces > li > p { font-size: var(--t-pequeno); line-height: 1.45; color: var(--apagado); }
+.enlaces > li > * + * { margin-top: var(--e-2); }
 
-.cierre { padding-top: var(--e-8); }
+/* Límites: la nota de los contadores va bajo las cifras, en la columna derecha */
+.notaCifras { margin-top: var(--e-6); }
+
+/* Un Desplegable cerrado no ocupa lugar ni para el navegador ni para quien mide la página: sin esto, Chrome calcula
+   la posición de su contenido oculto debajo del resumen, encima de la sección siguiente. */
+.plegable :global(details:not([open])) > :not(summary) { display: none; }
+
+/* Portada: apilada (bajo 900 px), la cifra se separa de las acciones; al lado, se alinea arriba con el título */
+@media (max-width: 899px) { .piezaPortada { padding-top: var(--e-6); } }
+
+/* Con qué está hecho, bajo la cifra de la portada: dos por fila, como en la página de la API. El texto hereda el blanco
+   del campo. Apilada (bajo 900 px) se omite: empujaría el chat fuera del primer pantallazo y cada dato vuelve más abajo. */
+.tecnologias {
+  max-width: 36rem;
+  margin-top: var(--e-5);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e-4) var(--medianil);
+}
+.tecnologias dt { font-size: var(--t-pequeno); line-height: 1.45; }
+.tecnologias dd { margin: var(--e-1) 0 0; font-size: var(--t-texto); font-weight: 600; line-height: 1.4; }
+@media (max-width: 899px) { .tecnologias { display: none; } }

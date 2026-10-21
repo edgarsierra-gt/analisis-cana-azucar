@@ -1,149 +1,172 @@
-/* Página de inicio. Solo tokens de globals.css: ningún color suelto. */
+/* Página de inicio. Solo tokens de globals.css: ningún color suelto. Sin líneas de 1 px: la estructura sale del
+   espacio, del tono y de las barras de 4 px del sistema. */
 
-/* ── 01 · Las tres series: columnas alineadas fila por fila (subgrid) ─────── */
-.series {
+/* ── Portada: la pieza son las tres recomendaciones ──────────────────────── */
+/* Va en el panel blanco que la Portada pone sobre el campo de tinta. Cada fila lleva a su capítulo. */
+.recomendaciones { list-style: none; padding: 0; display: grid; gap: var(--e-1); }
+.recomendaciones > li + li { margin-top: 0; }
+.recomendacion {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(7, auto);
-  row-gap: var(--e-4);
-}
-.serie {
-  grid-row: span 7;
-  display: grid;
-  grid-template-rows: subgrid;
-  align-content: start;
-  padding: var(--e-4) var(--e-5) 0;
-  border-top: 3px solid var(--serie);
-}
-.serie:first-child { padding-left: 0; }
-.serie:last-child { padding-right: 0; }
-.serie + .serie { border-left: 1px solid var(--linea); }
-
-.rotulo { color: var(--serie); font-weight: 600; }
-.clave {
-  font-family: var(--fuente-dato);
-  font-size: var(--t-etiqueta);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--tinta-3);
-}
-.decision { font-size: var(--t-chico); color: var(--tinta-2); }
-.decision p + p { margin-top: var(--e-1); }
-.hallazgo { font-size: var(--t-h3); }
-.cifras { display: grid; align-content: start; gap: var(--e-4); }
-.cifras > * + * { padding-top: var(--e-4); border-top: 1px solid var(--linea-suave); }
-.recomiendo { border-left: 2px solid var(--serie); padding-left: var(--e-4); color: var(--tinta); align-self: start; }
-.certeza { display: grid; align-content: start; gap: var(--e-2); }
-.certeza p { font-size: var(--t-chico); color: var(--tinta-2); }
-.verCaso {
-  align-self: end;
-  padding-top: var(--e-3);
-  border-top: 1px solid var(--linea);
-  font-size: var(--t-chico);
-  font-weight: 600;
-  color: var(--serie);
-  text-decoration: none;
-}
-.verCaso:hover { text-decoration: underline; }
-
-@media (max-width: 960px) {
-  .series { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; row-gap: var(--e-7); }
-  .serie { grid-row: auto; grid-template-rows: none; row-gap: var(--e-4); padding: var(--e-4) 0 0; }
-  .serie + .serie { border-left: 0; }
-}
-
-/* ── 02 · Método: una fila por regla, sin tarjetas ───────────────────────── */
-.reglas { list-style: none; padding: 0; border-bottom: 1px solid var(--linea); }
-.regla {
-  display: grid;
-  grid-template-columns: 3.5rem minmax(0, 15rem) minmax(0, 1fr);
-  column-gap: var(--e-6);
-  row-gap: var(--e-4);
-  padding: var(--e-6) 0;
-  border-top: 1px solid var(--linea);
-}
-.reglas > .regla + .regla { margin-top: 0; }
-.numeroRegla {
-  font-family: var(--fuente-titulo);
-  font-size: var(--t-cifra);
-  line-height: 0.9;
-  color: var(--tinta-3);
-  font-variant-numeric: lining-nums;
-}
-.tituloRegla { font-size: var(--t-h3); }
-.cuerpoRegla { display: grid; gap: var(--e-4); max-width: 46rem; }
-.casos { list-style: none; padding: 0; display: grid; gap: var(--e-3); }
-.casos li { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: var(--e-3); font-size: var(--t-chico); color: var(--tinta-2); }
-.casos li + li { margin-top: 0; }
-.marca {
-  padding-top: 0.15rem;
-  font-family: var(--fuente-dato);
-  font-size: var(--t-etiqueta);
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--serie);
-}
-.refs { font-family: var(--fuente-dato); font-size: 0.75rem; color: var(--tinta-3); }
-.figuraRegla { margin-top: var(--e-3); }
-
-@media (max-width: 860px) {
-  .regla { grid-template-columns: 2.5rem minmax(0, 1fr); }
-  .cuerpoRegla { grid-column: 2; }
-}
-@media (max-width: 560px) {
-  .regla { column-gap: var(--e-4); }
-  .cuerpoRegla { grid-column: 1 / -1; }
-}
-@media (max-width: 480px) {
-  .casos li { grid-template-columns: minmax(0, 1fr); gap: var(--e-1); }
-}
-
-/* ── 03 · Del análisis a la operación ────────────────────────────────────── */
-.destinos {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border-top: 1px solid var(--linea);
-  border-bottom: 1px solid var(--linea);
-}
-.destinos > li + li { margin-top: 0; border-left: 1px solid var(--linea); }
-.destino {
-  display: grid;
-  align-content: start;
-  gap: var(--e-2);
-  height: 100%;
-  padding: var(--e-5) var(--e-5) var(--e-6);
+  gap: var(--e-1) var(--e-4);
+  padding: var(--e-4);
+  margin-inline: calc(-1 * var(--e-4));
   color: var(--tinta);
   text-decoration: none;
+  transition: background-color 120ms var(--curva);
 }
-.destinos > li:first-child .destino { padding-left: 0; }
-.destino:hover { text-decoration: none; }
-.destino:hover .destinoTitulo { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.15em; }
-.destinoTitulo {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--e-3);
-  font-family: var(--fuente-titulo);
-  font-size: var(--t-h2);
-  line-height: 1.1;
-}
-.flecha { font-family: var(--fuente-dato); font-size: var(--t-texto); color: var(--tinta-3); }
-.destinoTexto { font-size: var(--t-chico); color: var(--tinta-2); }
-
-@media (max-width: 760px) {
-  .destinos { grid-template-columns: minmax(0, 1fr); }
-  .destinos > li + li { border-left: 0; border-top: 1px solid var(--linea); }
-  .destino, .destinos > li:first-child .destino { padding: var(--e-4) 0 var(--e-5); }
+.recomendacion:hover { background: var(--serie-fondo); text-decoration: none; }
+.recomendacion:hover .recAccion { text-decoration: underline; text-decoration-color: var(--serie); text-decoration-thickness: 2px; text-underline-offset: 0.18em; }
+.recSerie { font-weight: 600; line-height: 1.4; color: var(--serie); }
+.recAccion { font-size: var(--t-entrada); font-weight: 600; line-height: 1.3; }
+.recCerteza { display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-1) var(--e-3); font-size: var(--t-texto); line-height: 1.4; }
+/* Dónde baja la certeza, en gris: se lee como matiz de "Certeza alta", no como otra certeza */
+.recMatiz { color: var(--apagado); }
+/* Con espacio, el nombre de la serie es una columna a la izquierda y la acción y la certeza van a su lado */
+@media (min-width: 480px) {
+  .recomendacion { grid-template-columns: 5.5rem minmax(0, 1fr); }
+  .recSerie { grid-row: 1 / span 2; padding-top: 0.2em; }
 }
 
-/* ── 04 · Cómo verificarlo ───────────────────────────────────────────────── */
-.verificar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: var(--e-7); }
+/* ── Capítulos de serie: cada uno sobre el tinte de su serie, de borde a borde ── */
+/* El cambio de tinte separa un capítulo del siguiente; adentro, la figura va en un panel blanco. */
+.banda { --ritmo-banda: clamp(3.5rem, 1.5rem + 5vw, 6rem); }
+.banda > section { background: var(--serie-fondo); padding-block: var(--ritmo-banda); }
+/* Lo que sigue a los tres capítulos (blanco) arranca a la distancia normal entre secciones */
+
+/* Cifras de una sección: dos (o tres) columnas con su barra; en el teléfono, un rango largo va en una sola columna */
+.cifras { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-6) var(--sep-columnas); }
+.cifras[data-columnas="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 599px) {
+  .cifras { gap: var(--e-6); }
+  .cifras[data-apilar] { grid-template-columns: minmax(0, 1fr); }
+  .cifras[data-columnas="3"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Cuerpo del capítulo: el relato a la izquierda (columnas 1-6, bajo la entrada) y la figura a la derecha (7-12, bajo las
+   cifras). En pantallas angostas, la figura primero y luego el relato. */
+.capitulo { display: grid; gap: var(--e-7) var(--medianil); align-items: start; }
+.panelFigura { background: var(--fondo); padding: var(--e-5); min-width: 0; }
+.lado { display: grid; align-content: start; gap: var(--e-6); min-width: 0; }
+.contexto > * + * { margin-top: var(--e-3); }
+@media (min-width: 900px) {
+  .capitulo { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .panelFigura { grid-column: 7 / 13; grid-row: 1; }
+  .lado { grid-column: 1 / 7; grid-row: 1; padding-right: var(--e-5); }
+}
+/* La figura es más alta que el relato: con pantalla de alto suficiente, el relato acompaña a la figura mientras se
+   lee (queda fijo bajo el encabezado) en vez de dejar un hueco de tinte a su lado. */
+@media (min-width: 900px) and (min-height: 760px) {
+  .lado { position: sticky; top: calc(var(--alto-encabezado) + var(--e-7)); }
+}
+@media (max-width: 560px) {
+  .panelFigura { padding: var(--e-4); margin-inline: calc(-1 * var(--e-2)); }
+}
+
+/* Los tres caminos para seguir: el caso (botón), la herramienta y la consulta de la API (enlaces de 44 px) */
+.caminos { display: grid; justify-items: start; gap: var(--e-3); }
+.caminos ul { list-style: none; padding: 0; display: grid; gap: 0; }
+.caminos li + li { margin-top: 0; }
+/* Bloque en línea (no flex): el texto y la ruta en código fluyen juntos y se parten como una frase */
+.caminos ul a { display: inline-block; padding-block: var(--e-3); line-height: 1.5; font-weight: 600; }
+.caminos code { background: var(--fondo); white-space: nowrap; }
+
+/* ── Método: la lista de datos al lado del encabezado y una fila por regla ── */
+.fuentes h3 { font-size: var(--t-texto); }
+.fuentes dl { margin-top: var(--e-4); display: grid; gap: var(--e-4); }
+.fuentes dt { font-weight: 600; color: var(--serie); }
+.fuentes dd { margin: 0; }
+@media (min-width: 600px) {
+  .fuentes dl > div { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: var(--e-4); }
+}
+
+/* Cada regla es una fila: la regla y su frase juntas a la izquierda (1-6) y su prueba a la derecha (7-12): los ejemplos
+   de las tres series o, en la regla de validación, la Figura 4 (entonces los ejemplos van bajo la frase). Así ninguna
+   columna queda vacía y el título no queda lejos de su texto. */
+.reglas { list-style: none; padding: 0; display: grid; gap: var(--ritmo-bloque); }
+.reglas > li + li { margin-top: 0; }
+.regla { display: grid; gap: var(--e-5) var(--medianil); align-items: start; }
+.reglaTexto, .reglaPrueba { min-width: 0; }
+.reglaTexto h3 { max-width: 30ch; }
+.reglaTexto > * + * { margin-top: var(--e-3); }
+.reglaTexto > .casos { margin-top: var(--e-6); }
+.reglaTexto > .refs, .reglaPrueba > .refs { margin-top: var(--e-4); }
+@media (min-width: 900px) {
+  .regla { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .reglaTexto { grid-column: 1 / 7; padding-right: var(--e-5); }
+  .reglaPrueba { grid-column: 7 / 13; padding-top: 0.2rem; }
+}
+
+/* Ejemplos de cada regla, a la vista: el nombre de la serie en su color, en letra de texto */
+.casos { list-style: none; padding: 0; display: grid; gap: var(--e-4); }
+.casos li + li { margin-top: 0; }
+.casos li { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr); gap: var(--e-3); }
+.marca { font-weight: 600; color: var(--serie); }
+.refs { font-size: var(--t-pequeno); color: var(--apagado); }
+.refs a { color: inherit; }
+/* En el teléfono el nombre de la serie abre la frase en el mismo renglón: un renglón menos por ejemplo */
+@media (max-width: 480px) {
+  .casos li { display: block; }
+  .marca { margin-right: 0.4em; }
+}
+
+/* ── Producción: la API en vivo, en una fila de superficie (estado · lo que contestó · acción) ── */
+.vivo {
+  display: grid;
+  gap: var(--e-3) var(--medianil);
+  padding: var(--e-5);
+  background: var(--superficie);
+}
+.vivoEstado { display: flex; align-items: center; gap: var(--e-3); font-size: var(--t-entrada); font-weight: 600; line-height: 1.3; }
+.vivoMarca { flex: none; width: 0.75rem; height: 0.75rem; background: var(--apagado); }
+.vivo[data-estado="ok"] .vivoMarca { background: var(--en-linea); }
+.vivo[data-estado="ok"] .vivoEstado { color: var(--en-linea); }
+.vivo[data-estado="error"] .vivoMarca { background: var(--alerta); }
+.vivo[data-estado="error"] .vivoEstado { color: var(--alerta); }
+.vivoTexto p { max-width: 64ch; }
+.vivoTexto strong { font-weight: 600; }
+.vivoAcciones a { display: inline-block; padding-block: var(--e-2); font-weight: 600; }
+@media (prefers-reduced-motion: no-preference) {
+  .vivo[data-estado="consultando"] .vivoMarca { animation: esperar 900ms var(--curva) infinite alternate; }
+}
+@keyframes esperar { to { opacity: 0.25; } }
+@media (min-width: 900px) {
+  .vivo {
+    grid-template-columns: minmax(12rem, auto) minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--e-7);
+    padding: var(--e-5) var(--e-6);
+  }
+  .vivoAcciones { justify-self: end; }
+}
+
+/* El desplegable de seguridad llega al mismo borde derecho que la tabla de arriba; abierto, sus tres párrafos
+   (límites, acceso y costos) van en tres columnas para no dejar media barra vacía */
+.anchoTabla > details { max-width: none; }
+@media (min-width: 900px) {
+  .anchoTabla > details > div {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--e-5) var(--sep-columnas);
+  }
+  .anchoTabla > details > div > * { margin-top: 0; }
+}
+
+/* Grupo de palabras que no se parte: decide dónde corta un h2 de dos renglones */
+.junto { white-space: nowrap; }
+
+/* ── Verificar: dónde revisarlo y cómo reproducirlo, en dos columnas ────── */
+.verificar { display: grid; gap: var(--e-8) var(--medianil); }
 .verificar > * > * + * { margin-top: var(--e-4); }
-.enlaces { list-style: none; padding: 0; border-top: 1px solid var(--linea); }
-.enlaces > li { border-bottom: 1px solid var(--linea-suave); }
+.verificar > * > h3 + * { margin-top: var(--e-4); }
+.verificar > * > * + h3 { margin-top: var(--e-7); }
+@media (min-width: 900px) {
+  .verificar { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .verificar > :first-child { grid-column: 1 / 6; }
+  .verificar > :last-child { grid-column: 7 / 13; }
+}
+
+/* Enlaces en barras de superficie (sin líneas), cada una de 44 px o más */
+.enlaces { list-style: none; padding: 0; display: grid; gap: var(--e-2); }
 .enlaces > li + li { margin-top: 0; }
 .enlaces a {
   display: flex;
@@ -151,16 +174,19 @@
   justify-content: space-between;
   align-items: baseline;
   gap: var(--e-1) var(--e-4);
-  padding: var(--e-3) 0;
+  min-height: 2.75rem;
+  padding: var(--e-3) var(--e-4);
+  background: var(--superficie);
   text-decoration: none;
+  transition: background-color 120ms var(--curva);
 }
-.enlaces a:hover .enlaceTitulo { text-decoration: underline; }
-.enlaceTitulo { font-weight: 600; color: var(--enlace); }
-.enlaceRuta { font-family: var(--fuente-dato); font-size: var(--t-etiqueta); color: var(--tinta-3); }
-.texto { font-size: var(--t-chico); color: var(--tinta-2); }
-.codigo { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+.enlaces a:hover { background: var(--superficie-2); }
+.enlaces a:hover .enlaceTitulo { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.18em; }
+.enlaceTitulo { font-weight: 600; color: var(--tinta); }
+.enlaceRuta { font-size: var(--t-pequeno); color: var(--apagado); overflow-wrap: anywhere; }
 
-@media (max-width: 860px) {
-  .verificar { grid-template-columns: minmax(0, 1fr); gap: var(--e-6); }
+.codigo { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+/* En el teléfono el comando largo se parte en renglones en vez de cortarse en el borde */
+@media (max-width: 560px) {
+  .codigo { white-space: pre-wrap; overflow-wrap: anywhere; }
 }
-.refs a { color: inherit; }

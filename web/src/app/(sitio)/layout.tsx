@@ -1,4 +1,5 @@
 import { Encabezado } from "@/components/Encabezado";
+import { Movimiento } from "@/components/Movimiento";
 import { Pie } from "@/components/Pie";
 
 export default function LayoutSitio({ children }: { children: React.ReactNode }) {
@@ -8,6 +9,7 @@ export default function LayoutSitio({ children }: { children: React.ReactNode })
       <Encabezado />
       <main id="contenido">{children}</main>
       <Pie />
+      <Movimiento />
     </>
   );
 }

@@ -1,82 +1,99 @@
+/* Barra de 64 px (56 en el teléfono) sobre blanco, sin borde. Flota sobre el contenido al desplazar: solo entonces
+   lleva sombra. El enlace activo y "Presentar" van en el color de la página (data-serie en la barra o en el enlace). */
 .encabezado {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: var(--papel);
-  border-bottom: 1px solid var(--tinta);
+  background: var(--fondo);
+  transition: box-shadow 150ms var(--curva); /* taste-skill-ignore: barra fija */
 }
+.encabezado[data-desplazado] { box-shadow: 0 2px 12px rgb(22 24 27 / 0.08); } /* taste-skill-ignore: barra fija que flota */
+/* Con un índice local pegado debajo, la sombra la lleva el índice: una sola para los dos */
+:global(html:has([data-indice-local][data-pegado])) .encabezado { box-shadow: none; } /* taste-skill-ignore */
+
 .barra {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
   gap: var(--e-5);
-  min-height: 4.25rem;
+  height: var(--alto-encabezado);
 }
-.marca { display: grid; text-decoration: none; color: var(--tinta); line-height: 1.05; }
-.marca:hover { text-decoration: none; }
-.marcaTitulo { font-family: var(--fuente-titulo); font-size: 1.45rem; font-weight: 500; font-style: italic; letter-spacing: -0.01em; }
-.marcaSub { font-family: var(--fuente-dato); font-size: 0.7rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--tinta-3); margin-top: 0.2rem; }
+.marca {
+  display: flex; align-items: center;
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-entrada);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--tinta);
+  text-decoration: none;
+  white-space: nowrap;
+}
 
-.nav { display: flex; align-items: center; gap: var(--e-1); }
+.nav { display: flex; align-items: stretch; gap: var(--e-5); }
 .enlace {
   position: relative;
-  padding: 0.5rem 0.7rem;
-  font-size: var(--t-chico);
-  font-weight: 500;
-  color: var(--tinta-2);
+  display: flex; align-items: center;
+  font-size: var(--t-texto);
+  font-weight: 400;
+  color: var(--apagado);
   text-decoration: none;
+  transition: color 120ms var(--curva);
 }
-.enlace:hover { color: var(--tinta); text-decoration: none; }
-.enlace[aria-current="page"] { color: var(--tinta); font-weight: 650; }
-.enlace[aria-current="page"]::after {
+/* La barra de 3 px va en el color de la serie del enlace: al pasar el cursor asoma, en la página activa queda llena */
+.enlace::after {
   content: "";
   position: absolute;
-  left: 0.7rem; right: 0.7rem; bottom: -0.62rem;
+  left: 0; right: 0; bottom: 0;
   height: 3px;
-  background: var(--serie);
+  background: var(--acento);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 200ms var(--curva);
 }
-.presentar {
-  margin-left: var(--e-3);
-  padding: 0.5rem 0.85rem;
-  font-size: var(--t-chico);
-  font-weight: 600;
-  color: var(--papel);
-  background: var(--tinta);
-  border-radius: var(--radio);
-  text-decoration: none;
-}
-.presentar:hover { background: var(--tinta-2); text-decoration: none; }
+.enlace:hover { color: var(--tinta); }
+.enlace:hover::after { transform: scaleX(0.35); }
+.enlace[aria-current="page"] { color: var(--tinta); font-weight: 600; }
+.enlace[aria-current="page"]::after { transform: scaleX(1); }
+.presentar { align-self: center; margin-left: var(--e-2); }
 
 .menu {
   display: none;
-  font: 600 var(--t-chico) var(--fuente-texto);
-  background: none;
-  border: 1px solid var(--tinta);
+  align-self: center;
+  min-height: 2.75rem;
+  padding: 0 var(--e-4);
+  font: 600 var(--t-texto) var(--fuente-texto);
+  background: var(--serie-fondo);
+  border: 0;
   border-radius: var(--radio);
-  padding: 0.4rem 0.75rem;
   color: var(--tinta);
   cursor: pointer;
 }
 
+@media (max-width: 1000px) {
+  .nav { gap: var(--e-4); }
+  .presentar { margin-left: 0; }
+}
+
+/* Teléfono y tableta: "Menú" abre una hoja a pantalla completa bajo la barra, con enlaces de 48 px y sin líneas */
 @media (max-width: 860px) {
   .menu { display: block; }
   .nav {
     display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
+    position: fixed;
+    top: var(--alto-encabezado);
+    left: 0; right: 0; bottom: 0;
     flex-direction: column;
     align-items: stretch;
     gap: 0;
-    background: var(--papel);
-    border-bottom: 1px solid var(--tinta);
-    padding: var(--e-2) var(--margen) var(--e-4);
+    overflow-y: auto;
+    background: var(--fondo);
+    padding: var(--e-4) var(--margen) var(--e-7);
   }
   .nav.abierto { display: flex; }
-  .enlace { padding: 0.75rem 0; border-bottom: 1px solid var(--linea-suave); }
-  .enlace[aria-current="page"]::after { left: auto; right: 0; top: 50%; bottom: auto; width: 0.6rem; height: 0.6rem; margin-top: -0.3rem; border-radius: 50%; }
-  .presentar { margin: var(--e-4) 0 0; text-align: center; }
+  .enlace { min-height: 3rem; font-size: var(--t-entrada); color: var(--tinta); }
+  .enlace::after { right: auto; width: 2rem; bottom: 0.4rem; }
+  .enlace:hover::after { transform: scaleX(1); }
+  .presentar { align-self: flex-start; margin-top: var(--e-6); }
 }
 
 @media print { .encabezado { display: none; } }

@@ -5,8 +5,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--e-1) var(--e-5);
-  font-size: var(--t-etiqueta);
-  color: var(--tinta-2);
+  font-size: var(--t-pequeno);
+  color: var(--tinta);
 }
 .leyenda li + li { margin-top: 0; }
 .leyenda li { display: inline-flex; align-items: center; gap: var(--e-2); }

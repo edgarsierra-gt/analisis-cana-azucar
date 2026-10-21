@@ -27,8 +27,11 @@ async function pedirSalud(): Promise<Estado> {
   }
 }
 
-/** Estado en vivo de la API: si responde, su versión, qué cargó y dónde está la documentación interactiva. */
-export function EstadoApi() {
+/**
+ * Estado en vivo de la API, en una sola fila: si responde (GET /salud, que no gasta la cuota), dónde está, qué versión
+ * corre y qué cargó. `version` es la del código (api/main.py); si la API responde, se muestra la que ella dice.
+ */
+export function EstadoApi({ version }: { version: string }) {
   const [estado, setEstado] = useState<Estado>({ tipo: "consultando" });
 
   useEffect(() => {
@@ -51,38 +54,45 @@ export function EstadoApi() {
   return (
     <section className={s.estado} data-estado={estado.tipo} aria-labelledby="estado-api-titulo">
       <div className={s.cabeza}>
-        <p id="estado-api-titulo" className="etiqueta">Estado en vivo · GET /salud</p>
+        <p id="estado-api-titulo" className={s.titulo}>Estado en vivo de la API</p>
         <p className={s.rotulo} role="status" aria-live="polite">
           <span className={s.marca} aria-hidden="true" />
           {rotulo}
         </p>
+        <p className={s.consulta}>
+          Pregunta a <code>GET /salud</code>
+          {/* "es-GT" da la hora como "02:30 a. m.": ya trae su punto, no se le agrega otro */}
+          {estado.tipo === "ok" ? (
+            <>, a las <span className="num">{estado.hora}</span>{estado.hora.endsWith(".") ? "" : "."}</>
+          ) : "."}
+        </p>
       </div>
 
       <dl className={s.datos}>
-        <div>
+        <div className={s.direccion}>
           <dt>Dirección</dt>
-          <dd className={s.url}>{API_URL}</dd>
+          <dd><code className={s.url}>{API_URL}</code></dd>
+        </div>
+        <div>
+          <dt>Versión</dt>
+          <dd className="num">{estado.tipo === "ok" ? estado.salud.version : version}</dd>
         </div>
         {estado.tipo === "ok" && (
-          <>
-            <div>
-              <dt>Versión</dt>
-              <dd className="dato">{estado.salud.version}</dd>
-            </div>
-            <div>
-              <dt>Cargó</dt>
-              <dd>
-                {estado.salud.variedades_ciclo} variedades para el ciclo, {estado.salud.variedades_pronostico} para el
-                pronóstico y {estado.salud.grupos} grupos
-              </dd>
-            </div>
-            <div>
-              <dt>Consultado</dt>
-              <dd className="dato">{estado.hora}</dd>
-            </div>
-          </>
+          <div className={s.cargo}>
+            <dt>Cargó</dt>
+            <dd>
+              {estado.salud.variedades_ciclo} variedades para el ciclo, {estado.salud.variedades_pronostico} para el
+              pronóstico y {estado.salud.grupos} grupos
+            </dd>
+          </div>
         )}
       </dl>
+
+      <div className={s.acciones}>
+        <button type="button" className="boton boton-sec" onClick={reintentar} disabled={estado.tipo === "consultando"}>
+          Consultar de nuevo
+        </button>
+      </div>
 
       {estado.tipo === "error" && (
         <div className={s.aviso}>
@@ -92,15 +102,6 @@ export function EstadoApi() {
           </p>
         </div>
       )}
-
-      <div className={s.acciones}>
-        <a className="boton" href={`${API_URL}/docs`} target="_blank" rel="noreferrer">
-          Abrir la documentación interactiva
-        </a>
-        <button type="button" className="boton boton-sec" onClick={reintentar} disabled={estado.tipo === "consultando"}>
-          Consultar de nuevo
-        </button>
-      </div>
     </section>
   );
 }

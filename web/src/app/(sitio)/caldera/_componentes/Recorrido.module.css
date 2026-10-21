@@ -1,45 +1,22 @@
+/* Las siete partes de la caldera en el orden del recorrido. Cada una es una columna con su barra de 4 px del color de la
+   página. Sin "Paso n": el orden lo da la lista y la lectura de izquierda a derecha. */
 .pasos {
   list-style: none;
   padding: 0;
   margin: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
-  gap: var(--e-6) var(--e-6);
+  gap: var(--e-7) var(--sep-columnas);
 }
 .pasos > li + li { margin-top: 0; }
-.paso { border-top: 1px solid var(--tinta); padding-top: var(--e-3); }
-.numero {
-  font-family: var(--fuente-dato);
-  font-size: var(--t-etiqueta);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--serie);
-  font-weight: 600;
-}
-.nombre { margin-top: var(--e-1); font-size: 1.25rem; }
-.texto { margin-top: var(--e-2); font-size: var(--t-chico); color: var(--tinta-2); line-height: 1.5; }
-.rotulo {
-  margin-top: var(--e-3);
-  font-family: var(--fuente-dato);
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--tinta-3);
-}
-.sensores {
-  list-style: none;
-  padding: 0;
-  margin-top: var(--e-1);
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--e-1) var(--e-2);
-}
-.sensores li + li { margin-top: 0; }
-.sensores li {
-  font-size: 0.8125rem;
-  line-height: 1.3;
-  color: var(--tinta);
-  background: var(--serie-fondo);
-  padding: 0.15rem 0.4rem;
-  border-radius: var(--radio);
+.paso { border-top: var(--barra) solid var(--serie); padding-top: var(--e-4); min-width: 0; }
+.nombre { font-size: var(--t-entrada); }
+.texto { margin-top: var(--e-2); font-size: var(--t-texto); line-height: 1.55; }
+.sensores { margin-top: var(--e-3); font-size: var(--t-pequeno); line-height: 1.5; color: var(--apagado); }
+.sensores strong { color: var(--tinta); }
+/* Cuatro por fila: el hogar (13 sensores, el texto más largo) ocupa dos filas y las otras seis llenan las tres columnas
+   restantes, sin hueco al final. */
+@media (min-width: 1240px) {
+  .pasos { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .paso:first-child { grid-row: span 2; }
 }

@@ -1,8 +1,73 @@
-.portada { padding: var(--e-8) 0 var(--e-7); border-bottom: 1px solid var(--linea); }
-.etiqueta { color: var(--serie); display: flex; align-items: center; gap: var(--e-3); }
-.etiqueta::before { content: ""; width: 1.75rem; height: 3px; background: var(--serie); }
-.titulo { margin-top: var(--e-4); max-width: 18ch; }
+/* Portada: el primer pantallazo, sobre un campo de color de la serie (o de tinta) a todo el ancho. Sin bordes. */
+.portada { padding: clamp(3.5rem, 2.4rem + 3.4vw, 6rem) 0 clamp(3rem, 2rem + 3vw, 5rem); }
+
+/* ── Fondos ───────────────────────────────────────────────────────────────── */
+/* Sobre un campo, todo lo propio de la portada (.propio: título, entrada, acciones, meta y la pieza sin panel) va en
+   blanco, sin grises: la jerarquía la dan tamaño y peso. Lo que llega en children con su propio panel no se toca. */
+.serie { background: var(--serie); color: var(--sobre-serie); }
+.tinta { background: var(--tinta); color: var(--sobre-tinta); }
+.tinte { background: var(--serie-fondo); --boton-sec-fondo: var(--fondo); }
+.blanco { background: var(--fondo); }
+
+:is(.serie, .tinta) :is(.titulo, .entrada, .meta dt, .meta dd, .cifraValor, .cifraUnidad, .cifraEtiqueta, .cifraDetalle) { color: #fff; }
+
+/* Enlaces y botones sobre el campo: el botón primario se invierte (blanco con texto del color) */
+:is(.serie, .tinta) .propio a:not(:global(.boton)) { color: #fff; text-decoration-color: #fff; }
+:is(.serie, .tinta) .propio :global(.boton) { background: #fff; color: var(--serie); }
+:is(.serie, .tinta) .propio :global(.boton):hover { background: var(--serie-fondo); }
+:is(.serie, .tinta) .propio :global(.boton-sec) { background: transparent; color: #fff; box-shadow: inset 0 0 0 2px #fff; } /* taste-skill-ignore: contorno de 2 px de un botón */
+:is(.serie, .tinta) .propio :global(.boton-sec):hover { background: rgb(255 255 255 / 0.14); }
+:is(.serie, .tinta) .propio :focus-visible { outline-color: #fff; }
+:is(.serie, .tinta) .propio ::selection { background: #fff; color: var(--tinta); }
+:is(.serie, .tinta) .propio :global(code) { background: rgb(255 255 255 / 0.16); color: #fff; }
+
+/* ── Rejilla ──────────────────────────────────────────────────────────────── */
+.rejilla { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--medianil); row-gap: var(--e-7); }
+.texto { grid-column: 1 / -1; min-width: 0; }
+.titulo { max-width: 22ch; }
 .entrada { margin-top: var(--e-5); }
-.meta { display: flex; flex-wrap: wrap; gap: var(--e-3) var(--e-7); margin-top: var(--e-6); padding-top: var(--e-4); border-top: 1px solid var(--linea); }
-.meta dt { font-family: var(--fuente-dato); font-size: var(--t-etiqueta); letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-3); }
-.meta dd { margin: 0.15rem 0 0; font-size: var(--t-chico); color: var(--tinta); }
+.acciones { margin-top: var(--e-6); display: flex; flex-wrap: wrap; align-items: center; gap: var(--e-4) var(--e-5); }
+.pieza { grid-column: 1 / -1; min-width: 0; }
+.panel { background: var(--fondo); color: var(--tinta); padding: var(--e-5); }
+.extra { grid-column: 1 / -1; min-width: 0; }
+/* Sobre un campo, lo que llega en children va en un panel blanco: conserva sus colores (estado en vivo de la API) */
+:is(.serie, .tinta) .extra { background: var(--fondo); color: var(--tinta); padding: var(--e-5) var(--e-6); }
+@media (max-width: 560px) { :is(.serie, .tinta) .extra { padding: var(--e-4); } }
+
+@media (min-width: 900px) {
+  .texto { grid-column: 1 / 8; }
+  .conPieza .pieza { grid-column: 8 / 13; align-self: start; }
+  .conPieza .pieza:not(.panel) { padding-top: 0.4rem; }
+}
+
+/* ── Meta: datos de contexto, sin líneas. Rótulo de 14 px, valor a tamaño de texto. ── */
+.meta { display: grid; gap: var(--e-5) var(--medianil); }
+.meta dt { font-size: var(--t-pequeno); line-height: 1.45; color: var(--apagado); }
+.meta dd { margin: var(--e-1) 0 0; font-size: var(--t-texto); font-weight: 600; line-height: 1.4; color: var(--tinta); }
+/* Con pieza: bajo la entrada, en dos columnas */
+.metaJunto { margin-top: var(--e-7); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* Sin pieza: en la columna derecha, uno bajo otro; en pantallas angostas, bajo el texto en dos columnas */
+.metaLado { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 900px) {
+  .metaLado { grid-column: 9 / 13; grid-template-columns: minmax(0, 1fr); align-self: start; padding-top: 0.6rem; row-gap: var(--e-5); }
+}
+
+/* ── Cifra de la pieza: la que responde, al tamaño más grande de la página ── */
+.cifra { max-width: 32rem; }
+.cifraValor {
+  font-family: var(--fuente-titulo);
+  font-size: var(--t-pieza);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--serie);
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+.cifraUnidad { font-family: var(--fuente-texto); font-size: var(--t-entrada); font-weight: 400; letter-spacing: 0; color: var(--apagado); white-space: normal; }
+.cifraEtiqueta { margin-top: var(--e-4); font-size: var(--t-entrada); font-weight: 600; line-height: 1.35; color: var(--tinta); }
+.cifraDetalle { margin-top: var(--e-2); font-size: var(--t-pequeno); line-height: 1.45; color: var(--apagado); }
+
+@media (max-width: 560px) {
+  .cifraValor { white-space: normal; }
+}

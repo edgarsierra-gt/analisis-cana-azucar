@@ -5,7 +5,7 @@ import { Evaluacion } from "@/components/Evaluacion";
 import { Figura } from "@/components/Figura";
 import { IndiceLocal } from "@/components/IndiceLocal";
 import { Desplegable, Nota } from "@/components/Nota";
-import { Portada } from "@/components/Portada";
+import { CifraPortada, Portada } from "@/components/Portada";
 import { Seccion } from "@/components/Seccion";
 import { Tabla } from "@/components/Tabla";
 import pronostico2022Lotes from "@/datos/serie1_pronostico_2022_lotes.json";
@@ -20,16 +20,18 @@ import pronosticoPrecio from "@/datos/serie3_pronostico.json";
 import { API_URL } from "@/lib/api";
 import { archivoRepo } from "@/lib/base";
 import { conSigno, num, pctFraccion, usd } from "@/lib/formato";
-import { conteos, GRUPOS, TOTAL_CONSULTAS, VERSION_API } from "./_componentes/consultas";
+import { ANALISIS, conteos, GRUPOS, TOTAL_CONSULTAS, VERSION_API } from "./_componentes/consultas";
 import { DiagramaFlujo, type ArchivosJson } from "./_componentes/DiagramaFlujo";
 import { EstadoApi } from "./_componentes/EstadoApi";
 import { Codigo, ListaConsultas } from "./_componentes/ListaConsultas";
 import s from "./_componentes/Pagina.module.css";
+// Captura real de /docs (Swagger UI de FastAPI) de la API 1.2.0 en Docker, recortada a los grupos General y Campo
+import capturaDocs from "./_componentes/documentacion-interactiva.webp";
 
 export const metadata: Metadata = {
   title: "API",
   description:
-    "La API de la Serie IV: qué responde de campo, caldera y mercado, cómo funciona, cómo se usa y cómo se comprobó que repite las cifras de los notebooks.",
+    "La API de la Serie IV: qué responde de campo, caldera y mercado, cómo funciona, qué decidí y por qué, cómo se usa y cómo se comprobó que repite las cifras de los notebooks.",
 };
 
 // ── Cifras que salen de los JSON ──────────────────────────────────────────────────────────────────────────────────
@@ -50,6 +52,9 @@ const preguntasDe = (clave: string) =>
 const preguntasCampo = preguntasDe("campo");
 const preguntasCaldera = preguntasDe("caldera");
 const preguntasMercado = preguntasDe("mercado");
+const preguntasTotal = preguntasCampo + preguntasCaldera + preguntasMercado;
+// Consultas que se ven en la captura de la documentación: los grupos General y Campo
+const enCaptura = GRUPOS.filter((g) => g.clave === "general" || g.clave === "campo").reduce((n, g) => n + g.consultas.length, 0);
 
 // Banda de 80 % del precio en % del último cierre: exp(z · vol_3m · √h) − 1, como api/mercado.py (notebook 12)
 const banda80 = (h: 1 | 3) => {
@@ -66,9 +71,6 @@ const ARCHIVOS: ArchivosJson = [
 ];
 
 const Ruta = ({ children }: { children: string }) => <code className={s.ruta}>{children}</code>;
-
-/** "I · 2" con espacios que no se parten al final de una línea */
-const pregunta = (serie: string, n: number) => `${serie}\u00a0·\u00a0${n}`;
 
 type Fila = Record<string, unknown>;
 
@@ -87,16 +89,24 @@ const USOS: Fila[] = [
   },
 ];
 
+// Decisiones de la Serie IV con lo que descarté: todo sale de bitacora.md, sección "Serie IV · API en producción".
+// "—" donde la bitácora no registra una alternativa descartada.
 const DECISIONES: Fila[] = [
-  { decision: "Lee JSON, no pickles", porque: "Un pickle de scikit-learn depende de la versión exacta y no se puede leer. Un JSON se abre con cualquier editor.", ref: "D63" },
-  { decision: "No vuelve a entrenar", porque: "Re-entrenar al arrancar obligaría a llevar los datasets a la imagen. La imagen solo lleva código y JSON.", ref: "D63, D69" },
-  { decision: "Consultas por pregunta", porque: "Cada respuesta trae lo necesario para decidir: el margen de cada ciclo posible, la banda del pronóstico, el segundo grupo más cercano.", ref: "D64" },
-  { decision: "Banda con su cobertura real", porque: `La banda del pronóstico cubrió el ${pctFraccion(conteos.coberturaE1)} en la validación, no el 80 % nominal. La respuesta lo dice.`, ref: "D67" },
-  { decision: "La caldera no guarda estado", porque: `Quien consulta manda la ventana de minutos que hace falta: ${conteos.ventanaVapor} o más para el vapor, ${conteos.persistencia} o más para que una alarma cuente como persistente.`, ref: "D72" },
-  { decision: "Límite de uso por IP", porque: "Es pública y sin llave: 300 consultas por IP al día, 40 por minuto y 5,000 en total. Al pasarse responde 429 con un mensaje en español.", ref: "D78" },
-  { decision: "Errores en español", porque: "Cada 422 nombra el campo y el motivo, por ejemplo \"precio: debe ser mayor o igual a 0.05\".", ref: "D79" },
-  { decision: "El asistente no calcula", porque: "Gemini pide las cifras a las mismas funciones de la API y redacta con lo que devuelven. Tiene su propia cuota: 30 preguntas por IP al día.", ref: "D80-D82" },
-  { decision: "Solo lo que se consulta en el momento", porque: "Elegí lo que una persona de planta o de comercialización consultaría al momento. Lo demás está en la sección 06.", ref: "D71" },
+  { decision: "Lee JSON, no pickles", porque: "Un JSON se abre con cualquier editor y se revisa en el repositorio.", descarte: "Pickles de scikit-learn: dependen de la versión exacta y no se pueden leer.", ref: "D63" },
+  { decision: "No vuelve a entrenar", porque: "La imagen solo lleva código y JSON, así que no necesita los datasets.", descarte: "Re-entrenar al arrancar: obligaría a llevar los datasets a la imagen.", ref: "D63, D69" },
+  { decision: "Consultas por pregunta", porque: "Cada respuesta trae lo necesario para decidir: el margen de cada ciclo posible, la banda del pronóstico, el segundo grupo más cercano.", descarte: "Devolver solo el número.", ref: "D64" },
+  { decision: "Banda con su cobertura real", porque: `La banda del pronóstico cubrió el ${pctFraccion(conteos.coberturaE1)} en la validación. La respuesta lo dice.`, descarte: "Anunciar el 80 % nominal.", ref: "D67" },
+  { decision: "La caldera no guarda estado", porque: `Quien consulta manda la ventana de minutos que hace falta: ${conteos.ventanaVapor} o más para el vapor, ${conteos.persistencia} o más para que una alarma cuente como persistente.`, descarte: "—", ref: "D72" },
+  { decision: "Límite de uso por IP", porque: "Es pública y sin llave: 300 consultas por IP al día, 40 por minuto y 5,000 en total. Al pasarse responde 429 con un mensaje en español.", descarte: "Cloud Armor (pide un balanceador con costo fijo) y una base compartida como Redis (otro servicio que mantener para una demo).", ref: "D78" },
+  { decision: "Errores en español", porque: "Cada 422 nombra el campo y el motivo, por ejemplo \"precio: debe ser mayor o igual a 0.05\".", descarte: "Los mensajes de pydantic, en inglés y sin nombrar el campo.", ref: "D79" },
+  { decision: "Cloud Run sin instancias fijas", porque: "Con 0 instancias mínimas no cuesta si nadie la usa; con 2 como máximo, el gasto tiene tope. Es la misma imagen de Docker.", descarte: "—", ref: "D77" },
+  { decision: "El asistente no calcula", porque: "Gemini pide las cifras a las mismas funciones de la API y redacta con lo que devuelven. Tiene su propia cuota: 30 preguntas por IP al día.", descarte: "Buscar en documentos con vectores (RAG): los datos son pocos y estructurados, y una herramienta devuelve la cifra exacta.", ref: "D80-D82" },
+  {
+    decision: "Solo lo que se consulta en el momento",
+    porque: <>Elegí lo que una persona de planta o de comercialización consultaría al momento. Lo demás, y cómo lo resolvería, está en <a href="#fuera">Lo que no está</a>.</>,
+    descarte: "El monitor PCA (24 h de historia, se reentrena cada hora) y el detector de sensor congelado (muestras de 5 s).",
+    ref: "D71",
+  },
 ];
 
 // Texto de docs/api.md, "Cómo se verificó". Las tolerancias (≤ 1 lb/acre, ≤ 0.006 t/h, ≤ 0.02 ¢/lb), el rango de precio
@@ -117,6 +127,18 @@ const VERIFICACION: Fila[] = [
   { pregunta: "Asistente", que: "Con un modelo falso, sin llamar a Vertex AI: cada herramienta da lo mismo que su consulta, el bucle se detiene en 6 pasos, el modelo de respaldo entra si el principal está saturado y la cuota responde 429." },
 ];
 
+/** Primera columna de la tabla de pruebas: la pregunta de la prueba, con enlace a su análisis. */
+const preguntaConEnlace = (f: Fila) => {
+  const a = ANALISIS[f.pregunta as string];
+  if (!a) return f.pregunta as string;
+  return (
+    <>
+      <Link href={a.href}>{a.texto.charAt(0).toUpperCase() + a.texto.slice(1)}</Link>
+      <span className={s.deSerie}>Pregunta {a.n} de {a.serie}</span>
+    </>
+  );
+};
+
 // Entradas que las pruebas mandan a propósito para comprobar el 422 (tests/test_api.py y tests/test_api_caldera_mercado.py)
 // Los límites de cada regla son los de api/esquemas.py.
 const RECHAZOS: Fila[] = [
@@ -125,7 +147,7 @@ const RECHAZOS: Fila[] = [
   { consulta: "POST /campo/ciclo", entrada: "barbecho 5", regla: "De 0 a 2 años sin caña" },
   { consulta: "POST /campo/pronostico", entrada: "corte 7", regla: "Corte de 0 (plantía) a 4" },
   { consulta: "POST /campo/pronostico", entrada: "finca \"NO-EXISTE\"", regla: `Una de las ${conteos.fincas} fincas conocidas, o "nueva"` },
-  { consulta: "POST /campo/pronostico", entrada: "variedad sin historia en etapa 5", regla: "Es el escenario 3, pendiente (sección 06)" },
+  { consulta: "POST /campo/pronostico", entrada: "variedad sin historia en etapa 5", regla: "Es el escenario 3, pendiente (ver Lo que no está)" },
   { consulta: "POST /campo/pronostico", entrada: "ventaja del lote 0", regla: "Mayor que 0.2 y menor que 5" },
   { consulta: "POST /campo/segmento", entrada: "3 de los 4 indicadores", regla: "Los 4 son obligatorios" },
   { consulta: "POST /campo/auditoria", entrada: "lista de cosechas vacía", regla: "Al menos un registro" },
@@ -150,27 +172,72 @@ const ARCHIVOS_PRUEBA: Fila[] = [
 ];
 const TOTAL_PRUEBAS = ARCHIVOS_PRUEBA.reduce((n, f) => n + (f.n as number), 0);
 
+/** Primera columna de las pruebas por archivo: la ruta y, debajo, qué prueba (la fila Total lleva el entorno). */
+const archivoConQue = (f: Fila) => (
+  <>
+    {f.archivo === "Total" ? "Total" : <Ruta>{f.archivo as string}</Ruta>}
+    <span className={s.deSerie}>{f.que as string}</span>
+  </>
+);
+
+// Extracto del registro de la última corrida (outputs/tests/pytest_docker.txt): el comando (línea 2), la versión de
+// Python y pytest (línea 4, recortada), "collected" (línea 10), la primera prueba (sin su porcentaje) y la última línea
+// sin los signos "=" del marco.
+const REGISTRO = `# docker compose --profile pruebas run --rm pruebas
+platform linux -- Python 3.12.15, pytest-9.1.1
+collected ${TOTAL_PRUEBAS} items
+
+tests/test_api.py::test_salud PASSED
+…
+${TOTAL_PRUEBAS} passed in 20.75s`;
+
+const TECNOLOGIAS = [
+  { clave: "Hecha con", valor: "FastAPI, pydantic y Docker" },
+  { clave: "Publicada en", valor: "Cloud Run, de Google Cloud" },
+  { clave: "Probada con", valor: "pytest y PostgreSQL 16" },
+  { clave: "Asistente", valor: "Gemini en Vertex AI" },
+];
+
 export default function PaginaApi() {
   return (
     <>
       <Portada
-        etiqueta="Serie IV · API"
-        titulo="La API responde con las mismas cifras que los notebooks"
+        titulo="La API repite las cifras del análisis"
         entrada={
           <>
-            Es un servicio web: otro sistema le manda datos y recibe la respuesta del análisis. No vuelve a entrenar
-            ni lee los datasets: carga los JSON que dejan los notebooks. Las {TOTAL_PRUEBAS} pruebas automáticas
-            comprueban que repite sus cifras.
+            Un servicio web: otro sistema le manda datos y recibe la respuesta del análisis. No vuelve a entrenar ni
+            lee los datasets.
           </>
         }
-        meta={[
-          { clave: "Consultas", valor: `${TOTAL_CONSULTAS}, de campo, caldera, mercado y el asistente` },
-          { clave: "Pruebas", valor: `${TOTAL_PRUEBAS} aprobadas en Docker` },
-          { clave: "Versión", valor: VERSION_API },
-          { clave: "Hecha con", valor: "FastAPI, pydantic y Docker" },
-        ]}
+        acciones={
+          <>
+            <a className="boton" href={`${API_URL}/docs`} target="_blank" rel="noreferrer">
+              Abrir la documentación interactiva
+            </a>
+            <Link href="/herramientas">Probarla en las herramientas</Link>
+          </>
+        }
+        piezaPanel={false}
+        pieza={
+          <div className={s.pieza}>
+            <CifraPortada
+              valor={`${TOTAL_PRUEBAS} de ${TOTAL_PRUEBAS}`}
+              etiqueta="pruebas aprobadas"
+              detalle="Cada una llama a la API y compara la respuesta con la cifra del notebook. Corrieron dentro de Docker, con PostgreSQL 16."
+            />
+            {/* De punta a punta: con qué está hecha, dónde corre y cómo se prueba (bitácora D63-D82) */}
+            <dl className={s.tecnologias}>
+              {TECNOLOGIAS.map((t) => (
+                <div key={t.clave}>
+                  <dt>{t.clave}</dt>
+                  <dd>{t.valor}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        }
       >
-        <EstadoApi />
+        <EstadoApi version={VERSION_API} />
       </Portada>
 
       <IndiceLocal
@@ -178,25 +245,37 @@ export default function PaginaApi() {
         items={[
           { id: "para-que", etiqueta: "Para qué sirve" },
           { id: "como-funciona", etiqueta: "Cómo funciona" },
+          { id: "decisiones", etiqueta: "Decisiones" },
           { id: "consultas", etiqueta: "Consultas" },
-          { id: "pruebas", etiqueta: "Validación y pruebas" },
-          { id: "correrla", etiqueta: "Cómo correrla" },
+          { id: "pruebas", etiqueta: "Pruebas" },
+          { id: "correrla", etiqueta: "Docker y Cloud Run" },
           { id: "fuera", etiqueta: "Lo que no está" },
           { id: "evaluacion", etiqueta: "Evaluación" },
         ]}
       />
 
-      {/* 01 · Qué es y para qué sirve */}
+      {/* Qué es y para qué sirve */}
       <Seccion
         id="para-que"
-        numero="01"
-        etiqueta="Para qué sirve"
-        titulo="Cualquier sistema puede pedir la respuesta sin repetir el análisis"
-        entrada="Una hoja de cálculo, las herramientas de este sitio o el asistente le mandan datos en JSON y reciben la respuesta en JSON. Responde las cuatro preguntas de campo y parte de las de caldera y mercado."
+        titulo="Otros sistemas usan el análisis sin repetirlo"
+        entrada="Una hoja de cálculo, las herramientas de este sitio o el asistente mandan datos en JSON y reciben la respuesta del análisis."
+        cifras={
+          <FilaCifras columnas={2}>
+            <Cifra valor={TOTAL_CONSULTAS} unidad="consultas" etiqueta="De campo, caldera, mercado y el asistente" />
+            <Cifra
+              valor={preguntasTotal}
+              unidad="preguntas"
+              etiqueta={`De la prueba: ${preguntasCampo} de campo, ${preguntasCaldera} de caldera y ${preguntasMercado} de mercado`}
+              detalle="Las cuatro de campo y parte de las de caldera y mercado"
+            />
+          </FilaCifras>
+        }
       >
-        <div className={s.medio}>
+        <div className={s.conLado}>
           <Tabla
             titulo="Usos previstos"
+            ancho="total"
+            movil="apilar"
             columnas={[
               { clave: "uso", titulo: "Uso", ancho: "13rem" },
               { clave: "ejemplo", titulo: "Ejemplo" },
@@ -212,199 +291,248 @@ export default function PaginaApi() {
             ]}
             filas={USOS}
           />
+          <div className={`${s.lado} ${s.ladoFijo}`}>
+            <Nota tipo="limite" titulo="datos públicos y de otros lugares">
+              <p>
+                Los ensayos son de Louisiana (2010-2021){/* fuente: docs/api.md, "Límite principal" */}, la caldera quema
+                carbón y el precio es el del mercado mundial. La API sirve para el método. Los valores para el ingenio
+                saldrán de sus propios datos.
+              </p>
+            </Nota>
+          </div>
         </div>
-        <Nota tipo="limite" titulo="Datos públicos y de otros lugares">
-          <p>
-            Los ensayos son de Louisiana (2010-2021){/* fuente: docs/api.md, "Límite principal" */}, la caldera quema
-            carbón y el precio es el del mercado mundial. La API sirve para el método. Los valores para el ingenio
-            saldrán de sus propios datos.
-          </p>
-        </Nota>
       </Seccion>
 
-      {/* 02 · Cómo funciona */}
+      {/* Cómo funciona */}
       <Seccion
         id="como-funciona"
-        numero="02"
-        etiqueta="Cómo funciona"
-        titulo="La API no vuelve a entrenar: lee lo que dejaron los notebooks"
+        titulo="No reentrena: lee los JSON del análisis"
         entrada={
           <>
-            Los notebooks hacen el análisis una vez y guardan cada modelo como un archivo JSON. La API carga esos
-            archivos al arrancar y calcula con el mismo código de <code>src/</code>. Por eso sus respuestas coinciden
-            con los notebooks.
+            Los notebooks hacen el análisis una vez y guardan cada modelo en un JSON. La API los carga al arrancar y
+            calcula con el mismo código de <code>src/</code>.
           </>
         }
       >
         <Figura
-          numero={1}
           ancho="total"
           titulo="Los datasets se quedan en el análisis: a la API llegan el código y los JSON"
-          nota="Las flechas siguen el camino de los datos. Para actualizar una respuesta se vuelve a correr su notebook con datos nuevos y se publica el JSON que deja."
+          nota="Las flechas siguen el camino de los datos. Por eso las respuestas coinciden con los notebooks. Para actualizar una respuesta se vuelve a correr su notebook con datos nuevos y se publica el JSON que deja."
           fuente="docs/api.md · Dockerfile · api/servicios.py, api/caldera.py y api/mercado.py"
         >
           <DiagramaFlujo archivos={ARCHIVOS} />
         </Figura>
-        <div className={s.medio}>
-          <Tabla
-            titulo="Decisiones de diseño"
-            columnas={[
-              { clave: "decision", titulo: "Decisión", ancho: "14rem" },
-              { clave: "porque", titulo: "Por qué" },
-              { clave: "ref", titulo: "Bitácora", ancho: "6rem", valor: (f) => <span className="dato">{f.ref as string}</span> },
-            ]}
-            filas={DECISIONES}
-            nota={<>Detalle de cada decisión en la <a href={archivoRepo("bitacora.md")}>bitácora</a>, sección Serie IV.</>}
-          />
+      </Seccion>
+
+      {/* Decisiones de diseño: el criterio de cada pieza */}
+      <Seccion
+        id="decisiones"
+        titulo="Cada decisión, con lo que descarté"
+        entrada="Lo que decidí para la API, por qué y qué dejé de lado. Cada fila remite a su entrada de la bitácora."
+      >
+        <Tabla
+          titulo="Decisiones de la API"
+          ancho="total"
+          movil="apilar"
+          columnas={[
+            {
+              clave: "decision",
+              titulo: "Decisión",
+              ancho: "15rem",
+              // La entrada de la bitácora va bajo la decisión: tres columnas de texto dejan más ancho a cada una en tableta
+              valor: (f) => (
+                <>
+                  {f.decision as string}
+                  <span className={s.deSerie}>Bitácora <span className="num">{f.ref as string}</span></span>
+                </>
+              ),
+            },
+            { clave: "porque", titulo: "Por qué" },
+            { clave: "descarte", titulo: "Qué descarté" },
+          ]}
+          filas={DECISIONES}
+          nota={<>Detalle de cada decisión en la <a href={archivoRepo("bitacora.md")}>bitácora</a>, sección Serie IV.</>}
+        />
+      </Seccion>
+
+      {/* Las consultas */}
+      <Seccion
+        id="consultas"
+        titulo="Cada respuesta trae lo necesario para decidir"
+        entrada="Las GET solo leen; las POST reciben JSON o un CSV y devuelven el cálculo. Ninguna guarda lo que recibe."
+      >
+        <ListaConsultas grupos={GRUPOS} />
+        {/* La documentación interactiva, tal como se ve: la prueba de que el contrato (OpenAPI) está publicado */}
+        <div className={s.conLado}>
+          <Figura
+            titulo="La documentación interactiva: cada consulta se abre y se prueba desde el navegador"
+            nota={`La captura muestra las ${enCaptura} consultas de general y campo; debajo siguen caldera, mercado y el asistente.`}
+            fuente={<>captura de <code>/docs</code> de la API {VERSION_API} (FastAPI y Swagger UI) corriendo en Docker</>}
+          >
+            <div className={s.captura} data-ui="">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={capturaDocs.src}
+                width={capturaDocs.width}
+                height={capturaDocs.height}
+                loading="lazy"
+                alt="Documentación interactiva de la API: los grupos General y Campo con sus consultas GET y POST, de /salud a /campo/auditoria/csv, cada una con su resumen y una flecha para abrirla."
+              />
+            </div>
+          </Figura>
+          <div className={`${s.lado} ${s.ladoFijo}`}>
+            <p className={s.texto}>
+              Cada ejemplo salió de llamar a la API con los artefactos del repositorio. La{" "}
+              <a href={`${API_URL}/docs`}>documentación interactiva</a> muestra cada campo con su rango válido y su
+              ejemplo, y permite probar la consulta desde el navegador (OpenAPI). La guía completa está en{" "}
+              <a href={archivoRepo("docs/api.md")}>docs/api.md</a>.
+            </p>
+            <a className="boton boton-sec" href={`${API_URL}/docs`} target="_blank" rel="noreferrer">
+              Abrir la documentación
+            </a>
+          </div>
         </div>
       </Seccion>
 
-      {/* 03 · Las consultas */}
-      <Seccion
-        id="consultas"
-        numero="03"
-        etiqueta="Consultas"
-        titulo={`${TOTAL_CONSULTAS} consultas responden las ${preguntasCampo} preguntas de campo, ${preguntasCaldera} de caldera y ${preguntasMercado} de mercado`}
-        entrada="Las consultas GET solo leen. Las POST reciben datos en JSON, o un CSV, y devuelven el cálculo. Ninguna guarda lo que recibe. Cada ejemplo salió de llamar a la API con los artefactos del repositorio."
-      >
-        <ListaConsultas grupos={GRUPOS} />
-        <p className={s.texto}>
-          La <a href={`${API_URL}/docs`}>documentación interactiva</a> muestra cada campo con su rango válido y su
-          ejemplo, y permite probar la consulta desde el navegador (OpenAPI). La guía completa está en{" "}
-          <a href={archivoRepo("docs/api.md")}>docs/api.md</a>.
-        </p>
-      </Seccion>
-
-      {/* 04 · Validación y pruebas */}
+      {/* Validación y pruebas */}
       <Seccion
         id="pruebas"
-        numero="04"
-        etiqueta="Validación y pruebas"
-        titulo={`${TOTAL_PRUEBAS} pruebas comprueban que la API repite las cifras de los notebooks`}
-        entrada={`Las pruebas llaman a la API y comparan cada respuesta con la cifra del notebook. La última corrida, dentro de Docker con PostgreSQL 16, aprobó las ${TOTAL_PRUEBAS}.`}
+        titulo={`Las ${TOTAL_PRUEBAS} pruebas pasan dentro de Docker`}
+        entrada="Cada prueba llama a la API y compara la respuesta con la cifra de su notebook, caso por caso."
+        cifras={
+          <div className={s.tresCifras}>
+            <Cifra
+              valor={num(predicciones2022)}
+              unidad="predicciones"
+              etiqueta="De 2022, del notebook 03"
+              detalle={`${num(lotes2022)} lotes y ${num(plantias2022)} plantías, con diferencia ≤ 1 lb/acre`}
+            />
+            <Cifra
+              valor={num(auditoria.cerrados_bien)}
+              unidad="ciclos"
+              etiqueta={`Bien clasificados de ${num(auditoria.cerrados)}`}
+              detalle="Igual en pandas, en la API y en PostgreSQL"
+            />
+            <Cifra
+              valor={num(ventanasModo)}
+              unidad="ventanas"
+              etiqueta="De 5 min, con la misma zona de carga"
+              detalle="El 100 % de las del notebook 07"
+            />
+          </div>
+        }
       >
-        <FilaCifras columnas={4}>
-          <Cifra
-            valor={TOTAL_PRUEBAS}
-            unidad="pruebas"
-            etiqueta="Aprobadas dentro de Docker"
-            detalle={`${ARCHIVOS_PRUEBA[0].n} de campo, ${ARCHIVOS_PRUEBA[1].n} de caldera y mercado, ${(ARCHIVOS_PRUEBA[2].n as number) + (ARCHIVOS_PRUEBA[3].n as number)} de límites y asistente y ${ARCHIVOS_PRUEBA[4].n} del esquema SQL`}
-          />
-          <Cifra
-            valor={num(predicciones2022)}
-            unidad="predicciones"
-            etiqueta={`De 2022, reproducidas (${pregunta("I", 2)})`}
-            detalle={`${num(lotes2022)} lotes y ${num(plantias2022)} plantías, con diferencia ≤ 1 lb/acre`}
-          />
-          <Cifra
-            valor={num(auditoria.cerrados_bien)}
-            unidad="ciclos"
-            etiqueta={`Bien clasificados de ${num(auditoria.cerrados)} cerrados (${pregunta("I", 4)})`}
-            detalle="Igual en pandas, en la API y en PostgreSQL"
-          />
-          <Cifra
-            valor={num(ventanasModo)}
-            unidad="ventanas"
-            etiqueta={`De 5 min con la misma zona de carga (${pregunta("II", 2)})`}
-            detalle="El 100 % de las del notebook 07"
-          />
-        </FilaCifras>
-
-        <div className={s.medio}>
+        <div className={s.conLado}>
           <Tabla
             titulo="Qué comprueban las pruebas"
+            ancho="total"
+            movil="apilar"
             columnas={[
-              { clave: "pregunta", titulo: "Pregunta", ancho: "8rem" },
+              { clave: "pregunta", titulo: "Pregunta", ancho: "13rem", valor: preguntaConEnlace },
               { clave: "que", titulo: "Qué se comprueba" },
             ]}
             filas={VERIFICACION}
             nota="Las muestras de la caldera las exportan los notebooks 07 y 08, así que las pruebas no necesitan los datasets."
           />
+          {/* Al lado de la tabla larga: el registro real y de qué archivos salen las 120. Fijo mientras se lee la tabla. */}
+          <div className={`${s.lado} ${s.ladoFijoAlto}`}>
+            <div className={s.registro} data-ui="">
+              <p className={s.registroTitulo}>La última corrida, tal como quedó en el registro</p>
+              <pre><code>{REGISTRO}</code></pre>
+            </div>
+            <Tabla
+              compacta
+              titulo="De dónde salen las pruebas"
+              movil="apilar"
+              columnas={[
+                { clave: "archivo", titulo: "Archivo y qué prueba", valor: archivoConQue },
+                { clave: "n", titulo: "Aprobadas", tipo: "num", ancho: "6.5rem" },
+              ]}
+              filas={[...ARCHIVOS_PRUEBA, { archivo: "Total", que: "Docker: python:3.12-slim y PostgreSQL 16", n: TOTAL_PRUEBAS }]}
+              destacar={(f) => f.archivo === "Total"}
+            />
+            <p className={s.notaLado}>
+              Registro completo en <a href={archivoRepo("outputs/tests/pytest_docker.txt")}>outputs/tests/pytest_docker.txt</a>.
+            </p>
+          </div>
         </div>
 
-        <Desplegable titulo="Pruebas por archivo en la última corrida">
-          <Tabla
-            compacta
-            columnas={[
-              { clave: "archivo", titulo: "Archivo", valor: (f) => (f.archivo === "Total" ? "Total" : <Ruta>{f.archivo as string}</Ruta>) },
-              { clave: "que", titulo: "Qué prueba" },
-              { clave: "n", titulo: "Aprobadas", tipo: "num" },
-            ]}
-            filas={[...ARCHIVOS_PRUEBA, { archivo: "Total", que: "Docker: python:3.12-slim y PostgreSQL 16", n: TOTAL_PRUEBAS }]}
-            destacar={(f) => f.archivo === "Total"}
-          />
-          <p>
-            Registro completo en <a href={archivoRepo("outputs/tests/pytest_docker.txt")}>outputs/tests/pytest_docker.txt</a>.
-          </p>
-        </Desplegable>
-
-        <h3 className={s.subtitulo}>Una entrada imposible se rechaza con un 422</h3>
-        <div className={s.texto}>
-          <p>
+        <div className={s.bloque}>
+          <h3 className={s.subtitulo}>Una entrada imposible se rechaza con un 422</h3>
+          <p className={s.texto}>
             Cada campo tiene un rango físico o económico plausible. El precio va de US$0.05 a 1.00/lb, el corte de 0 a
             4, el TCH (toneladas de caña por hectárea) de 0 a 400 y la presión del domo de 0 a 20 MPa: una presión en
             kPa se rechaza.{/* fuente: api/esquemas.py */} También se rechazan una variedad o finca desconocida y un
             CSV sin las columnas necesarias. En esos casos la API no calcula nada y responde con el código 422 (entrada
-            inválida). Las pruebas mandan a propósito estas entradas y esperan ese código:
+            inválida). Las pruebas mandan a propósito {RECHAZOS.length} entradas así y esperan ese código; están en el
+            detalle técnico, al final de esta sección.
           </p>
-        </div>
-        <div className={s.medio}>
-          <Tabla
-            compacta
-            titulo="Entradas que las pruebas mandan para comprobar el rechazo"
-            columnas={[
-              { clave: "consulta", titulo: "Consulta", ancho: "15rem", valor: (f) => <Ruta>{f.consulta as string}</Ruta> },
-              { clave: "entrada", titulo: "Entrada" },
-              { clave: "regla", titulo: "Regla" },
-            ]}
-            filas={RECHAZOS}
-          />
-        </div>
-        {/* Respuestas tal como las devuelve la API (api/servicios.py y pydantic) a dos entradas de tests/test_api.py */}
-        <div className={s.ejemplos}>
-          <div>
-            <p className={s.paso}><strong>Error de contenido:</strong> dice qué corregir.</p>
-            <Codigo rotulo="Petición" texto={`POST /campo/pronostico\n{"variedad": "HOCP14-885", "finca": "NO-EXISTE", "corte": 0}`} />
-            <Codigo
-              rotulo="Respuesta 422"
-              texto={`{"detail": "Finca 'NO-EXISTE' desconocida. Use una de /campo/variedades o 'nueva' si no tiene historia."}`}
-            />
-          </div>
-          <div>
-            <p className={s.paso}><strong>Error de rango:</strong> nombra el campo y el límite.</p>
-            <Codigo rotulo="Petición" texto={`POST /campo/ciclo\n{"variedad": "HOCP14-885", "precio": -0.2}`} />
-            <Codigo
-              rotulo="Respuesta 422"
-              texto={`{"detail": "precio: debe ser mayor o igual a 0.05",\n "errores": ["precio: debe ser mayor o igual a 0.05"]}`}
-            />
+          {/* Respuestas tal como las devuelve la API (api/servicios.py y pydantic) a dos entradas de tests/test_api.py */}
+          <div className={s.ejemplos}>
+            <div data-ui="">
+              <p className={s.paso}><strong>Error de contenido:</strong> dice qué corregir.</p>
+              <Codigo rotulo="Petición" texto={`POST /campo/pronostico\n{"variedad": "HOCP14-885", "finca": "NO-EXISTE", "corte": 0}`} />
+              <Codigo
+                rotulo="Respuesta 422"
+                texto={`{"detail": "Finca 'NO-EXISTE' desconocida. Use una de /campo/variedades o 'nueva' si no tiene historia."}`}
+              />
+            </div>
+            <div data-ui="">
+              <p className={s.paso}><strong>Error de rango:</strong> nombra el campo y el límite.</p>
+              <Codigo rotulo="Petición" texto={`POST /campo/ciclo\n{"variedad": "HOCP14-885", "precio": -0.2}`} />
+              <Codigo
+                rotulo="Respuesta 422"
+                texto={`{"detail": "precio: debe ser mayor o igual a 0.05",\n "errores": ["precio: debe ser mayor o igual a 0.05"]}`}
+              />
+            </div>
           </div>
         </div>
 
-        <h3 className={s.subtitulo}>Un uso excesivo se frena con un 429</h3>
-        <div className={s.texto}>
-          <p>
-            La API es pública y no pide llave, así que cada IP tiene 40 consultas por minuto y 300 por día, y el
-            servicio un tope de 5,000 diarias{/* fuente: api/limites.py */}. <code>/salud</code> y la documentación no
-            gastan la cuota. Al pasarse responde 429 con un mensaje en español y la cabecera <code>Retry-After</code>;
-            cada respuesta trae <code>X-Consultas-Restantes-Hoy</code>. El conteo se reinicia a la medianoche, hora de
-            Guatemala. El asistente tiene una cuota aparte y más corta: 30 preguntas por IP al día.
-          </p>
+        <div className={s.bloque}>
+          <h3 className={s.subtitulo}>Un uso excesivo se frena con un 429</h3>
+          <div className={s.conLado}>
+            <p className={s.texto}>
+              La API es pública y no pide llave, así que cada IP tiene 40 consultas por minuto y 300 por día, y el
+              servicio un tope de 5,000 diarias{/* fuente: api/limites.py */}. <code>/salud</code> y la documentación no
+              gastan la cuota. Al pasarse responde 429 con un mensaje en español y la cabecera <code>Retry-After</code>;
+              cada respuesta trae <code>X-Consultas-Restantes-Hoy</code>. El conteo se reinicia a la medianoche, hora de
+              Guatemala. El asistente tiene una cuota aparte y más corta: 30 preguntas por IP al día.
+            </p>
+            <div className={s.lado}>
+              <Nota tipo="limite" titulo="el conteo vive en la memoria de cada instancia">
+                <p>
+                  Con Cloud Run limitado a 2 instancias, el tope real puede llegar al doble. Basta para frenar abusos y
+                  acotar el costo de una demo; para un uso real iría una base compartida o una llave por usuario.
+                </p>
+              </Nota>
+            </div>
+          </div>
         </div>
-        <Nota tipo="limite" titulo="El conteo vive en la memoria de cada instancia">
-          <p>
-            Con Cloud Run limitado a 2 instancias, el tope real puede llegar al doble. Basta para frenar abusos y acotar
-            el costo de una demo; para un uso real iría una base compartida o una llave por usuario.
-          </p>
-        </Nota>
+
+        {/* Cerrado, su tabla no ocupa lugar (Pagina.module.css, .plegado): sin eso el navegador la sigue midiendo,
+            encimada e invisible sobre la sección siguiente. */}
+        <div className={s.plegado}>
+          <Desplegable titulo={`Detalle técnico: las ${RECHAZOS.length} entradas que las pruebas mandan para el 422`}>
+            <Tabla
+              compacta
+              titulo="Entradas que las pruebas mandan para comprobar el rechazo"
+              movil="apilar"
+              columnas={[
+                { clave: "consulta", titulo: "Consulta", ancho: "15rem", valor: (f) => <Ruta>{f.consulta as string}</Ruta> },
+                { clave: "entrada", titulo: "Entrada" },
+                { clave: "regla", titulo: "Regla" },
+              ]}
+              filas={RECHAZOS}
+            />
+          </Desplegable>
+        </div>
       </Seccion>
 
-      {/* 05 · Cómo correrla */}
+      {/* Cómo correrla y dónde corre */}
       <Seccion
         id="correrla"
-        numero="05"
-        etiqueta="Cómo correrla"
-        titulo={`Un comando levanta la API y otro corre las ${TOTAL_PRUEBAS} pruebas`}
-        entrada="Solo pide Docker. No necesita los datasets ni variables secretas."
+        titulo="Un comando la levanta y otro la prueba"
+        entrada="Solo pide Docker: no necesita los datasets ni variables secretas. La misma imagen es la que corre en Cloud Run."
       >
         <div className={s.par}>
           <div>
@@ -418,129 +546,145 @@ export default function PaginaApi() {
             <p className={s.paso}>El perfil <code>pruebas</code> agrega un PostgreSQL 16 temporal, en memoria y sin puertos expuestos.</p>
           </div>
         </div>
-        <Desplegable titulo="Sin Docker">
+
+        <div className="columnas">
+          <div>
+            <h3 className={s.tituloColumna}>Qué lleva la imagen</h3>
+            <p>
+              Una sola imagen (<code>python:3.12-slim</code>) corre la API y las pruebas. Pesa 777 MB
+              {/* fuente: bitácora D76 y D80 */} porque suma scikit-learn, para comparar la verificación con el código
+              del notebook 09, y la librería de Vertex AI del asistente.
+            </p>
+            <p>Lleva el código, los JSON y las tablas de control. No lleva datasets ni notebooks.</p>
+          </div>
+          <div>
+            <h3 className={s.tituloColumna}>Cómo corre</h3>
+            <p>
+              Con un usuario sin privilegios. Docker revisa <code>/salud</code> cada 10 s{/* fuente: docker-compose.yml, healthcheck */}.
+            </p>
+            <p>
+              <code>CORS_ORIGINS</code> (opcional) limita qué sitios web pueden consultarla. <code>LIMITE_IP_DIA</code>,{" "}
+              <code>LIMITE_IP_MINUTO</code> y <code>LIMITE_GLOBAL_DIA</code> (opcionales) cambian el límite de uso. Sin{" "}
+              <code>GOOGLE_CLOUD_PROJECT</code>, el asistente responde 503 y lo demás funciona igual.
+            </p>
+          </div>
+          <div>
+            <h3 className={s.tituloColumna}>En Cloud Run</h3>
+            <p>
+              Lee la variable <code>PORT</code>, así que la misma imagen sirve en Cloud Run. Corre como servicio aparte en{" "}
+              <span className={s.ruta}>us-central1</span>, con 1 GB de memoria{/* fuente: bitácora D77 */}.
+            </p>
+            <p>
+              CORS solo deja consultarla desde este sitio, localhost y sus vistas previas. Con Vertex AI se autentica con
+              la cuenta de servicio, sin llaves en el repositorio{/* fuente: bitácora D77 y D80 */}.
+            </p>
+          </div>
+        </div>
+
+        <Desplegable titulo="Detalle técnico: correrla sin Docker">
           <Codigo rotulo="Terminal" texto={"pip install -r requirements.txt\nuvicorn api.main:app --reload\npytest"} />
           <p>
             Sin la variable <code>CAMPO_PG_DSN</code>, <code>pytest</code> omite la prueba de PostgreSQL.
           </p>
         </Desplegable>
-        <ul className={s.puntos}>
-          <li>
-            Una sola imagen (<code>python:3.12-slim</code>) corre la API y las pruebas. Pesa 777 MB
-            {/* fuente: bitácora D76 y D80 */} porque suma scikit-learn, para comparar la verificación con el código del
-            notebook 09, y la librería de Vertex AI del asistente.
-          </li>
-          <li>Lleva el código, los JSON y las tablas de control. No lleva datasets ni notebooks.</li>
-          <li>
-            Corre con un usuario sin privilegios. Docker revisa <code>/salud</code> cada 10 s{/* fuente: docker-compose.yml, healthcheck */}.
-          </li>
-          <li>Lee la variable <code>PORT</code>, así que la misma imagen sirve en Cloud Run.</li>
-          <li><code>CORS_ORIGINS</code> (opcional) limita qué sitios web pueden consultarla.</li>
-          <li>
-            <code>LIMITE_IP_DIA</code>, <code>LIMITE_IP_MINUTO</code> y <code>LIMITE_GLOBAL_DIA</code> (opcionales)
-            cambian el límite de uso. Sin <code>GOOGLE_CLOUD_PROJECT</code>, el asistente responde 503 y lo demás
-            funciona igual.
-          </li>
-        </ul>
+
+        <div>
+          <h3 className={s.tituloColumna}>Archivos en el repositorio</h3>
+          <ul className={s.enlaces} aria-label="Archivos de la API en el repositorio">
+            <li><a href={archivoRepo("docs/api.md")}>docs/api.md</a></li>
+            <li><a href={archivoRepo("api/main.py")}>api/main.py</a></li>
+            <li><a href={archivoRepo("api/esquemas.py")}>api/esquemas.py</a></li>
+            <li><a href={archivoRepo("api/limites.py")}>api/limites.py</a></li>
+            <li><a href={archivoRepo("api/asistente.py")}>api/asistente.py</a></li>
+            <li><a href={archivoRepo("docker-compose.yml")}>docker-compose.yml</a></li>
+            <li><a href={archivoRepo("tests/test_api.py")}>tests/test_api.py</a></li>
+            <li><a href={archivoRepo("tests/test_api_caldera_mercado.py")}>tests/test_api_caldera_mercado.py</a></li>
+            <li><a href={archivoRepo("tests/test_asistente.py")}>tests/test_asistente.py</a></li>
+          </ul>
+        </div>
       </Seccion>
 
-      {/* 06 · Lo que no está en la API */}
+      {/* Lo que no está en la API */}
       <Seccion
         id="fuera"
-        numero="06"
-        etiqueta="Lo que no está en la API"
-        titulo="Quedan fuera el monitor de proceso, el sensor congelado, el precio en vivo y la variedad nueva"
+        titulo="Cuatro piezas quedan fuera, a propósito"
         entrada="Dejé fuera lo que necesita historia larga, datos más finos o un modelo que no hice. Así lo resolvería."
       >
-        <dl className={s.reglas}>
+        {/* En lista (la pieza a la izquierda, por qué y cómo lo resolvería a la derecha) y no en columnas con barra: así no
+            se repite la forma de "Docker y Cloud Run" ni la de la Evaluación, que vienen antes y después */}
+        <div className={s.fuera}>
           <div>
-            <dt>Monitor de proceso (PCA, notebook 09)</dt>
-            <dd>
+            <h3 className={s.tituloColumna}>Monitor de proceso (PCA, notebook 09)</h3>
+            <p>
               Detecta fallas de proceso o de equipo. Necesita 24 h de historia y se reentrena cada hora. En producción
               iría como un servicio programado que lee el historiador de la planta.
-            </dd>
+            </p>
           </div>
           <div>
-            <dt>Sensor congelado</dt>
-            <dd>
-              Se detecta con las muestras de {sensores.periodo_s} s. La API recibe promedios de 1 min.
-            </dd>
+            <h3 className={s.tituloColumna}>Sensor congelado</h3>
+            <p>Se detecta con las muestras de {sensores.periodo_s}&nbsp;s. La API recibe promedios de 1 min.</p>
           </div>
           <div>
-            <dt>Precio con datos nuevos</dt>
-            <dd>
+            <h3 className={s.tituloColumna}>Precio con datos nuevos</h3>
+            <p>
               El JSON trae el último cierre de los datos ({conteos.fechaCierre}). Para usarlo en vivo, un proceso diario
               tendría que recalcular la volatilidad y el último cierre.
-            </dd>
+            </p>
           </div>
           <div>
-            <dt>Variedad sin historia en etapa 5</dt>
-            <dd>
+            <h3 className={s.tituloColumna}>Variedad sin historia en etapa 5</h3>
+            <p>
               Es el escenario 3 de la pregunta 2. La API la rechaza con un 422: predecirla como un testigo promedio daría
               una cifra sin respaldo. El diseño para resolverlo está en el{" "}
               <a href={archivoRepo("README.md")}>README</a>, sección de pendientes.
-            </dd>
+            </p>
           </div>
-        </dl>
-        <ul className={s.enlaces} aria-label="Archivos de la API en el repositorio">
-          <li><a href={archivoRepo("docs/api.md")}>docs/api.md</a></li>
-          <li><a href={archivoRepo("api/main.py")}>api/main.py</a></li>
-          <li><a href={archivoRepo("api/esquemas.py")}>api/esquemas.py</a></li>
-          <li><a href={archivoRepo("api/limites.py")}>api/limites.py</a></li>
-          <li><a href={archivoRepo("api/asistente.py")}>api/asistente.py</a></li>
-          <li><a href={archivoRepo("tests/test_api.py")}>tests/test_api.py</a></li>
-          <li><a href={archivoRepo("tests/test_api_caldera_mercado.py")}>tests/test_api_caldera_mercado.py</a></li>
-          <li><a href={archivoRepo("tests/test_asistente.py")}>tests/test_asistente.py</a></li>
-          <li><a href={archivoRepo("docker-compose.yml")}>docker-compose.yml</a></li>
-        </ul>
+        </div>
       </Seccion>
 
-      {/* 07 · Evaluación gerencial: todo sale de docs/api.md, README "Serie IV" y bitácora D63-D82 */}
-      <Seccion
-        id="evaluacion"
-        numero="07"
-        etiqueta="Evaluación"
-        titulo="La API está lista para servir las cifras; para decidir con ella faltan los datos del ingenio"
-        ancho="medio"
-      >
-        <Evaluacion
-          significa={
-            <>
-              Cualquier sistema del ingenio puede pedir las respuestas de las tres series sin rehacer el análisis. Recibe
-              las mismas cifras de los notebooks, con su banda o su certeza.
-            </>
-          }
-          decision={
-            <>
-              Recomiendo que toda herramienta que muestre estas cifras las pida a la API, como ya hacen las{" "}
-              <Link href="/herramientas">herramientas de este sitio</Link>. Antes de usarla para decidir, recomiendo
-              volver a correr los notebooks con datos del ingenio y publicar los JSON que dejan.
-            </>
-          }
-          impacto={
-            <>
-              No lo medí en dinero. La API no agrega cifras nuevas: hace consultables las de las Series I a III. El
-              impacto de cada respuesta es el que estima su serie.
-            </>
-          }
-          riesgo={
-            <>
-              Los datos son públicos y de otros lugares, así que hoy sirve para el método y no para los valores. El
-              precio queda fijo en el último cierre de los datos ({conteos.fechaCierre}) hasta volver a correr el
-              notebook 12. El límite por IP vive en la memoria de cada instancia, así que el tope real puede llegar al
-              doble.
-            </>
-          }
-          certeza={{
-            nivel: "alta",
-            texto: (
+      {/* Evaluación gerencial: todo sale de docs/api.md, README "Serie IV" y bitácora D63-D82 */}
+      <Seccion id="evaluacion" titulo="Lista, pero faltan los datos del ingenio">
+        {/* La sección entera va sobre el tinte: el título y su banda se leen como un solo bloque (Pagina.module.css) */}
+        <div className={s.cierre}>
+          <Evaluacion
+            significa={
               <>
-                En que la API repite las cifras de los notebooks: lo comprueban {TOTAL_PRUEBAS} pruebas dentro de
-                Docker. La certeza de cada cifra es la de su serie.
+                Cualquier sistema del ingenio puede pedir las respuestas de las tres series sin rehacer el análisis. Recibe
+                las mismas cifras de los notebooks, con su banda o su certeza.
               </>
-            ),
-          }}
-        />
+            }
+            decision={
+              <>
+                Recomiendo que toda herramienta que muestre estas cifras las pida a la API, como ya hacen las{" "}
+                <Link href="/herramientas">herramientas de este sitio</Link>. Antes de usarla para decidir, recomiendo
+                volver a correr los notebooks con datos del ingenio y publicar los JSON que dejan.
+              </>
+            }
+            impacto={
+              <>
+                No lo medí en dinero. La API no agrega cifras nuevas: hace consultables las de las Series I a III. El
+                impacto de cada respuesta es el que estima su serie.
+              </>
+            }
+            riesgo={
+              <>
+                Los datos son públicos y de otros lugares, así que hoy sirve para el método y no para los valores. El
+                precio queda fijo en el último cierre de los datos ({conteos.fechaCierre}) hasta volver a correr el
+                notebook 12. El límite por IP vive en la memoria de cada instancia, así que el tope real puede llegar al
+                doble.
+              </>
+            }
+            certeza={{
+              nivel: "alta",
+              texto: (
+                <>
+                  En que la API repite las cifras de los notebooks: lo comprueban {TOTAL_PRUEBAS} pruebas dentro de
+                  Docker. La certeza de cada cifra es la de su serie.
+                </>
+              ),
+            }}
+          />
+        </div>
       </Seccion>
     </>
   );

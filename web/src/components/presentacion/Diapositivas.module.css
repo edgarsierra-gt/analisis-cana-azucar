@@ -1,64 +1,164 @@
-/* Pantalla de la presentación: un escenario 16:9 que ocupa lo máximo posible. */
-.pantalla { position: fixed; inset: 0; background: #12110f; display: grid; place-items: center; }
+/* Presentación ejecutiva: un escenario 16:9 sobre la pantalla de tinta, con los tokens del sitio (web/DESIGN.md).
+   Todo lo de adentro de una diapositiva se mide en cqw (1 % del ancho de la diapositiva): se ve igual en una laptop,
+   en un proyector y en el PDF. Fondo blanco, un color por diapositiva (el de su serie), Newsreader y Public Sans. */
+
+.pantalla {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding-bottom: 3rem; /* centra la diapositiva en el espacio sobre los controles */
+  background: var(--tinta);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
 .escenario { position: relative; width: min(100vw, calc((100vh - 3rem) * 16 / 9)); aspect-ratio: 16 / 9; }
-.marco { position: absolute; inset: 0; display: none; }
-.marco[data-activa="si"] { display: block; }
-.folio { position: absolute; right: 2.2cqw; bottom: 1.6cqw; font-family: var(--fuente-dato); font-size: 1cqw; color: var(--tinta-3); z-index: 2; }
 
-.diapositiva { width: 100%; height: 100%; container-type: inline-size; background: var(--papel); color: var(--tinta); overflow: hidden; }
-.lienzo { height: 100%; padding: 5.2cqw 6cqw 5cqw; display: flex; flex-direction: column; }
+/* Con las notas abiertas en una pantalla ancha, la diapositiva se corre a la izquierda y las notas quedan al lado. */
+@media (min-width: 70rem) {
+  .pantalla[data-notas="si"] { place-items: center start; padding-left: 1rem; }
+  .pantalla[data-notas="si"] .escenario { width: min(100vw - 33rem, calc((100vh - 3rem) * 16 / 9)); }
+}
 
-/* Portada: papel con una franja de las tres series */
-.portada .lienzo { justify-content: flex-end; background:
-  linear-gradient(to right, var(--campo) 0 33.33%, var(--caldera) 33.33% 66.66%, var(--mercado) 66.66% 100%) top / 100% 1.1cqw no-repeat; }
+/* Todas las diapositivas están dibujadas, una encima de otra; solo la activa se ve. Cada marco es el contenedor de
+   consulta: 1cqw = 1 % de su ancho. */
+.marco { position: absolute; inset: 0; visibility: hidden; container-type: inline-size; }
+.marco[data-activa="si"] { visibility: visible; }
 
-/* Separador de serie: fondo de color de la serie, texto claro */
-.separador { background: var(--serie); color: var(--papel); }
-.separador .lienzo { justify-content: flex-end; }
-.separador :global(.d-etiqueta), .separador :global(.d-sub) { color: color-mix(in srgb, var(--papel) 78%, transparent); }
-.separador + .folio, .separador ~ .folio { color: var(--papel); }
+.lamina {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--fondo);
+  color: var(--tinta);
+  font-size: 1.45cqw;
+  line-height: 1.4;
+}
+/* Los márgenes del sitio están en rem; dentro de una diapositiva van en la escala de la diapositiva. Sin especificidad
+   de clase (:where), para que las piezas de cada diapositiva los cambien. */
+:where(.lamina) p + p { margin-top: 0.55em; }
+:where(.lamina) li + li { margin-top: 0.3em; }
+:where(.lamina) ul, :where(.lamina) ol { padding-left: 0; list-style: none; }
 
-.contenido .lienzo { border-top: 0.55cqw solid var(--serie); }
+/* ── Barra de capítulos: pestañas sobre el tinte de la diapositiva; la actual, rellena de su color ── */
+.capitulos {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 1.2cqw;
+  height: 3.9cqw;
+  padding: 0 4.2cqw 0 4.4cqw;
+  background: var(--serie-fondo);
+}
+.capitulos ul { flex: 1; display: flex; align-items: center; gap: 0.25cqw; }
+.capitulos li { display: flex; margin: 0; }
+.capitulos li.pestanaAnexo { margin-left: auto; }
+.capitulos button {
+  display: flex;
+  align-items: center;
+  height: 2.65cqw;
+  padding: 0 1cqw;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--tinta);
+  font: 400 1.12cqw / 1 var(--fuente-texto);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms var(--curva), color 150ms var(--curva);
+}
+.capitulos button:hover { background: var(--serie-medio); }
+.capitulos button[aria-current="step"] { background: var(--serie); color: var(--sobre-serie); font-weight: 600; }
+.capitulos button:focus-visible { outline: 2px solid var(--tinta); outline-offset: 1px; }
+.folio {
+  flex: none;
+  min-width: 4.6cqw;
+  text-align: right;
+  font-size: 1.12cqw;
+  color: var(--apagado);
+  font-variant-numeric: tabular-nums lining-nums;
+}
 
-/* ── Tipografía dentro de una diapositiva (todo en cqw para que escale) ── */
-.diapositiva :global(.d-etiqueta) { font-family: var(--fuente-dato); font-size: 1.15cqw; letter-spacing: 0.08em; text-transform: uppercase; color: var(--serie); font-weight: 600; }
-.diapositiva :global(.d-titulo) { font-family: var(--fuente-titulo); font-weight: 500; font-size: 4.1cqw; line-height: 1.08; letter-spacing: -0.015em; margin-top: 1.4cqw; max-width: 70cqw; text-wrap: balance; }
-.diapositiva :global(.d-titulo-grande) { font-family: var(--fuente-titulo); font-weight: 500; font-size: 6.2cqw; line-height: 1.02; letter-spacing: -0.02em; max-width: 80cqw; text-wrap: balance; }
-.diapositiva :global(.d-sub) { font-size: 1.85cqw; line-height: 1.45; color: var(--tinta-2); margin-top: 1.6cqw; max-width: 64cqw; }
-.diapositiva :global(.d-texto) { font-size: 1.6cqw; line-height: 1.5; color: var(--tinta-2); }
-.diapositiva :global(.d-cuerpo) { margin-top: 3cqw; flex: 1; min-height: 0; }
-.diapositiva :global(.d-columnas) { display: grid; grid-template-columns: 1fr 1fr; gap: 4cqw; }
-.diapositiva :global(.d-columnas-3) { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3cqw; }
-.diapositiva :global(.d-cifra) { font-family: var(--fuente-titulo); font-size: 6cqw; line-height: 1; color: var(--serie); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-.diapositiva :global(.d-cifra-unidad) { font-family: var(--fuente-dato); font-size: 1.3cqw; color: var(--tinta-3); margin-left: 0.6cqw; letter-spacing: 0; }
-.diapositiva :global(.d-cifra-texto) { font-size: 1.45cqw; line-height: 1.4; color: var(--tinta-2); margin-top: 0.8cqw; }
-.diapositiva :global(.d-lista) { list-style: none; padding: 0; margin: 0; }
-.diapositiva :global(.d-lista li) { font-size: 1.65cqw; line-height: 1.45; padding: 1cqw 0; border-top: 0.08cqw solid var(--linea); color: var(--tinta); }
-.diapositiva :global(.d-lista li + li) { margin-top: 0; }
-.diapositiva :global(.d-nota) { font-size: 1.15cqw; color: var(--tinta-3); margin-top: auto; padding-top: 1.5cqw; }
-.diapositiva :global(.d-fuente) { font-family: var(--fuente-dato); font-size: 0.95cqw; color: var(--tinta-3); }
-.diapositiva :global(.d-figura) { width: 100%; height: 100%; object-fit: contain; object-position: left top; }
-.diapositiva :global(.d-caja) { background: var(--hoja); border: 0.08cqw solid var(--linea); border-top: 0.45cqw solid var(--serie); padding: 1.8cqw 2cqw; }
-.diapositiva :global(.d-caja h3) { font-family: var(--fuente-texto); font-size: 1.25cqw; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; color: var(--serie); }
-.diapositiva :global(.d-caja p) { font-size: 1.55cqw; line-height: 1.45; margin-top: 0.8cqw; }
+/* ── Cuerpo de la diapositiva ── */
+.diapositiva {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 2.9cqw 5cqw 2.1cqw;
+}
+/* Portada: campo de tinta a sangre, sin barra; el texto en blanco. */
+.portada { padding: 0; background: var(--tinta); color: var(--sobre-tinta); }
 
-/* ── Controles ── */
-.controles { position: fixed; left: 0; right: 0; bottom: 0; height: 3rem; display: flex; align-items: center; gap: 0.5rem; padding: 0 1rem; color: #d9d4c7; font: 500 0.85rem var(--fuente-texto); }
-.controles button { background: none; border: 1px solid #4a463e; color: inherit; border-radius: var(--radio); padding: 0.3rem 0.65rem; font: inherit; cursor: pointer; }
+/* ── Controles (fuera de la diapositiva, sobre la pantalla de tinta) ── */
+.controles {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1rem;
+  color: var(--sobre-tinta);
+  font: 400 var(--t-pequeno) / 1 var(--fuente-texto);
+}
+.controles button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem;
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 0;
+  background: #2a2d33;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background-color 120ms var(--curva);
+}
+.controles button:hover:not(:disabled) { background: #3a3e45; }
 .controles button:disabled { opacity: 0.35; cursor: default; }
-.controles button[aria-pressed="true"] { background: #2b2925; }
-.salir { color: inherit; text-decoration: none; margin-right: auto; }
-.progreso { width: 14rem; height: 3px; background: #2b2925; }
-.progreso span { display: block; height: 100%; background: var(--resalte); transition: width 0.2s ease; }
-.contador { font-family: var(--fuente-dato); min-width: 3.5rem; text-align: right; }
+.controles button[aria-pressed="true"] { background: var(--sobre-tinta); color: var(--tinta); }
+.controles :focus-visible { outline: 2px solid var(--sobre-tinta); outline-offset: 2px; }
+.salir { color: inherit; text-decoration-color: var(--sobre-tinta-2); margin-right: auto; }
+.progreso { width: 14rem; height: 4px; background: #2a2d33; }
+.progreso span { display: block; height: 100%; background: var(--sobre-tinta-2); transition: width 200ms var(--curva); }
+.contador { min-width: 5.5rem; text-align: right; color: var(--sobre-tinta-2); font-variant-numeric: tabular-nums lining-nums; }
 
-.notas { position: fixed; right: 1rem; top: 1rem; width: min(28rem, 40vw); max-height: calc(100vh - 5rem); overflow: auto; background: var(--hoja); color: var(--tinta); border: 1px solid var(--linea); padding: 1rem 1.2rem; font-size: 0.95rem; line-height: 1.5; z-index: 10; box-shadow: 0 10px 30px rgb(0 0 0 / 0.35); }
-.notas > div { margin-top: 0.5rem; }
+/* ── Notas del orador ── */
+.notas {
+  position: fixed;
+  right: 1rem;
+  top: 1rem;
+  bottom: 3.5rem;
+  width: min(30rem, 44vw);
+  overflow: auto;
+  background: var(--fondo);
+  color: var(--tinta);
+  padding: 1.25rem 1.5rem 1.5rem;
+  font-size: var(--t-texto);
+  line-height: 1.55;
+  z-index: 10;
+}
+.notasCabeza { font-size: var(--t-pequeno); font-weight: 600; color: var(--apagado); margin-bottom: 0.75rem; }
 
-/* ── Impresión: una diapositiva por página, todas visibles ── */
+/* ── Impresión: una diapositiva por página, todas visibles, sin controles ni notas ── */
 @media print {
   @page { size: 297mm 167mm; margin: 0; }
-  .pantalla { position: static; display: block; background: #fff; }
+  .pantalla { position: static; display: block; padding: 0; background: var(--fondo); }
   .escenario { width: 297mm; aspect-ratio: auto; }
-  .marco { position: relative; display: block !important; width: 297mm; height: 167mm; break-after: page; }
+  .marco {
+    position: relative;
+    visibility: visible;
+    width: 297mm;
+    height: 167mm;
+    break-after: page;
+    break-inside: avoid;
+  }
+  .marco:last-child { break-after: auto; }
+  .controles, .notas { display: none; }
 }

@@ -1,18 +1,87 @@
-.envoltura { overflow-x: auto; }
-.tabla { width: 100%; border-collapse: collapse; font-size: var(--t-chico); }
-.titulo { caption-side: top; text-align: left; font-weight: 650; padding-bottom: var(--e-3); color: var(--tinta); }
-.tabla thead th {
-  font-family: var(--fuente-dato); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase;
-  color: var(--tinta-3); text-align: left; padding: var(--e-2) var(--e-3); border-bottom: 1px solid var(--tinta); vertical-align: bottom;
+/* Tablas: cada columna se lee como unidad sin una sola línea de 1 px. La cabecera va sobre una banda del tinte de la
+   página, en 600; las filas alternan blanco y un tono muy claro (cebra); relleno generoso; números a la derecha con
+   cifras tabulares; primera columna en 600. Los fondos van en las celdas (no en la fila) para que la primera columna
+   fija del teléfono lleve el mismo tono que su fila.
+   El texto de las celdas queda al ras del marco: la envoltura sale 1 rem a cada lado y las celdas lo devuelven con su
+   relleno, así las bandas de color no quedan pegadas al texto. */
+.tablaBloque { min-width: 0; }
+.medio { max-width: var(--span-8); }
+.total { max-width: none; }
+
+.envoltura { overflow-x: auto; margin-inline: -1rem; }
+/* Con desplazamiento lateral, el navegador la enfoca con Tab: el anillo va por dentro (afuera caería en el borde de la
+   pantalla del teléfono) */
+.envoltura:focus-visible { outline-offset: -2px; }
+.tabla { width: 100%; border-collapse: collapse; font-size: var(--t-texto); line-height: 1.45; }
+
+.titulo {
+  caption-side: top; text-align: left;
+  padding: 0 1rem var(--e-4);
+  font-size: var(--t-texto); font-weight: 600; line-height: 1.4; color: var(--tinta);
+  text-wrap: balance;
 }
-.tabla tbody th, .tabla tbody td { padding: 0.55rem var(--e-3); border-bottom: 1px solid var(--linea-suave); vertical-align: top; text-align: left; }
-.tabla tbody th { font-weight: 600; color: var(--tinta); }
-.tabla td { color: var(--tinta-2); }
-.tabla th:first-child, .tabla td:first-child { padding-left: 0; }
-.num { text-align: right !important; font-family: var(--fuente-dato); font-variant-numeric: tabular-nums; white-space: nowrap; }
-.destacada th, .destacada td { background: var(--serie-fondo); color: var(--tinta); }
-.destacada th:first-child { box-shadow: inset 3px 0 0 var(--serie); padding-left: var(--e-3); }
-.compacta { font-size: 0.875rem; }
-.compacta tbody th, .compacta tbody td { padding-top: 0.35rem; padding-bottom: 0.35rem; }
-.nota { margin-top: var(--e-3); font-size: var(--t-chico); color: var(--tinta-3); }
+
+.tabla thead th {
+  background: var(--serie-fondo);
+  font-size: var(--t-pequeno); font-weight: 600; line-height: 1.35; color: var(--tinta);
+  text-align: left; vertical-align: bottom;
+  padding: var(--e-3) 1rem;
+}
+.tabla tbody th, .tabla tbody td {
+  background: var(--fondo);
+  padding: 0.8rem 1rem;
+  vertical-align: top; text-align: left;
+  color: var(--tinta);
+}
+.tabla tbody tr:nth-child(even) > * { background: var(--cebra); }
+.tabla tbody th { font-weight: 600; }
+.tabla tbody td { font-weight: 400; }
+
+.num { text-align: right !important; font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
 .tabla thead th.num { white-space: normal; }
+
+/* Fila destacada: el tinte medio de la serie en toda la fila y una barra de 4 px al inicio */
+.tabla tbody .destacada > * { background: var(--serie-medio); }
+.tabla tbody .destacada > :first-child { box-shadow: inset var(--barra) 0 0 var(--serie); } /* taste-skill-ignore: barra de 4 px */
+@media (hover: hover) and (pointer: fine) {
+  .tabla tbody tr:not(.destacada):hover > * { background: var(--superficie-2); }
+}
+
+.compacta tbody th, .compacta tbody td { padding-top: var(--e-2); padding-bottom: var(--e-2); }
+/* Rótulos cortos de la primera columna (códigos de variedad, años): en un renglón, nunca partidos por el guion */
+.primeraCorta tbody th { white-space: nowrap; }
+
+.nota { margin-top: var(--e-3); font-size: var(--t-pequeno); line-height: 1.45; color: var(--apagado); max-width: 64ch; }
+.aviso { display: none; }
+.rotulo { display: none; }
+
+/* ── Teléfono ───────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Desplazar: la primera columna queda fija y las de texto no se aplastan a una palabra por renglón */
+  .aviso { display: block; margin-bottom: var(--e-2); font-size: var(--t-pequeno); color: var(--apagado); }
+  .desplazar .tabla thead th:first-child, .desplazar .tabla tbody th {
+    position: sticky; left: 0; z-index: 1;
+  }
+  .desplazar .tabla td.txt { min-width: 14rem; }
+  /* El título no se desplaza con la tabla: queda fijo y del ancho de la pantalla para leerse completo */
+  .desplazar .titulo { position: sticky; left: 0; max-width: calc(100vw - 2 * var(--margen) + 2rem); }
+
+  /* Apilar: cada fila es un bloque de cebra; la primera celda es su título y debajo van pares rótulo / valor */
+  .apilar .envoltura { margin-inline: 0; overflow: visible; }
+  .apilar .tabla, .apilar .tabla tbody, .apilar .tabla tr, .apilar .tabla th, .apilar .tabla td, .apilar .tabla caption { display: block; }
+  .apilar .titulo { padding-inline: 0; }
+  .apilar .tabla thead {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+  .apilar .tabla tbody tr { padding: var(--e-4); background: var(--cebra); }
+  .apilar .tabla tbody tr + tr { margin-top: var(--e-3); }
+  .apilar .tabla tbody tr > *, .apilar .tabla tbody tr:nth-child(even) > * { background: none; }
+  .apilar .tabla tbody th, .apilar .tabla tbody td { padding: 0; text-align: left !important; white-space: normal; }
+  .apilar .tabla tbody th { font-size: var(--t-texto); margin-bottom: var(--e-3); }
+  .apilar .tabla tbody td + td { margin-top: var(--e-3); }
+  .apilar .rotulo { display: block; font-size: var(--t-pequeno); line-height: 1.4; color: var(--apagado); }
+  .apilar .valor { display: block; font-size: 1rem; }
+  .apilar .tabla tbody .destacada { background: var(--serie-medio); box-shadow: inset var(--barra) 0 0 var(--serie); } /* taste-skill-ignore: barra de 4 px */
+  .apilar .tabla tbody .destacada > :first-child { box-shadow: none; } /* taste-skill-ignore */
+}

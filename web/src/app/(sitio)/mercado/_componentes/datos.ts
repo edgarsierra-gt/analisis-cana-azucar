@@ -64,7 +64,7 @@ export function redondeoPar(x: number, decimales: number): number {
 
 /** p con tres decimales, como en el notebook; "p < 0.001" cuando redondea a cero. */
 export function textoP(p: number): string {
-  return p < 0.0005 ? "p < 0.001" : `p = ${p.toFixed(3)}`;
+  return p < 0.0005 ? "p < 0.001" : `p = ${p.toFixed(3)}`; // sin cortes de renglón dentro de la expresión
 }
 
 /** Ordinal corto en español: 8 → "8.º". */

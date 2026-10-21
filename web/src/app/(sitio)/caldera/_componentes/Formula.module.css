@@ -1,10 +1,12 @@
+/* La fórmula del sensor virtual de dos variables: un panel de superficie con barra de 4 px del color de la página, la
+   ecuación en la letra de los títulos y sus términos explicados debajo. Sin bordes ni rótulos. */
 .formula {
-  max-width: var(--ancho-medio);
-  background: var(--hoja);
-  border: 1px solid var(--linea);
-  border-left: 3px solid var(--serie);
-  padding: var(--e-4) var(--e-5);
+  position: relative;
+  background: var(--superficie);
+  padding: calc(var(--barra) + var(--e-4)) var(--e-5) var(--e-5);
 }
+.formula::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: var(--barra); background: var(--serie); }
+.titulo { font-size: var(--t-texto); font-weight: 600; line-height: 1.4; }
 .ecuacion {
   margin-top: var(--e-3);
   display: flex;
@@ -14,16 +16,16 @@
   font-family: var(--fuente-titulo);
   font-size: clamp(1.15rem, 2.4vw, 1.5rem);
   line-height: 1.35;
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 .lado { font-weight: 500; }
-.igual, .signo { color: var(--tinta-3); }
+.igual, .signo { color: var(--apagado); }
 .termino { color: var(--serie); white-space: nowrap; }
-.terminos { margin-top: var(--e-4); display: grid; gap: var(--e-2); font-size: var(--t-chico); }
+.terminos { margin-top: var(--e-4); display: grid; gap: var(--e-2); font-size: var(--t-texto); }
 .terminos > div { display: grid; grid-template-columns: 3.5rem 1fr; gap: var(--e-3); }
-.terminos dt { font-family: var(--fuente-dato); color: var(--tinta); font-weight: 600; }
-.terminos dd { margin: 0; color: var(--tinta-2); }
+.terminos dt { color: var(--tinta); font-weight: 600; font-variant-numeric: tabular-nums lining-nums; }
+.terminos dd { margin: 0; color: var(--tinta); }
 @media (max-width: 560px) {
-  .formula { padding: var(--e-4); }
+  .formula { padding-inline: var(--e-4); }
   .termino { white-space: normal; }
 }

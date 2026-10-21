@@ -38,6 +38,7 @@ export function GraficoZonas({
   zonas: { zona: string; vapor: number }[];
 }) {
   const datos = puntos.map((p) => ({ t: aFecha(p.m), v: p.v, z: p.z }));
+  const inicio = datos[0].t;
   const fin = datos[datos.length - 1].t;
   const orden = zonas.map((z) => z.zona);
   const margenes = (ancho: number) => ({ marginLeft: ancho < 600 ? 84 : 92, marginRight: ancho < 600 ? 12 : 116 });
@@ -55,9 +56,10 @@ export function GraficoZonas({
           marks: [
             Plot.ruleY(zonas, { y: "vapor", stroke: COLORES.caldera, strokeDasharray: "4 3" }),
             Plot.lineY(datos, { x: "t", y: "v", stroke: COLORES.tinta2, strokeWidth: 0.9 }),
-            // En pantallas angostas no hay margen para rotular las medias: las líneas punteadas se explican en la nota.
+            // En pantallas angostas no hay margen a la derecha: la media de cada zona se rotula al inicio, sobre su línea,
+            // con un halo blanco para leerse encima del vapor.
             ancho < 600
-              ? null
+              ? Plot.text(zonas, { x: () => inicio, y: "vapor", text: (d) => `${d.zona}: ${num(d.vapor, 1)}`, textAnchor: "start", dx: 2, dy: -9, fill: COLORES.caldera, fontWeight: 600, stroke: COLORES.fondo, strokeWidth: 4, paintOrder: "stroke" })
               : Plot.text(zonas, { x: () => fin, y: "vapor", text: (d) => `${d.zona}: ${num(d.vapor, 1)}`, textAnchor: "start", dx: 6, fill: COLORES.caldera, fontWeight: 600 }),
             Plot.tip(datos, Plot.pointerX({ x: "t", y: "v", title: (d) => `${fechaHora(d.t)}\n${num(d.v, 1)} t/h · ${d.z}` })),
           ],
@@ -115,21 +117,25 @@ export function GraficoRezago({ rezagos, r }: { rezagos: number[]; r: number[] }
     <PlotFigura
       alto={300}
       etiqueta={`Correlación entre cambios de 1 minuto del agua de atemperación y de la temperatura del vapor, según el rezago. El mínimo es ${num(pico.r, 2)} a los ${pico.k} minutos: más agua enfría el vapor unos ${pico.k} minutos después.`}
-      crear={() => ({
-        marginLeft: 52,
-        x: { label: "Rezago (min)", grid: false },
-        y: { label: "Correlación de cambios de 1 min", grid: true },
-        marks: [
-          Plot.ruleY([0], { stroke: COLORES.tinta2 }),
-          Plot.ruleX([0], { stroke: COLORES.contexto, strokeDasharray: "3 3" }),
-          Plot.lineY(datos, { x: "k", y: "r", stroke: COLORES.contexto, strokeWidth: 1.5 }),
-          Plot.dot(datos, { x: "k", y: "r", r: 2.2, fill: COLORES.contexto }),
-          Plot.dot([pico], { x: "k", y: "r", r: 5, fill: COLORES.caldera }),
-          Plot.text([pico], { x: "k", y: "r", text: (d) => `${num(d.r, 2)} a los ${d.k} min`, dx: 9, textAnchor: "start", fill: COLORES.caldera, fontWeight: 600 }),
-          Plot.text(["← el vapor cambia antes"], { x: () => kMin, text: (d) => d, frameAnchor: "bottom", dy: -6, textAnchor: "start", fill: COLORES.tinta2 }),
-          Plot.text(["el agua cambia antes →"], { x: () => kMax, text: (d) => d, frameAnchor: "bottom", dy: -6, textAnchor: "end", fill: COLORES.tinta2 }),
-        ],
-      })}
+      crear={(ancho) => {
+        // Angosto: los dos rótulos de sentido se enciman con el del mínimo; el sentido pasa al rótulo del eje.
+        const angosto = ancho < 600;
+        return {
+          marginLeft: 52,
+          x: { label: angosto ? "Rezago (min); negativo: el vapor cambia antes" : "Rezago (min)", grid: false },
+          y: { label: "Correlación de cambios de 1 min", grid: true },
+          marks: [
+            Plot.ruleY([0], { stroke: COLORES.tinta2 }),
+            Plot.ruleX([0], { stroke: COLORES.contexto, strokeDasharray: "3 3" }),
+            Plot.lineY(datos, { x: "k", y: "r", stroke: COLORES.contexto, strokeWidth: 1.5 }),
+            Plot.dot(datos, { x: "k", y: "r", r: 2.2, fill: COLORES.contexto }),
+            Plot.dot([pico], { x: "k", y: "r", r: 5, fill: COLORES.caldera }),
+            Plot.text([pico], { x: "k", y: "r", text: (d) => `${num(d.r, 2)} a los ${d.k} min`, dx: 9, textAnchor: "start", fill: COLORES.caldera, fontWeight: 600 }),
+            angosto ? null : Plot.text(["← el vapor cambia antes"], { x: () => kMin, text: (d) => d, frameAnchor: "bottom", dy: -6, textAnchor: "start", fill: COLORES.tinta2 }),
+            angosto ? null : Plot.text(["el agua cambia antes →"], { x: () => kMax, text: (d) => d, frameAnchor: "bottom", dy: -6, textAnchor: "end", fill: COLORES.tinta2 }),
+          ],
+        };
+      }}
     />
   );
 }
@@ -168,7 +174,8 @@ export function GraficoModelos({ filas }: { filas: { modelo: string; mae: number
   const maximo = Math.max(...filas.map((f) => f.mae));
   return (
     <PlotFigura
-      alto={230}
+      // Alta como la figura del modelo hidráulico (leyenda + 300 px), que va a su lado: así las dos arrancan y terminan juntas.
+      alto={324}
       etiqueta="Error típico de cada modelo en días que no vio. El Ridge completo es el menor; el gradient boosting queda peor que el modelo físico de una variable."
       crear={(ancho) => {
         const angosto = ancho < 600;
@@ -183,7 +190,7 @@ export function GraficoModelos({ filas }: { filas: { modelo: string; mae: number
           Plot.barX(filas, { x: "mae", y: "modelo", fill: (d) => (d.elegido ? COLORES.caldera : COLORES.contexto) }),
           Plot.ruleX([0], { stroke: COLORES.tinta }),
           Plot.text(filas.filter((f) => !f.elegido), { x: "mae", y: "modelo", text: rotulo, dx: 6, textAnchor: "start", fill: COLORES.tinta2 }),
-          Plot.text(filas.filter((f) => f.elegido), { x: "mae", y: "modelo", text: rotulo, dx: 6, textAnchor: "start", fill: COLORES.tinta, fontWeight: 650 }),
+          Plot.text(filas.filter((f) => f.elegido), { x: "mae", y: "modelo", text: rotulo, dx: 6, textAnchor: "start", fill: COLORES.tinta, fontWeight: 600 }),
         ],
         };
       }}
@@ -299,7 +306,7 @@ export function GraficoOportunidades({
         ancho < 600
           ? {
               // Angosto: el nombre va arriba de cada fila y el valor abajo, para que nada se salga del ancho.
-              height: 330,
+              height: 380,
               marginLeft: 8,
               marginRight: 12,
               marginTop: 30,
@@ -307,13 +314,16 @@ export function GraficoOportunidades({
               y: { label: null, domain: orden, axis: null },
               marks: [
                 ...marcas,
-                Plot.text(orden, { y: (d) => d, x: () => 0, text: (d) => d, dy: -15, textAnchor: "start", fill: COLORES.tinta, fontWeight: 600 }),
-                Plot.text(filas, { y: "nombre", x: () => 0, text: rotulo, dy: 15, textAnchor: "start", fill: COLORES.tinta2 }),
-                Plot.text([sinEstimar], { y: (d) => d, x: () => 0, text: () => sinValor, dx: 8, textAnchor: "start", fill: COLORES.tinta2 }),
+                // Nombre arriba de la barra y valor abajo, con un respiro desde el eje para que no se monten en él.
+                Plot.text(orden, { y: (d) => d, x: () => 0, text: (d) => d, dy: -19, dx: 6, textAnchor: "start", fill: COLORES.tinta, fontWeight: 600 }),
+                Plot.text(filas, { y: "nombre", x: () => 0, text: rotulo, dy: 18, dx: 6, textAnchor: "start", fill: COLORES.tinta2 }),
+                Plot.text([sinEstimar], { y: (d) => d, x: () => 0, text: () => sinValor, dy: 2, dx: 6, textAnchor: "start", fill: COLORES.tinta2 }),
               ],
             }
           : {
-              marginLeft: 230,
+              // El rótulo más largo ("Limpieza: recuperar 10 °C de gases") mide ~235 px a 14 px: con 230 se salía
+              // 10 px del marco de la página por la izquierda.
+              marginLeft: 256,
               marginRight: 20,
               x: { label: "US$ al año", grid: true, domain: [0, maximo * 1.45], tickFormat: (d: number) => usd(d, 0), ticks: 5 },
               y: { label: null, domain: orden },

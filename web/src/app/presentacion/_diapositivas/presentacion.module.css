@@ -1,135 +1,338 @@
-/* Piezas propias de la presentación ejecutiva. Todo en cqw para que escale con la diapositiva,
-   y solo con los tokens de globals.css. La tipografía base (d-titulo, d-cifra, d-caja...) es la de Diapositivas. */
+/* Piezas de las diapositivas. Todo en cqw (1 % del ancho de la diapositiva) y solo con los tokens de globals.css:
+   fondo blanco, tinta, apagado, el color de la serie de la diapositiva (--serie) y sus tintes. Sin líneas finas, sin
+   mayúsculas espaciadas y sin monoespaciado fuera de código. La estructura sale del espacio, el tono y las barras de
+   4 px (0.3cqw) del color de la serie. */
 
-/* ── Maquetas del cuerpo ── */
-.dos { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.36fr); grid-template-rows: minmax(0, 1fr); gap: 4.2cqw; }
-.dosIguales { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 4.2cqw; }
-.encargo { display: grid; grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr); grid-template-rows: minmax(0, 1fr); gap: 4cqw; }
-.filaYResto { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 2cqw; }
-.tres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.4cqw; align-items: start; }
+/* ── Texto ─────────────────────────────────────────────────────────────────── */
+.titulo {
+  font-family: var(--fuente-titulo);
+  font-weight: 500;
+  font-size: 3.3cqw;
+  line-height: 1.1;
+  letter-spacing: -0.012em;
+  max-width: 82cqw;
+  text-wrap: balance;
+}
+.bajada { margin-top: 0.9cqw; font-size: 1.6cqw; line-height: 1.4; max-width: 72cqw; color: var(--tinta); }
+.num { font-variant-numeric: tabular-nums lining-nums; }
+.enSerie { color: var(--serie); font-weight: 600; }
+.apagado { color: var(--apagado); }
 
-/* ── Cifras ── */
-.cifras { display: flex; flex-direction: column; justify-content: flex-start; min-height: 0; }
-.cifras > .cifra { padding: 0.9cqw 0; }
-.cifras > .cifra:first-child { padding-top: 0.2cqw; }
-.cifras > .cifra + .cifra { border-top: 0.08cqw solid var(--linea); }
-.cifras.compactas :global(.d-cifra) { font-size: 3.3cqw; }
-.cifras.compactas :global(.d-cifra-texto) { font-size: 1.28cqw; margin-top: 0.4cqw; }
+/* Cuerpo: lo que queda entre el título y el pie */
+.cuerpo { flex: 1; min-height: 0; margin-top: 2.4cqw; }
 
-.filaCifras { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 0.08cqw solid var(--linea); border-bottom: 0.08cqw solid var(--linea); }
-.filaCifras > .cifra { padding: 1.2cqw 2cqw 1.2cqw 0; }
-.filaCifras > .cifra + .cifra { border-left: 0.08cqw solid var(--linea); padding-left: 2cqw; }
-.filaCifras.medianas :global(.d-cifra) { font-size: 4.2cqw; }
-.filaCifras.medianas :global(.d-cifra-texto) { font-size: 1.36cqw; margin-top: 0.6cqw; }
+/* ── Maquetas ──────────────────────────────────────────────────────────────── */
+/* Gráfica a la izquierda (la pieza que manda) y cifras en columna a la derecha */
+.graficaYCifras { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 4.4cqw; }
+.cifrasColumna { display: flex; flex-direction: column; gap: 2cqw; min-height: 0; }
+.cifrasFila { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3.4cqw; }
+.dosColumnas { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); grid-template-rows: minmax(0, 1fr); gap: 4cqw; }
+.columnaFlex { display: flex; flex-direction: column; min-height: 0; }
 
-.cifra { min-width: 0; }
-/* El párrafo de la cifra toma su altura de la cifra, no del cuerpo de texto de la página */
-.valor { font-size: 1cqw; line-height: 1; }
-.cifraDetalle { font-family: var(--fuente-dato); font-size: 1cqw; line-height: 1.45; color: var(--tinta-3); margin-top: 0.35cqw; }
+/* ── Cifra ─────────────────────────────────────────────────────────────────── */
+.cifra { position: relative; min-width: 0; padding-top: 1.05cqw; }
+.cifra::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 0.3cqw; background: var(--serie); }
+.cifraValor {
+  font-family: var(--fuente-titulo);
+  font-weight: 500;
+  font-size: 3.5cqw;
+  line-height: 1.02;
+  letter-spacing: -0.015em;
+  color: var(--serie);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.cifraUnidad { font-family: var(--fuente-texto); font-size: 1.3cqw; letter-spacing: 0; color: var(--apagado); margin-left: 0.6cqw; }
+.cifraTitulo { margin-top: 0.55cqw; font-size: 1.36cqw; font-weight: 600; line-height: 1.3; }
+.cifraDetalle { margin-top: 0.3cqw; font-size: 1.12cqw; line-height: 1.4; color: var(--apagado); }
+.cifraGrande .cifraValor { font-size: 5.4cqw; }
+.cifraGrande .cifraTitulo { font-size: 1.5cqw; }
+.cifraTinta::before { background: var(--tinta); }
+.cifraTinta .cifraValor { color: var(--tinta); }
+/* Una cifra dentro de un párrafo de las piezas (p + p del sitio no aplica: cada p tiene su margen) */
+.cifra p + p { margin-top: 0; }
+.cifra .cifraTitulo { margin-top: 0.55cqw; }
+.cifra .cifraDetalle { margin-top: 0.3cqw; }
 
-/* ── Gráficas ── */
-.columnaGrafica { display: flex; flex-direction: column; min-height: 0; }
-.leyenda { font-family: var(--fuente-dato); font-size: 1.05cqw; letter-spacing: 0.04em; text-transform: uppercase; color: var(--tinta-2); font-weight: 600; }
-.celdaGrafica { position: relative; flex: 1; min-height: 0; margin-top: 0.8cqw; }
+/* ── Gráfica ───────────────────────────────────────────────────────────────── */
+.grafica { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.graficaTitulo { font-size: 1.32cqw; font-weight: 600; line-height: 1.3; }
+.graficaLienzo { position: relative; flex: 1; min-height: 0; margin-top: 0.6cqw; }
 .lienzoGrafica { position: absolute; inset: 0; }
-.leyendaPie { font-size: 1.1cqw; line-height: 1.4; color: var(--tinta-3); margin-top: 0.6cqw; }
-.muestra { display: inline-block; width: 1.6cqw; height: 0.9cqw; vertical-align: baseline; margin-right: 0.4cqw; background: var(--serie); }
-.muestraClara { opacity: 0.35; }
+/* El SVG escala parejo si la diapositiva cambia de tamaño (al imprimir) */
+.lienzoGrafica svg { width: 100%; height: auto; }
+.graficaNota { margin-top: 0.6cqw; font-size: 1.1cqw; line-height: 1.4; color: var(--apagado); }
+/* Una gráfica que comparte columna con una tabla o una cifra toma el alto que sobra */
+.columnaFlex > .grafica, .cifrasColumna > .grafica { flex: 1; }
+.columnaFlex > .tabla + .grafica { margin-top: 2cqw; }
 
-/* ── Listas ── */
-.subtitulo { font-family: var(--fuente-dato); font-size: 1.1cqw; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-3); font-weight: 600; margin-bottom: 0.9cqw; }
-.lista { list-style: none; padding: 0; margin: 0; counter-reset: paso; }
-.lista > li { display: grid; grid-template-columns: 2.6cqw minmax(0, 1fr); gap: 0.4cqw; padding: 0.85cqw 0; border-top: 0.08cqw solid var(--linea); font-size: 1.45cqw; line-height: 1.4; color: var(--tinta); }
-.lista > li + li { margin-top: 0; }
-.lista > li::before { counter-increment: paso; content: counter(paso); font-family: var(--fuente-titulo); font-size: 1.75cqw; line-height: 1.1; color: var(--serie); }
-.lista strong { font-weight: 650; }
-.lista .apagado { display: block; color: var(--tinta-2); font-size: 1.22cqw; margin-top: 0.15cqw; }
-.listaSinNumero > li { grid-template-columns: minmax(0, 1fr); }
-.listaSinNumero > li::before { content: none; }
+/* ── Pie: fuente y enlace al detalle ───────────────────────────────────────── */
+.pie {
+  flex: none;
+  margin-top: auto;
+  padding-top: 1.3cqw;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 3cqw;
+  font-size: 1.05cqw;
+  line-height: 1.35;
+  color: var(--apagado);
+}
+.pie p { margin: 0; }
+.pieEnlace { font-weight: 600; color: var(--tinta); white-space: nowrap; text-decoration-color: var(--serie); text-decoration-thickness: 0.12cqw; }
 
-/* Preguntas por serie en la diapositiva del encargo */
-.pregunta { display: grid; grid-template-columns: 0.5cqw minmax(0, 1fr); gap: 1.4cqw; padding: 0.95cqw 0; border-top: 0.08cqw solid var(--linea); }
-.pregunta::before { content: ""; background: var(--serie); }
-.preguntaSerie { font-family: var(--fuente-dato); font-size: 1.05cqw; letter-spacing: 0.06em; text-transform: uppercase; color: var(--serie); font-weight: 600; }
-.preguntaTexto { font-size: 1.48cqw; line-height: 1.4; color: var(--tinta); margin-top: 0.25cqw; }
+/* ── Certeza ───────────────────────────────────────────────────────────────── */
+.certeza { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35cqw 0.8cqw; }
+.certeza + .certeza { margin-top: 1cqw; }
+.marcas { display: inline-flex; gap: 0.22cqw; }
+.marcas i { width: 0.7cqw; height: 1.3cqw; background: var(--serie-medio); }
+.alta .marcas i, .media .marcas i:nth-child(-n + 2), .baja .marcas i:first-child { background: var(--serie); }
+.nivel { font-size: 1.32cqw; font-weight: 600; line-height: 1.2; }
+.motivo { flex-basis: 100%; font-size: 1.24cqw; line-height: 1.38; }
 
-/* Capas de alarmas y bloques cortos */
-.bloque { border-top: 0.45cqw solid var(--serie); background: var(--hoja); border-left: 0.08cqw solid var(--linea); border-right: 0.08cqw solid var(--linea); border-bottom: 0.08cqw solid var(--linea); padding: 1.3cqw 1.6cqw 1.5cqw; }
-.bloqueTitulo { font-family: var(--fuente-texto); font-size: 1.5cqw; font-weight: 650; color: var(--tinta); line-height: 1.25; }
-.bloqueTexto { font-size: 1.32cqw; line-height: 1.42; color: var(--tinta-2); margin-top: 0.6cqw; }
-.bloqueAccion { font-size: 1.32cqw; line-height: 1.42; color: var(--tinta); margin-top: 0.7cqw; font-weight: 600; }
+/* ── Evaluación gerencial ──────────────────────────────────────────────────── */
+.evaluacion {
+  flex: 1;
+  min-height: 0;
+  margin-top: 2.2cqw;
+  padding: 2.2cqw 2.6cqw 2.4cqw;
+  background: var(--serie-fondo);
+  display: flex;
+  flex-direction: column;
+  gap: 2.4cqw;
+}
+.evDecision { background: var(--fondo); padding: 1.7cqw 2.2cqw 1.9cqw; }
+.evRotulo { font-size: 1.15cqw; color: var(--apagado); }
+.evDecision p:not(.evRotulo) { margin-top: 0.5cqw; font-size: 2cqw; line-height: 1.36; }
+.evPares { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3cqw; }
+.evPares > section { position: relative; padding-top: 1.05cqw; min-width: 0; }
+.evPares > section::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 0.3cqw; background: var(--serie); }
+.evPares h3 { font-family: var(--fuente-texto); font-size: 1.5cqw; font-weight: 600; line-height: 1.3; }
+.evPares p { margin-top: 0.6cqw; font-size: 1.45cqw; line-height: 1.42; }
+.evPares p + p { margin-top: 0.45cqw; }
+.evPares .certeza { margin-top: 0.8cqw; }
+.evPares .nivel { font-size: 1.45cqw; }
+.evPares .motivo { font-size: 1.38cqw; }
+.evPares .certeza + .certeza { margin-top: 1.2cqw; }
 
-/* ── Evaluación gerencial ── */
-.evaluacion { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-rows: auto; gap: 1.2cqw; align-content: start; }
-.ancha { grid-column: span 3; }
-.angosta { grid-column: span 2; }
-.evaluacion .caja.decision { background: var(--serie-fondo); }
-/* Más compacta que la d-caja base para que quepan las cinco respuestas (selectores dobles: ganan a la regla base) */
-div.evaluacion.evaluacion { margin-top: 1.6cqw; }
-.evaluacion .caja.caja { padding: 1.2cqw 1.5cqw 1.35cqw; }
-.evaluacion .caja.caja h3 { font-size: 1.05cqw; }
-.evaluacion .caja.caja p { font-size: 1.32cqw; line-height: 1.4; margin-top: 0.55cqw; }
-.decision p { color: var(--tinta); font-weight: 500; }
-.caja p + p { margin-top: 0.5cqw; }
+/* ── Tablas: cabecera sobre el tinte, cebra, sin líneas ────────────────────── */
+.tabla { width: 100%; border-collapse: collapse; font-size: 1.24cqw; line-height: 1.32; }
+.tabla th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 1.1cqw;
+  padding: 0.7cqw 1cqw;
+  background: var(--serie-fondo);
+  vertical-align: bottom;
+}
+.tabla td { padding: 0.72cqw 1cqw; vertical-align: top; }
+.tabla tbody tr:nth-child(even) td { background: var(--cebra); }
+.tabla td:first-child { font-weight: 600; }
+.tabla .der { text-align: right; font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
+.tabla .destacada td { background: var(--serie-medio); }
+.tablaChica { font-size: 1.14cqw; }
+.tablaFija { table-layout: fixed; }
+.tablaGrande { font-size: 1.36cqw; }
+.tablaGrande td { padding: 0.95cqw 1.1cqw; }
+.tablaGrande th { font-size: 1.18cqw; padding: 0.8cqw 1.1cqw; }
+.tablaChica td { padding: 0.6cqw 0.9cqw; }
+/* Tabla que es la pieza principal de la diapositiva (anexo): letra y filas más amplias, se lee desde el fondo */
+.tablaAmplia { font-size: 1.5cqw; line-height: 1.34; }
+.tablaAmplia td { padding: 1.35cqw 1.2cqw; }
+.tablaAmplia th { font-size: 1.24cqw; padding: 0.9cqw 1.2cqw; }
+/* Una cifra al pie de una columna: se alinea con el pie de la columna vecina */
+.alPie { margin-top: auto; padding-top: 2cqw; }
 
-/* Certeza escalada a la diapositiva (con texto siempre: el color nunca es la única señal) */
-.certeza { margin-top: 0.7cqw; }
-.certeza + .certeza { margin-top: 0.9cqw; }
-.nivel { display: inline-flex; align-items: center; gap: 0.6cqw; font-family: var(--fuente-dato); font-size: 1.1cqw; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 600; }
-.marcas { display: inline-flex; gap: 0.2cqw; }
-.marcas i { width: 0.55cqw; height: 1.1cqw; border: 0.1cqw solid currentColor; }
-.alta .nivel { color: var(--certeza-alta); }
-.alta .marcas i { background: currentColor; }
-.media .nivel { color: var(--certeza-media); }
-.media .marcas i:nth-child(-n + 2) { background: currentColor; }
-.baja .nivel { color: var(--certeza-baja); }
-.baja .marcas i:first-child { background: currentColor; }
-.motivo { font-size: 1.25cqw; line-height: 1.38; color: var(--tinta-2); margin-top: 0.25cqw; }
+/* ── Portada ───────────────────────────────────────────────────────────────── */
+.portada { height: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 31cqw; }
+.portadaTexto { display: flex; flex-direction: column; padding: 6cqw 4cqw 4.4cqw 5.6cqw; min-width: 0; }
+.portadaTitulo {
+  font-family: var(--fuente-titulo);
+  font-weight: 500;
+  font-size: 5.5cqw;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  max-width: 50cqw;
+  color: var(--sobre-tinta);
+  text-wrap: balance;
+}
+.portadaEntrada { margin-top: 2.2cqw; font-size: 1.85cqw; line-height: 1.4; max-width: 50cqw; color: var(--sobre-tinta); }
+.portadaMeta { margin-top: auto; display: flex; gap: 1.6cqw 4.4cqw; flex-wrap: wrap; }
+.portadaMeta dt { font-size: 1.12cqw; color: var(--sobre-tinta); }
+.portadaMeta dd { margin: 0.35cqw 0 0; font-size: 1.42cqw; font-weight: 600; line-height: 1.3; color: var(--sobre-tinta); max-width: 26cqw; }
+.franjas { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.franja { margin: 0; background: var(--serie); color: var(--sobre-serie); padding: 6cqw 1.3cqw 4.4cqw; display: flex; flex-direction: column; }
+.franja strong { font-size: 1.6cqw; font-weight: 600; line-height: 1.2; }
+.franja span { margin-top: 0.4cqw; font-size: 1.25cqw; line-height: 1.3; }
 
-/* ── Decisiones por gerencia ── */
-.decisiones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2cqw; align-items: start; }
-.decisiones .caja.caja { padding: 1.4cqw 1.7cqw 1.5cqw; }
-.rotulo { font-family: var(--fuente-dato); font-size: 1cqw; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-3); font-weight: 600; margin-top: 1.2cqw; }
-.decisiones .caja p.rotulo { font-size: 1cqw; margin-top: 1.2cqw; }
-.puntos { list-style: none; padding: 0; margin: 0.5cqw 0 0; }
-.puntos li { font-size: 1.38cqw; line-height: 1.38; color: var(--tinta); padding-left: 1.4cqw; position: relative; }
-.puntos li + li { margin-top: 0.3cqw; }
-.puntos li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 0.6cqw; height: 0.6cqw; background: var(--serie); }
-.puntosSec li { color: var(--tinta-2); }
-.puntosSec li::before { background: var(--tinta-3); }
+/* ── Diapositiva 2: una respuesta por gerencia ─────────────────────────────── */
+.respuestas { flex: 1; min-height: 0; margin-top: 2.4cqw; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2cqw; }
+.respuesta { position: relative; display: flex; flex-direction: column; min-width: 0; padding: 2cqw 2cqw 1.9cqw; background: var(--serie-fondo); }
+.respuesta::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 0.4cqw; background: var(--serie); }
+.respuesta h3 { font-family: var(--fuente-texto); font-size: 1.36cqw; font-weight: 600; color: var(--serie); }
+.respuestaDecision { margin-top: 0.6cqw; font-size: 1.7cqw; font-weight: 600; line-height: 1.3; }
+.respuesta .respuestaPorque { margin-top: 0.8cqw; font-size: 1.3cqw; line-height: 1.4; }
+.respuesta .cifraValor { font-size: 4.4cqw; }
+.respuesta .cifra { margin-top: auto; }
+.respuesta .cifra::before { display: none; }
+.respuesta .cifra { padding-top: 1.6cqw; }
+.respuesta .certeza { margin-top: 1.4cqw; }
+.aclaracion { flex: none; margin-top: 1.6cqw; font-size: 1.4cqw; line-height: 1.4; }
 
-/* ── Pie de cada diapositiva: fuente y enlace al detalle ── */
-.pie { margin-top: auto; padding-top: 1.4cqw; display: flex; align-items: baseline; justify-content: space-between; gap: 3cqw; }
-.pie a.detalle { color: var(--enlace); text-decoration: underline; text-underline-offset: 0.2em; white-space: nowrap; }
-.pie a.detalle:hover { text-decoration-thickness: 2px; }
+/* ── Campo: renovaciones de cuatro lotes tipo ──────────────────────────────── */
+.renovaciones { display: grid; grid-template-columns: 19cqw repeat(12, minmax(0, 1fr)); gap: 0.35cqw; align-items: center; }
+.renovacionesAnio { font-size: 1.05cqw; color: var(--apagado); text-align: center; font-variant-numeric: tabular-nums lining-nums; padding-bottom: 0.2cqw; }
+.renovacionesCaso { font-size: 1.4cqw; font-weight: 600; line-height: 1.2; padding-right: 1cqw; }
+.casilla {
+  display: grid;
+  place-items: center;
+  height: 3.5cqw;
+  font-size: 1.4cqw;
+  font-variant-numeric: tabular-nums lining-nums;
+  background: var(--serie-medio);
+  color: var(--tinta);
+}
+.casilla[data-tipo="plantia"] { background: var(--serie); color: var(--sobre-serie); font-weight: 600; }
+.casilla[data-tipo="vencida"] { background: var(--tinta); color: var(--sobre-tinta); }
+.leyenda { display: flex; flex-wrap: wrap; gap: 0.6cqw 2.6cqw; margin-top: 1.4cqw; font-size: 1.2cqw; color: var(--tinta); }
+.leyenda span { display: inline-flex; align-items: center; gap: 0.6cqw; }
+.leyenda i { width: 1.6cqw; height: 1.1cqw; background: var(--serie-medio); }
+.leyenda i[data-tipo="plantia"] { background: var(--serie); }
+.leyenda i[data-tipo="vencida"] { background: var(--tinta); }
 
-/* ── Portada y cierre ── */
-.arriba { margin-bottom: auto; }
-.meta { display: flex; flex-wrap: wrap; gap: 1.2cqw 4cqw; margin-top: 3.4cqw; padding-top: 1.6cqw; border-top: 0.08cqw solid var(--linea); }
-.meta dt { font-family: var(--fuente-dato); font-size: 1cqw; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-3); }
-.meta dd { margin: 0.3cqw 0 0; font-size: 1.5cqw; color: var(--tinta); }
-.enlaces { margin-top: 3cqw; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3cqw; padding-top: 1.6cqw; border-top: 0.08cqw solid var(--linea); }
-.enlaces dt { font-family: var(--fuente-dato); font-size: 1cqw; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-3); }
-.enlaces dd { margin: 0.4cqw 0 0; font-size: 1.5cqw; line-height: 1.4; }
-.enlaces dd a { color: var(--enlace); }
-.enlaces .apagado { display: block; font-size: 1.15cqw; color: var(--tinta-3); margin-top: 0.2cqw; }
+/* ── Caldera: capas de alarmas y tabla de fallas ───────────────────────────── */
+.capas { display: flex; flex-direction: column; gap: 1.2cqw; }
+.capa { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) 11cqw; gap: 1.4cqw; align-items: center; padding: 1.1cqw 1.4cqw; background: var(--superficie); }
+.capa h3 { font-family: var(--fuente-texto); font-size: 1.5cqw; font-weight: 600; line-height: 1.25; }
+.capa p { margin-top: 0.35cqw; font-size: 1.28cqw; line-height: 1.38; }
+.capaAvisa { font-size: 1.15cqw; line-height: 1.3; }
+.capaAvisa strong { display: block; color: var(--serie); font-size: 1.32cqw; }
+.alarmas { margin-top: 1.6cqw; font-size: 1.36cqw; line-height: 1.42; }
 
-/* Texto sobre el color de la serie (separadores). La regla base de Diapositivas pinta d-etiqueta con el color de la
-   serie, que sobre el fondo de la serie no se ve; esta regla la sobreescribe con más especificidad. */
-p.sobreColor.sobreColor { color: color-mix(in srgb, var(--papel) 80%, transparent); margin-bottom: 1.2cqw; }
+/* ── Producción: del notebook a la consulta ────────────────────────────────── */
+.flujo { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1.8cqw; }
+.paso { position: relative; display: flex; flex-direction: column; min-width: 0; margin: 0; padding: 1.6cqw 1.5cqw 1.5cqw; background: var(--superficie); }
+.paso::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 0.3cqw; background: var(--tinta); }
+/* Flecha entre pasos: un triángulo lleno, no un carácter */
+.paso + .paso::after {
+  content: "";
+  position: absolute;
+  left: -1.35cqw;
+  top: 50%;
+  width: 0.9cqw;
+  height: 1.6cqw;
+  transform: translateY(-50%);
+  background: var(--tinta);
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+}
+.pasoNombre { font-family: var(--fuente-texto); font-size: 1.8cqw; font-weight: 600; line-height: 1.22; }
+.pasoGerencia { margin-top: 0.6cqw; font-size: 1.6cqw; line-height: 1.36; }
+.pasoTecnica { margin-top: auto; padding-top: 1.2cqw; font-size: 1.2cqw; line-height: 1.35; color: var(--apagado); }
+.paso p + p { margin-top: 0; }
+.paso .pasoGerencia { margin-top: 0.6cqw; }
+.paso .pasoTecnica { margin-top: auto; }
+.produccionPie { margin-top: 2.4cqw; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 4cqw; align-items: start; }
 
-/* Texto de apoyo en separadores */
-.contexto { font-size: 1.5cqw; line-height: 1.5; max-width: 62cqw; margin-top: 2.4cqw; padding-top: 1.4cqw; border-top: 0.08cqw solid var(--linea-suave); color: inherit; opacity: 0.86; }
+/* Estado en vivo de la API */
+.estadoApi { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.4cqw 2cqw; align-items: center; padding: 1.3cqw 1.6cqw; background: var(--superficie); }
+.estadoRotulo { display: inline-flex; align-items: center; gap: 0.8cqw; font-size: 1.6cqw; font-weight: 600; line-height: 1.2; }
+.estadoMarca { width: 1cqw; height: 1cqw; background: var(--apagado); }
+[data-estado="ok"] .estadoMarca { background: var(--en-linea); }
+[data-estado="ok"] .estadoRotulo { color: var(--en-linea); }
+[data-estado="error"] .estadoMarca { background: var(--alerta); }
+[data-estado="error"] .estadoRotulo { color: var(--alerta); }
+.estadoDetalle { grid-column: 1; font-size: 1.12cqw; line-height: 1.4; }
+.estadoApi p + p { margin-top: 0; }
+.estadoDetalle code { font-size: 0.95em; }
+.estadoBoton {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  border: 0;
+  border-radius: 0;
+  padding: 0.7cqw 1.2cqw;
+  background: var(--fondo);
+  color: var(--tinta);
+  font: 600 1.1cqw / 1.2 var(--fuente-texto);
+  cursor: pointer;
+}
+.estadoBoton:hover:not(:disabled) { background: var(--superficie-2); }
+.estadoBoton:disabled { opacity: 0.5; cursor: default; }
 
-/* Notas del expositor */
-.notas p + p { margin-top: 0.6rem; }
-.notasPregunta { font-weight: 650; }
+/* ── Demostración ──────────────────────────────────────────────────────────── */
+.demo { flex: 1; min-height: 0; margin-top: 2.2cqw; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 1.6cqw 2cqw; }
+.demoPaso { position: relative; display: flex; flex-direction: column; min-width: 0; padding: 1.4cqw 1.8cqw 1.4cqw; background: var(--serie-fondo); }
+.demoPaso::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 0.3cqw; background: var(--serie); }
+.demoGerencia { font-size: 1.15cqw; font-weight: 600; color: var(--serie); }
+.demoPregunta { margin-top: 0.35cqw; font-size: 1.6cqw; font-weight: 600; line-height: 1.28; }
+.demoRespuesta { margin-top: 0.6cqw; font-size: 1.3cqw; line-height: 1.4; }
+.demoFuente { margin-top: auto; padding-top: 0.6cqw; font-size: 1.05cqw; color: var(--apagado); }
+.demoPaso p + p { margin-top: 0; }
+.demoPaso .demoPregunta { margin-top: 0.35cqw; }
+.demoPaso .demoRespuesta { margin-top: 0.6cqw; }
+.demoPaso .demoFuente { margin-top: auto; }
+.demoExtra { flex: none; margin-top: 1.3cqw; display: flex; align-items: center; justify-content: space-between; gap: 3cqw; font-size: 1.22cqw; line-height: 1.4; }
+.acciones { display: flex; gap: 1cqw; flex: none; }
+.accion {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.75cqw 1.4cqw;
+  background: var(--tinta);
+  color: var(--sobre-tinta);
+  font-size: 1.2cqw;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.accion:hover { background: color-mix(in srgb, var(--tinta) 82%, #fff); }
+.accionSec { background: var(--superficie-2); color: var(--tinta); }
+.accionSec:hover { background: var(--serie-medio); }
 
-/* Aviso para teléfonos en vertical (fuera de las diapositivas, sobre el fondo oscuro de la pantalla) */
+/* ── Criterio ──────────────────────────────────────────────────────────────── */
+.criterio { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 4cqw; }
+.reglas { display: flex; flex-direction: column; gap: 1.2cqw; }
+.regla { position: relative; margin: 0; padding-top: 0.85cqw; }
+.regla::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 0.3cqw; background: var(--tinta); }
+.regla h3 { font-family: var(--fuente-texto); font-size: 1.42cqw; font-weight: 600; line-height: 1.25; }
+.regla p { margin-top: 0.3cqw; font-size: 1.2cqw; line-height: 1.38; }
+.criterioCifras { flex: none; margin-top: 2cqw; }
+.criterioCifras .cifraValor { font-size: 3cqw; }
+
+/* ── Cierre con pedido ─────────────────────────────────────────────────────── */
+/* Las tres columnas comparten filas (subgrid): "Necesito" queda a la misma altura en las tres. */
+.pedido { flex: none; margin-top: 2.2cqw; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(5, auto); gap: 0 2cqw; }
+.pedidoCol { position: relative; display: grid; grid-row: span 5; grid-template-rows: subgrid; align-content: start; min-width: 0; padding: 2cqw 2cqw 2.2cqw; background: var(--serie-fondo); }
+.pedidoCol::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 0.4cqw; background: var(--serie); }
+.pedidoCol h3 { font-family: var(--fuente-texto); font-size: 1.6cqw; font-weight: 600; color: var(--serie); }
+.pedidoCol h4 { margin-top: 1.4cqw; font-family: var(--fuente-texto); font-size: 1.3cqw; font-weight: 600; color: var(--tinta); }
+.pedidoCol p { margin-top: 0.4cqw; font-size: 1.5cqw; line-height: 1.4; }
+.pedidoCol h4 + p { margin-top: 0.4cqw; }
+.cierreFrase { flex: 1; display: flex; align-items: center; margin: 0; font-family: var(--fuente-titulo); font-weight: 500; font-size: 2.5cqw; line-height: 1.2; letter-spacing: -0.01em; max-width: 72cqw; text-wrap: balance; }
+.enlacesCierre { flex: none; margin: 0; padding-top: 1.3cqw; display: flex; flex-wrap: wrap; gap: 0.6cqw 3cqw; font-size: 1.15cqw; line-height: 1.35; }
+.enlacesCierre a { font-weight: 600; color: var(--tinta); text-decoration-color: var(--tinta); text-decoration-thickness: 0.12cqw; }
+
+/* ── Anexo ─────────────────────────────────────────────────────────────────── */
+.cadena { display: flex; flex-wrap: wrap; gap: 0.5cqw; margin-top: 1.6cqw; }
+.cadena span { padding: 0.45cqw 0.9cqw; background: var(--superficie); font-size: 1.12cqw; line-height: 1.3; }
+.listaCorta { display: flex; flex-direction: column; gap: 0.8cqw; font-size: 1.28cqw; line-height: 1.4; }
+.listaCorta li { position: relative; padding-left: 1.4cqw; }
+.listaCorta li::before { content: ""; position: absolute; left: 0; top: 0.55em; width: 0.6cqw; height: 0.6cqw; background: var(--serie); }
+.listaCorta li + li { margin-top: 0; }
+
+/* ── Notas del orador (en el panel lateral, a tamaño de pantalla, no de diapositiva) ── */
+.notas p + p { margin-top: 0.7rem; }
+.notasSi { margin-top: 1.1rem; font-weight: 600; color: var(--apagado); font-size: var(--t-pequeno); }
+.notas .notasSi { margin-top: 1.1rem; }
+.notasLista { margin-top: 0.4rem; padding: 0; list-style: none; display: grid; gap: 0.55rem; }
+.notasLista li + li { margin-top: 0; }
+
+/* Aviso para teléfonos en vertical (fuera de las diapositivas, sobre la pantalla de tinta) */
 .girar { display: none; }
 @media (max-width: 40rem) and (orientation: portrait) {
   .girar {
     display: block; position: fixed; top: 1rem; left: 1rem; right: 1rem; z-index: 5;
-    font-family: var(--fuente-dato); font-size: var(--t-etiqueta); line-height: 1.4; text-align: center; color: var(--linea);
+    font-size: var(--t-pequeno); line-height: 1.4; text-align: center; color: var(--sobre-tinta);
   }
 }
+.sinCorte { white-space: nowrap; }
+
+@media print { .estadoBoton { display: none; } }

@@ -1,15 +1,15 @@
 "use client";
 
 import * as Plot from "@observablehq/plot";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Cifra, FilaCifras } from "@/components/Cifra";
 import { Figura } from "@/components/Figura";
 import { COLORES, PlotFigura } from "@/components/graficos/PlotFigura";
-import { Desplegable } from "@/components/Nota";
 import { Tabla } from "@/components/Tabla";
+import { consultar } from "@/lib/api";
 import { conSigno, num, pctFraccion } from "@/lib/formato";
-import { nombreCorte, useConsulta, useVariedades } from "./consulta";
-import { Respuesta, RespuestaJson } from "./Respuesta";
+import { nombreCorte, useAlAsomar, useConsulta, useVariedades } from "./consulta";
+import { BloqueDetalle, DetalleTecnico, Respuesta, Secundarias } from "./Respuesta";
 import s from "./herramientas.module.css";
 
 type RespuestaPronostico = {
@@ -36,7 +36,14 @@ const MAX_CONSULTAS = 6;
 
 const nombreFinca = (f: string) => (f === NUEVA ? "finca nueva" : f);
 
-export function PronosticoAzucar() {
+export function PronosticoAzucar({
+  metodo, contexto,
+}: {
+  /** Cómo calcula la API (texto de la página), para el detalle técnico. */
+  metodo?: React.ReactNode;
+  /** "Cómo lo sé" y el límite: van entre la herramienta y su detalle técnico. */
+  contexto?: React.ReactNode;
+}) {
   const id = useId();
   const catalogo = useVariedades();
   const { ejecutar, ...consulta } = useConsulta<RespuestaPronostico>();
@@ -62,6 +69,27 @@ export function PronosticoAzucar() {
     return c;
   }, [v, f, corte, conLote, ventaja]);
 
+  // Al asomar la sección, la figura suma la misma variedad y corte en una finca nueva (escenario 2 del notebook 03): así
+  // compara desde el principio, en lugar de abrir con una sola banda. Una sola consulta, y solo si alguien llega aquí.
+  const [asomo, setAsomo] = useState(false);
+  const sembrado = useRef(false);
+  const raiz = useAlAsomar<HTMLDivElement>(() => setAsomo(true));
+  useEffect(() => {
+    const base = historial[0];
+    if (!asomo || sembrado.current || !base || base.finca === NUEVA) return;
+    sembrado.current = true;
+    consultar<RespuestaPronostico>("/campo/pronostico", { variedad: base.variedad, finca: NUEVA, corte: base.corte }).then(
+      (r) =>
+        setHistorial((h) => {
+          const clave = `${r.variedad}|${r.finca}|${r.corte}|`;
+          if (h.some((x) => x.clave === clave)) return h;
+          const rotulo = `${r.variedad} · ${nombreFinca(r.finca)} · ${nombreCorte(r.corte)}`;
+          return [...h, { ...r, clave, rotulo }].slice(0, MAX_CONSULTAS);
+        }),
+      () => {}, // si falla, la figura se queda con la consulta de la persona
+    );
+  }, [asomo, historial]);
+
   useEffect(() => {
     if (!cuerpo) return;
     const t = setTimeout(
@@ -81,9 +109,10 @@ export function PronosticoAzucar() {
   const errorCatalogo = catalogo.error;
 
   return (
-    <div className={s.herramienta}>
-      <form className={s.controles} onSubmit={(e) => e.preventDefault()} aria-label="Datos del pronóstico">
-        <p className={`etiqueta ${s.tituloPanel}`}>Lote a pronosticar</p>
+    <>
+    <div className={s.herramienta} ref={raiz}>
+      <form className={s.controles} onSubmit={(e) => e.preventDefault()} aria-label="Datos del pronóstico" data-ui="">
+        <p className={s.tituloPanel}>Lote a pronosticar</p>
         <div className="campo-form">
           <label htmlFor={`${id}-variedad`}>Variedad</label>
           <select id={`${id}-variedad`} value={v ?? ""} disabled={!cat} onChange={(e) => setVariedad(e.target.value)}>
@@ -166,19 +195,88 @@ export function PronosticoAzucar() {
               </>
             )
           }
+          cabeza={d && <CifrasPronostico d={d} />}
         >
-          {d && <DetallePronostico d={d} historial={historial} />}
+          {d && <FiguraPronostico d={d} historial={historial} />}
         </Respuesta>
       </div>
     </div>
+    {contexto}
+    <DetalleTecnico metodo={metodo} respuestas={d ? [{ titulo: "Respuesta completa de la API (JSON)", datos: d }] : []}>
+      {d && <DesglosePronostico d={d} />}
+    </DetalleTecnico>
+    </>
   );
 }
 
-function DetallePronostico({ d, historial }: { d: RespuestaPronostico; historial: Consulta[] }) {
+/** Banda en % del azúcar esperado, como la reporta el notebook 03 (−29 % / +32 %). */
+const bandaPct = (d: RespuestaPronostico) => d.banda_lb_acre.map((b) => conSigno((b / d.azucar_lb_acre - 1) * 100, 0));
+
+function CifrasPronostico({ d }: { d: RespuestaPronostico }) {
+  const [abajo, arriba] = bandaPct(d);
+  return (
+    <>
+      <FilaCifras columnas={2}>
+        <Cifra
+          serie="campo"
+          valor={num(d.azucar_lb_acre, 1)}
+          unidad="lb/acre"
+          etiqueta="Azúcar esperado"
+          detalle={`Banda de 80 %: ${num(d.banda_lb_acre[0], 1)} a ${num(d.banda_lb_acre[1], 1)} lb/acre (${abajo} % y ${arriba} %).`}
+        />
+        <Cifra
+          serie="campo"
+          valor={num(d.cobertura_real_banda * 100, 0)}
+          unidad="%"
+          etiqueta="Cobertura real de la banda"
+          detalle={`La banda es de 80 %. En la validación por zafra cubrió el ${pctFraccion(d.cobertura_real_banda, 0)} de los casos (${d.escenario === 2 ? "fincas nuevas" : "fincas conocidas"}).`}
+        />
+      </FilaCifras>
+      <Secundarias>
+        <li>
+          <strong className="num">{num(d.azucar_t_ha, 3)} t/ha</strong> en toneladas por hectárea, con banda de{" "}
+          {num(d.banda_t_ha[0], 3)} a {num(d.banda_t_ha[1], 3)} t/ha.
+        </li>
+        {d.escenario === 2 && (
+          <li>Finca nueva: el modelo solo usa la ventaja de la variedad. Por eso la banda cubre menos.</li>
+        )}
+      </Secundarias>
+    </>
+  );
+}
+
+/**
+ * Título de la figura: lo que se lee en ella, no una instrucción. Con una consulta, el ancho de su banda; con varias, si
+ * las bandas comparten un tramo (se traslapan) o no.
+ */
+function tituloBandas(d: RespuestaPronostico, consultas: Consulta[]) {
+  if (consultas.length < 2) {
+    const [abajo, arriba] = bandaPct(d);
+    return `La banda de 80 % va de ${abajo} % a ${arriba} % del azúcar esperado`;
+  }
+  const piso = Math.max(...consultas.map((c) => c.banda_lb_acre[0]));
+  const techo = Math.min(...consultas.map((c) => c.banda_lb_acre[1]));
+  if (piso < techo) return `Las ${consultas.length} bandas comparten el tramo de ${num(piso, 0)} a ${num(techo, 0)} lb/acre`;
+  const esperados = consultas.map((c) => c.azucar_lb_acre);
+  return `Las ${consultas.length} bandas no comparten un tramo: el esperado va de ${num(Math.min(...esperados), 0)} a ${num(Math.max(...esperados), 0)} lb/acre`;
+}
+
+function FiguraPronostico({ d, historial }: { d: RespuestaPronostico; historial: Consulta[] }) {
+  const consultas = historial.length ? historial : [{ ...d, clave: "actual", rotulo: d.variedad }];
+  return (
+    <Figura
+      titulo={tituloBandas(d, consultas)}
+      nota="El punto es el azúcar esperado y la línea, la banda. La consulta actual va en verde y dice «Actual»; las anteriores (hasta 6) van en gris. Al abrir, la página suma la misma variedad en una finca nueva: sin historia, el modelo no usa el efecto de la finca. Cambie la variedad, la finca o el corte para comparar."
+      fuente="API, POST /campo/pronostico · modelo del notebook 03 (outputs/models/serie1_modelo_p2.json)"
+    >
+      <GraficoBandas consultas={consultas} actual={historial[0]?.clave} />
+    </Figura>
+  );
+}
+
+function DesglosePronostico({ d }: { d: RespuestaPronostico }) {
   const g = d.desglose_log;
   const efecto = (x: number) => `${conSigno((Math.exp(x) - 1) * 100, 1)} %`;
-  // Banda en % del azúcar esperado, como la reporta el notebook 03 (−29 % / +32 %).
-  const bandaPct = d.banda_lb_acre.map((b) => conSigno((b / d.azucar_lb_acre - 1) * 100, 0));
   const filas = [
     { componente: `Nivel típico de la ${nombreCorte(d.corte)}`, log: g.base_del_corte, efecto: `${num(Math.exp(g.base_del_corte), 0)} lb/acre` },
     { componente: d.escenario === 2 ? "Finca (nueva: sin efecto)" : `Finca ${d.finca}`, log: g.efecto_finca, efecto: efecto(g.efecto_finca) },
@@ -190,74 +288,23 @@ function DetallePronostico({ d, historial }: { d: RespuestaPronostico; historial
     },
   ];
   return (
-    <>
-      <div className={s.pilaCifras}>
-        <FilaCifras columnas={2}>
-          <Cifra
-            serie="campo"
-            valor={num(d.azucar_lb_acre, 1)}
-            unidad="lb/acre"
-            etiqueta="Azúcar esperado"
-            detalle={`Banda: ${num(d.banda_lb_acre[0], 1)} a ${num(d.banda_lb_acre[1], 1)} lb/acre.`}
-          />
-          <Cifra
-            serie="campo"
-            valor={num(d.azucar_t_ha, 3)}
-            unidad="t/ha"
-            etiqueta="Lo mismo, en toneladas por hectárea"
-            detalle={`Banda: ${num(d.banda_t_ha[0], 3)} a ${num(d.banda_t_ha[1], 3)} t/ha.`}
-          />
-        </FilaCifras>
-        <FilaCifras columnas={2}>
-          <Cifra
-            serie="campo"
-            valor={`${bandaPct[0]} / ${bandaPct[1]}`}
-            unidad="%"
-            etiqueta="Banda alrededor del esperado"
-            detalle="Abajo y arriba del azúcar esperado."
-          />
-          <Cifra
-            serie="campo"
-            valor={num(d.cobertura_real_banda * 100, 0)}
-            unidad="%"
-            etiqueta="Cobertura real de la banda"
-            detalle={`La banda nominal es de 80 %. En la validación por zafra cubrió el ${pctFraccion(d.cobertura_real_banda, 0)} de los casos (escenario ${d.escenario}).`}
-          />
-        </FilaCifras>
-      </div>
-      {d.escenario === 2 && (
-        <p className={s.lineaDato}>
-          Finca nueva: el modelo solo usa la ventaja de la variedad (escenario 2). Por eso la banda cubre menos.
-        </p>
-      )}
-
-      <Figura
-        numero={2}
-        titulo={`La banda de la consulta actual va de ${bandaPct[0]} % a ${bandaPct[1]} % del azúcar esperado`}
-        nota="El punto es el azúcar esperado y la línea, la banda. La consulta actual va en verde y dice «Actual»; las anteriores (hasta 6) van en gris. Cambie la variedad, la finca o el corte para comparar."
-        fuente="API, POST /campo/pronostico · modelo del notebook 03 (outputs/models/serie1_modelo_p2.json)"
-      >
-        <GraficoBandas consultas={historial.length ? historial : [{ ...d, clave: "actual", rotulo: d.variedad }]} actual={historial[0]?.clave} />
-      </Figura>
-
-      <Desplegable titulo="Cómo se arma el número (desglose del modelo)">
-        <p>
-          El modelo trabaja en logaritmo: suma el nivel típico del corte, el efecto de la finca y la ventaja de la variedad
-          (y la del lote, si se conoce). Cada término multiplica el azúcar esperado.
-        </p>
-        <Tabla
-          compacta
-          columnas={[
-            { clave: "componente", titulo: "Componente" },
-            { clave: "log", titulo: "En logaritmo", tipo: "num", valor: (x) => num(x.log, 4) },
-            { clave: "efecto", titulo: "Efecto", tipo: "num" },
-          ]}
-          filas={filas}
-        />
-        <p>{d.aviso}</p>
-      </Desplegable>
-      <RespuestaJson datos={d} />
-    </>
+    <BloqueDetalle titulo="Cómo se arma el número (desglose del modelo)">
+      <p>
+        El modelo trabaja en logaritmo: suma el nivel típico del corte, el efecto de la finca y la ventaja de la variedad
+        (y la del lote, si se conoce). Cada término multiplica el azúcar esperado. Escenario {d.escenario} del notebook 03
+        ({d.escenario === 2 ? "finca nueva" : "finca conocida"}).
+      </p>
+      <Tabla
+        compacta
+        columnas={[
+          { clave: "componente", titulo: "Componente" },
+          { clave: "log", titulo: "En logaritmo", tipo: "num", valor: (x) => num(x.log, 4) },
+          { clave: "efecto", titulo: "Efecto", tipo: "num" },
+        ]}
+        filas={filas}
+      />
+      <p>{d.aviso}</p>
+    </BloqueDetalle>
   );
 }
 
@@ -271,11 +318,12 @@ function GraficoBandas({ consultas, actual }: { consultas: Consulta[]; actual?: 
       alto={56 * filas.length + 56}
       etiqueta={etiqueta}
       dependencias={[consultas, actual]}
-      crear={() => ({
+      crear={(ancho) => ({
         marginLeft: 12,
         marginRight: 12,
         marginTop: 28,
-        x: { label: "Azúcar (lb/acre)", domain: [0, tope * 1.05], grid: true, tickFormat: (x: number) => num(x) },
+        // En pantallas angostas, menos marcas: los miles no caben y se enciman
+        x: { label: "Azúcar (lb/acre)", domain: [0, tope * 1.05], grid: true, ticks: ancho < 560 ? 4 : undefined, tickFormat: (x: number) => num(x) },
         y: { domain: filas.map((f) => f.clave), axis: null, padding: 0.5 },
         marks: [
           Plot.ruleX([0], { stroke: COLORES.tinta }),
@@ -295,6 +343,9 @@ function GraficoBandas({ consultas, actual }: { consultas: Consulta[]; actual?: 
             dx: 4,
             dy: -13,
             fill: (f: (typeof filas)[number]) => (f.esActual ? COLORES.tinta : COLORES.tinta2),
+            // Halo blanco: en el teléfono el rótulo llega hasta la banda y la línea lo tachaba.
+            stroke: "var(--fondo)",
+            strokeWidth: 4,
           }),
         ],
       })}
