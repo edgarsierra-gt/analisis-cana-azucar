@@ -1,0 +1,37 @@
+/* Piezas de maqueta propias de la página de mercado. Solo tokens de globals.css. */
+
+/* Dos gráficas lado a lado que se apilan en pantallas angostas */
+.par { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: var(--e-5) var(--e-6); }
+.subtitulo { margin-bottom: var(--e-2); color: var(--tinta-2); }
+.apilado > * + .subtitulo { margin-top: var(--e-5); }
+
+/* Bloque de contexto bajo el índice */
+.contexto { padding-top: var(--e-7); }
+.contexto > * + * { margin-top: var(--e-4); }
+
+/* Hipótesis descartadas */
+.descartes { max-width: var(--ancho-medio); }
+.descartes h3 { font-size: var(--t-h3); }
+.descartes dl { margin-top: var(--e-3); }
+.descartes dl > div { padding: var(--e-3) 0; border-top: 1px solid var(--linea-suave); }
+.codigo { font-family: var(--fuente-dato); font-size: var(--t-etiqueta); color: var(--serie); font-weight: 600; margin-right: var(--e-3); }
+.descartes dt { font-weight: 650; }
+.descartes dd { margin: var(--e-1) 0 0; color: var(--tinta-2); font-size: var(--t-chico); }
+
+/* Texto con subtítulo dentro de una sección */
+.bloque { max-width: var(--ancho-texto); }
+.bloque > * + * { margin-top: var(--e-3); }
+.bloque h3 { font-size: var(--t-h3); }
+
+/* Cierre: enlaces a notebooks */
+.enlaces { list-style: none; padding: 0; display: grid; gap: var(--e-2); }
+.enlaces li + li { margin-top: 0; }
+.enlaces a { font-family: var(--fuente-dato); font-size: var(--t-chico); }
+.enlaces span { color: var(--tinta-3); font-size: var(--t-chico); }
+
+/* Encabezados de columnas numéricas que pueden partirse (ver encabezados.tsx) */
+.encabezado { white-space: normal; }
+
+/* En el teléfono, las tablas anchas se desplazan de lado; el título de la tabla queda fijo y del ancho de la pantalla
+   para que se lea completo sin desplazar. */
+.pagina caption { position: sticky; left: 0; max-width: calc(100vw - 2 * var(--margen)); }

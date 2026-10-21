@@ -1,0 +1,37 @@
+/* Página del asistente. Solo tokens de globals.css. */
+
+.medio { max-width: var(--ancho-medio); }
+.bloque > * + * { margin-top: var(--e-4); }
+.subtitulo { font-size: var(--t-h3); }
+
+/* Reglas del asistente: lista corta con viñetas finas */
+.reglas { max-width: var(--ancho-texto); color: var(--tinta-2); }
+.reglas li::marker { color: var(--tinta-3); }
+.reglas strong { color: var(--tinta); }
+
+/* Decisiones de diseño: clave a la izquierda, explicación a la derecha */
+.decisiones { border-top: 1px solid var(--linea); }
+.decisiones > div { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: var(--e-4); padding: var(--e-3) 0; border-bottom: 1px solid var(--linea-suave); }
+.decisiones dt { font-weight: 650; color: var(--tinta); }
+.decisiones dd { margin: 0; }
+@media (max-width: 680px) { .decisiones > div { grid-template-columns: minmax(0, 1fr); gap: var(--e-1); } }
+
+/* Bloques de código con rótulo */
+.codigo { min-width: 0; }
+.codigo > * + * { margin-top: var(--e-1); }
+.rotulo { font-family: var(--fuente-dato); font-size: var(--t-etiqueta); letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-3); }
+.codigo pre { font-size: 0.8125rem; white-space: pre; }
+.codigo pre, .codigo code { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+.par { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-4) var(--e-5); }
+.par > * { min-width: 0; }
+@media (max-width: 860px) { .par { grid-template-columns: minmax(0, 1fr); } }
+
+/* Serie de cada herramienta: cuadro de color y nombre (el color nunca va solo) */
+.serie { display: inline-flex; align-items: center; gap: var(--e-2); white-space: nowrap; }
+.serie::before { content: ""; flex: none; width: 0.55rem; height: 0.55rem; background: var(--serie); }
+.nombre { white-space: nowrap; }
+
+.enlaces { list-style: none; padding: 0; display: grid; gap: var(--e-2); }
+.enlaces > li { margin: 0; }
+
+.cierre { padding-top: var(--e-8); }

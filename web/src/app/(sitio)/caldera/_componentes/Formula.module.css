@@ -1,0 +1,29 @@
+.formula {
+  max-width: var(--ancho-medio);
+  background: var(--hoja);
+  border: 1px solid var(--linea);
+  border-left: 3px solid var(--serie);
+  padding: var(--e-4) var(--e-5);
+}
+.ecuacion {
+  margin-top: var(--e-3);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--e-1) var(--e-2);
+  font-family: var(--fuente-titulo);
+  font-size: clamp(1.15rem, 2.4vw, 1.5rem);
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+.lado { font-weight: 500; }
+.igual, .signo { color: var(--tinta-3); }
+.termino { color: var(--serie); white-space: nowrap; }
+.terminos { margin-top: var(--e-4); display: grid; gap: var(--e-2); font-size: var(--t-chico); }
+.terminos > div { display: grid; grid-template-columns: 3.5rem 1fr; gap: var(--e-3); }
+.terminos dt { font-family: var(--fuente-dato); color: var(--tinta); font-weight: 600; }
+.terminos dd { margin: 0; color: var(--tinta-2); }
+@media (max-width: 560px) {
+  .formula { padding: var(--e-4); }
+  .termino { white-space: normal; }
+}

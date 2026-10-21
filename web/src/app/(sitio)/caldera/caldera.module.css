@@ -1,0 +1,46 @@
+/* Piezas de maqueta propias de la página de la caldera. Colores y medidas: tokens de globals.css. */
+
+.tag {
+  display: block;
+  font-family: var(--fuente-dato);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  color: var(--tinta-3);
+}
+
+.dosColumnas {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--e-7);
+  align-items: start;
+}
+@media (max-width: 1000px) {
+  .dosColumnas { grid-template-columns: 1fr; gap: var(--e-6); }
+}
+
+.pasos {
+  list-style: none;
+  padding: 0;
+  counter-reset: paso;
+  border-top: 1px solid var(--tinta);
+}
+.pasos li {
+  counter-increment: paso;
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  gap: var(--e-3);
+  padding: var(--e-3) 0;
+  border-bottom: 1px solid var(--linea-suave);
+  font-size: var(--t-texto);
+}
+.pasos li + li { margin-top: 0; }
+.pasos li::before {
+  content: counter(paso, decimal-leading-zero);
+  font-family: var(--fuente-dato);
+  font-size: var(--t-etiqueta);
+  font-weight: 600;
+  color: var(--serie);
+  padding-top: 0.2rem;
+}
+
+.medio { max-width: var(--ancho-medio); }

@@ -1,0 +1,14 @@
+.ficha { background: var(--hoja); border: 1px solid var(--linea); border-top: 4px solid var(--serie); padding: var(--e-5) var(--e-6) var(--e-6); }
+.titulo { color: var(--serie); }
+.lista { margin-top: var(--e-3); }
+.lista > div { display: grid; grid-template-columns: 13rem 1fr; gap: var(--e-5); padding: var(--e-4) 0; border-top: 1px solid var(--linea-suave); }
+.lista > div:first-child { border-top: 0; }
+.lista dt { font-weight: 650; font-size: var(--t-chico); color: var(--tinta); }
+.lista dd { margin: 0; color: var(--tinta-2); }
+.lista dd > * + * { margin-top: var(--e-2); }
+.decision dd { color: var(--tinta); font-weight: 500; }
+.motivo { margin-top: var(--e-2); font-size: var(--t-chico); color: var(--tinta-2); }
+@media (max-width: 680px) {
+  .ficha { padding: var(--e-4); }
+  .lista > div { grid-template-columns: 1fr; gap: var(--e-1); }
+}

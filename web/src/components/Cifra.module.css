@@ -1,0 +1,17 @@
+.fila {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr));
+  border-top: 1px solid var(--linea);
+  border-bottom: 1px solid var(--linea);
+}
+.fila > .cifra { padding: var(--e-5) var(--e-5) var(--e-5) 0; }
+.fila > .cifra + .cifra { border-left: 1px solid var(--linea); padding-left: var(--e-5); }
+.valor { font-family: var(--fuente-titulo); font-size: var(--t-cifra); line-height: 1; color: var(--serie); font-weight: 500; letter-spacing: -0.02em; }
+.unidad { font-family: var(--fuente-dato); font-size: var(--t-chico); color: var(--tinta-3); margin-left: 0.4rem; letter-spacing: 0; }
+.etiqueta { margin-top: var(--e-3); font-size: var(--t-chico); font-weight: 600; color: var(--tinta); }
+.detalle { margin-top: var(--e-1); font-size: var(--t-chico); color: var(--tinta-3); line-height: 1.45; }
+@media (max-width: 760px) {
+  .fila { grid-template-columns: 1fr; }
+  .fila > .cifra { padding: var(--e-4) 0; }
+  .fila > .cifra + .cifra { border-left: 0; border-top: 1px solid var(--linea); padding-left: 0; }
+}

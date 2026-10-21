@@ -1,0 +1,8 @@
+.seccion { padding-top: var(--e-8); }
+.cabeza { border-top: 1px solid var(--tinta); padding-top: var(--e-4); max-width: 48rem; }
+.etiqueta { display: flex; gap: var(--e-3); align-items: baseline; }
+.numero { color: var(--serie); font-weight: 600; }
+.titulo { margin-top: var(--e-3); }
+.entrada { margin-top: var(--e-4); }
+.cuerpo { margin-top: var(--e-6); }
+.cuerpo > * + * { margin-top: var(--e-6); }

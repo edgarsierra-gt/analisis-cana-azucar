@@ -17,3 +17,6 @@ node_modules/
 *.zip
 # instrucciones locales de trabajo con el asistente
 CLAUDE.md
+
+# configuración local del asistente
+.claude/

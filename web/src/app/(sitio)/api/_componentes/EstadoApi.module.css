@@ -1,0 +1,51 @@
+.estado {
+  margin-top: var(--e-6);
+  padding: var(--e-4) var(--e-5) var(--e-5);
+  background: var(--hoja);
+  border: 1px solid var(--linea);
+  border-left: 3px solid var(--tinta-3);
+  border-radius: var(--radio);
+  max-width: var(--ancho-medio);
+}
+.estado[data-estado="ok"] { border-left-color: var(--certeza-alta); }
+.estado[data-estado="error"] { border-left-color: var(--alerta); }
+
+.cabeza { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--e-2) var(--e-5); }
+
+.rotulo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  font-weight: 650;
+  font-size: var(--t-texto);
+  color: var(--tinta);
+}
+.marca { width: 0.65rem; height: 0.65rem; border: 1px solid var(--tinta-3); }
+[data-estado="ok"] .marca { background: var(--certeza-alta); border-color: var(--certeza-alta); }
+[data-estado="error"] .marca { background: var(--alerta); border-color: var(--alerta); }
+[data-estado="ok"] .rotulo { color: var(--certeza-alta); }
+[data-estado="error"] .rotulo { color: var(--alerta); }
+
+.datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-3) var(--e-6);
+  margin-top: var(--e-3);
+  padding-top: var(--e-3);
+  border-top: 1px solid var(--linea-suave);
+}
+.datos dt {
+  font-family: var(--fuente-dato);
+  font-size: var(--t-etiqueta);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+}
+.datos dd { margin: 0.15rem 0 0; font-size: var(--t-chico); color: var(--tinta); }
+.url { font-family: var(--fuente-dato); overflow-wrap: anywhere; }
+
+.aviso { margin-top: var(--e-3); font-size: var(--t-chico); color: var(--tinta-2); max-width: 46rem; }
+.aviso > * + * { margin-top: var(--e-2); }
+.aviso code { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+
+.acciones { display: flex; flex-wrap: wrap; gap: var(--e-3); margin-top: var(--e-4); }

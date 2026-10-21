@@ -1,0 +1,71 @@
+/* Diagrama de bloques del asistente. Los tamaños de letra están en unidades del viewBox: escalan con el dibujo. */
+
+.diagrama { width: 100%; }
+.lienzo { width: 100%; height: auto; overflow: visible; }
+
+/* Teléfono y tableta: el dibujo vertical, centrado y sin crecer de más. Pantalla ancha: el horizontal, desde 1120 px,
+   donde se dibuja a 0.93 de su tamaño o más (el texto de 13 px no baja de 12 px). */
+.horizontal { display: none; }
+.vertical { display: block; max-width: 26rem; margin-inline: auto; }
+@media (min-width: 1120px) {
+  .horizontal { display: block; }
+  .vertical { display: none; }
+}
+
+/* Zonas: límites de servicio, en línea punteada fina */
+.zona { fill: none; stroke: var(--tinta-3); stroke-width: 1; stroke-dasharray: 2 4; }
+
+/* Bloques: papel claro con trazo de tinta, como un plano */
+.caja, .caja path, .caja ellipse { fill: var(--hoja); stroke: var(--tinta-2); stroke-width: 1; }
+.separador { stroke: var(--linea); stroke-width: 1; }
+.credencial { stroke: var(--tinta-3); stroke-width: 1; stroke-dasharray: 1 3; }
+
+/* Flechas */
+.flecha path, .rechazo path { fill: none; stroke-width: 1.3; stroke-linejoin: round; }
+.flecha path { stroke: var(--tinta-2); }
+.flecha polygon { fill: var(--tinta-2); }
+.rechazo path { stroke: var(--alerta); stroke-dasharray: 5 4; }
+.rechazo polygon { fill: var(--alerta); }
+
+/* Números de paso */
+.paso circle { fill: var(--tinta); stroke: var(--papel); stroke-width: 2.5; }
+.paso text { font-family: var(--fuente-dato); font-size: 12px; font-weight: 600; fill: var(--papel); }
+
+/* Texto */
+.titulo { font-family: var(--fuente-titulo); font-size: 18px; font-weight: 500; fill: var(--tinta); }
+.sub { font-family: var(--fuente-texto); font-size: 14.5px; font-weight: 650; fill: var(--tinta); }
+.texto { font-family: var(--fuente-texto); font-size: 13px; fill: var(--tinta-2); }
+.mono, .monoChico, .leyenda { font-family: var(--fuente-dato); letter-spacing: 0.06em; fill: var(--tinta-3); }
+.mono, .leyenda { font-size: 11px; }
+.monoChico { font-size: 10.5px; }
+.codigo { font-family: var(--fuente-dato); font-size: 11.5px; fill: var(--tinta-2); font-variant-ligatures: none; }
+
+/* Rótulos sobre líneas: un halo del color del papel los separa de lo que cruzan */
+.fondoLeyenda { fill: var(--papel); }
+.rotulo, .rotuloMono, .rotuloRechazo {
+  paint-order: stroke;
+  stroke: var(--papel);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+.rotulo { font-family: var(--fuente-texto); font-size: 12.5px; fill: var(--tinta-2); }
+.rotuloMono, .rotuloRechazo { font-family: var(--fuente-dato); font-size: 11px; letter-spacing: 0.02em; font-variant-ligatures: none; }
+.rotuloMono { fill: var(--tinta-2); }
+.rotuloRechazo { fill: var(--alerta); font-weight: 600; }
+
+/* La lista numerada que explica el diagrama */
+.pasos { max-width: var(--ancho-medio); padding-left: 0; list-style: none; counter-reset: paso; display: grid; gap: var(--e-3); }
+.pasos > li { margin: 0; display: grid; grid-template-columns: 1.75rem minmax(0, 1fr); gap: var(--e-3); counter-increment: paso; font-size: var(--t-chico); color: var(--tinta-2); }
+.pasos > li::before {
+  content: counter(paso);
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--tinta);
+  color: var(--papel);
+  font: 600 0.75rem / 1 var(--fuente-dato);
+  margin-top: 0.05rem;
+}
+.pasos strong { color: var(--tinta); }

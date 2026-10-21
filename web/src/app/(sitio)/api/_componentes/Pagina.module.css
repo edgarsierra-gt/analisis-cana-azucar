@@ -1,0 +1,34 @@
+.medio { max-width: var(--ancho-medio); }
+.ruta { white-space: nowrap; }
+
+/* Dos columnas que pasan a una en teléfono (comandos) */
+.par { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--e-5) var(--e-6); max-width: var(--ancho-medio); }
+.par > * { min-width: 0; }
+.par > * > * + * { margin-top: var(--e-2); }
+@media (max-width: 760px) { .par { grid-template-columns: minmax(0, 1fr); } }
+
+.subtitulo { font-size: var(--t-h3); margin-top: var(--e-7); }
+.texto { max-width: var(--ancho-texto); color: var(--tinta-2); }
+.texto > * + * { margin-top: var(--e-3); }
+
+.paso { font-size: var(--t-chico); color: var(--tinta-2); }
+.paso strong { color: var(--tinta); }
+
+/* Ejemplos de respuesta, uno debajo del otro */
+.ejemplos { display: grid; gap: var(--e-5); max-width: var(--ancho-medio); }
+.ejemplos > * { min-width: 0; }
+.ejemplos > * > * + * { margin-top: var(--e-2); }
+
+/* Lista con reglas finas: clave a la izquierda, explicación a la derecha */
+.reglas { max-width: var(--ancho-medio); border-top: 1px solid var(--tinta); }
+.reglas > div { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: var(--e-5); padding: var(--e-4) 0; border-bottom: 1px solid var(--linea); }
+.reglas dt { font-weight: 650; color: var(--tinta); }
+.reglas dd { margin: 0; color: var(--tinta-2); }
+.reglas dd > * + * { margin-top: var(--e-2); }
+@media (max-width: 680px) { .reglas > div { grid-template-columns: minmax(0, 1fr); gap: var(--e-1); } }
+
+.puntos { max-width: var(--ancho-medio); color: var(--tinta-2); font-size: var(--t-chico); }
+.puntos li::marker { color: var(--tinta-3); }
+
+.enlaces { display: flex; flex-wrap: wrap; gap: var(--e-2) var(--e-5); list-style: none; padding: 0; font-size: var(--t-chico); }
+.enlaces li + li { margin-top: 0; }

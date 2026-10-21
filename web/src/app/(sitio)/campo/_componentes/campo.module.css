@@ -1,0 +1,69 @@
+/* Piezas propias de la página de campo. Solo tokens de globals.css. */
+
+/* Hipótesis descartadas: lista corta de "qué creía" y "qué la descartó" */
+.descartadas { max-width: var(--ancho-medio); border-top: 1px solid var(--linea); padding-top: var(--e-3); }
+.descartadas > p { color: var(--tinta-3); }
+.descartadas ul { list-style: none; padding: 0; margin-top: var(--e-2); }
+.descartadas li {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  gap: var(--e-4);
+  padding: var(--e-3) 0;
+  border-bottom: 1px solid var(--linea-suave);
+}
+.descartadas li + li { margin-top: 0; }
+.hipotesis { font-size: var(--t-chico); font-weight: 650; color: var(--tinta); }
+.motivo { margin-top: var(--e-1); font-size: var(--t-chico); color: var(--tinta-2); }
+.id {
+  font-family: var(--fuente-dato);
+  font-size: var(--t-etiqueta);
+  font-weight: 600;
+  color: var(--serie);
+  padding-top: 0.12rem;
+}
+
+/* Gráficas en varias columnas que bajan a una sola en pantallas angostas */
+.columnas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--e-5) var(--e-6);
+}
+.multiples {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+  gap: var(--e-5);
+}
+.panel { min-width: 0; }
+.panelTitulo { font-size: var(--t-chico); font-weight: 650; color: var(--tinta); line-height: 1.3; }
+.panelMeta { font-family: var(--fuente-dato); font-size: 0.75rem; color: var(--tinta-3); margin-top: 0.15rem; }
+
+/* Clave de lectura bajo una gráfica (en texto, no solo color) */
+.clave { display: flex; flex-wrap: wrap; gap: var(--e-2) var(--e-5); font-size: var(--t-etiqueta); color: var(--tinta-2); margin-top: var(--e-3); }
+.clave span { display: inline-flex; align-items: center; gap: var(--e-2); }
+.muestra { width: 0.75rem; height: 0.75rem; border-radius: 50%; background: var(--serie); flex: none; }
+.muestraHueca { width: 0.75rem; height: 0.75rem; border-radius: 50%; border: 1.5px solid var(--serie); flex: none; }
+.muestraGris { width: 0.75rem; height: 0.75rem; border-radius: 50%; background: var(--linea); flex: none; }
+/* Gris de contexto de las gráficas (COLORES.contexto), armado con tokens */
+.muestraContexto { width: 0.75rem; height: 0.75rem; border-radius: 50%; background: color-mix(in srgb, var(--tinta-3) 45%, var(--papel)); flex: none; }
+.muestraHuecaContexto { width: 0.75rem; height: 0.75rem; border-radius: 50%; border: 1.5px solid color-mix(in srgb, var(--tinta-3) 45%, var(--papel)); flex: none; }
+
+/* Figuras originales del notebook, dentro de un Desplegable */
+.galeria > * + * { margin-top: var(--e-5); }
+.galeria figcaption { font-family: var(--fuente-dato); font-size: 0.75rem; color: var(--tinta-3); margin-top: var(--e-2); overflow-wrap: anywhere; }
+
+/* Fórmula del modelo en una línea */
+.formula {
+  font-family: var(--fuente-dato);
+  font-size: var(--t-chico);
+  background: var(--serie-fondo);
+  border-left: 3px solid var(--serie);
+  padding: var(--e-3) var(--e-4);
+  color: var(--tinta);
+  overflow-x: auto;
+}
+
+/* Enlaces al notebook y a los archivos de salida */
+.fuentes { font-family: var(--fuente-dato); font-size: var(--t-etiqueta); color: var(--tinta-3); max-width: var(--ancho-medio); overflow-wrap: anywhere; }
+.fuentes a { color: var(--enlace); }
+.lista { list-style: none; padding: 0; display: grid; gap: var(--e-2); font-size: var(--t-chico); }
+.lista li + li { margin-top: 0; }

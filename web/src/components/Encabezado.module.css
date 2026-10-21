@@ -1,0 +1,82 @@
+.encabezado {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--papel);
+  border-bottom: 1px solid var(--tinta);
+}
+.barra {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-5);
+  min-height: 4.25rem;
+}
+.marca { display: grid; text-decoration: none; color: var(--tinta); line-height: 1.05; }
+.marca:hover { text-decoration: none; }
+.marcaTitulo { font-family: var(--fuente-titulo); font-size: 1.45rem; font-weight: 500; font-style: italic; letter-spacing: -0.01em; }
+.marcaSub { font-family: var(--fuente-dato); font-size: 0.7rem; letter-spacing: 0.09em; text-transform: uppercase; color: var(--tinta-3); margin-top: 0.2rem; }
+
+.nav { display: flex; align-items: center; gap: var(--e-1); }
+.enlace {
+  position: relative;
+  padding: 0.5rem 0.7rem;
+  font-size: var(--t-chico);
+  font-weight: 500;
+  color: var(--tinta-2);
+  text-decoration: none;
+}
+.enlace:hover { color: var(--tinta); text-decoration: none; }
+.enlace[aria-current="page"] { color: var(--tinta); font-weight: 650; }
+.enlace[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0.7rem; right: 0.7rem; bottom: -0.62rem;
+  height: 3px;
+  background: var(--serie);
+}
+.presentar {
+  margin-left: var(--e-3);
+  padding: 0.5rem 0.85rem;
+  font-size: var(--t-chico);
+  font-weight: 600;
+  color: var(--papel);
+  background: var(--tinta);
+  border-radius: var(--radio);
+  text-decoration: none;
+}
+.presentar:hover { background: var(--tinta-2); text-decoration: none; }
+
+.menu {
+  display: none;
+  font: 600 var(--t-chico) var(--fuente-texto);
+  background: none;
+  border: 1px solid var(--tinta);
+  border-radius: var(--radio);
+  padding: 0.4rem 0.75rem;
+  color: var(--tinta);
+  cursor: pointer;
+}
+
+@media (max-width: 860px) {
+  .menu { display: block; }
+  .nav {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    background: var(--papel);
+    border-bottom: 1px solid var(--tinta);
+    padding: var(--e-2) var(--margen) var(--e-4);
+  }
+  .nav.abierto { display: flex; }
+  .enlace { padding: 0.75rem 0; border-bottom: 1px solid var(--linea-suave); }
+  .enlace[aria-current="page"]::after { left: auto; right: 0; top: 50%; bottom: auto; width: 0.6rem; height: 0.6rem; margin-top: -0.3rem; border-radius: 50%; }
+  .presentar { margin: var(--e-4) 0 0; text-align: center; }
+}
+
+@media print { .encabezado { display: none; } }

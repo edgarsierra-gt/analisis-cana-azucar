@@ -1,0 +1,14 @@
+.indice { position: sticky; top: 4.25rem; z-index: 40; background: var(--papel); border-bottom: 1px solid var(--linea); }
+.fila { display: flex; align-items: center; gap: var(--e-5); overflow-x: auto; scrollbar-width: none; }
+.fila::-webkit-scrollbar { display: none; }
+.titulo { flex: none; color: var(--serie); }
+.lista { display: flex; gap: var(--e-1); list-style: none; padding: 0; margin: 0; }
+.lista li + li { margin-top: 0; }
+.lista a {
+  display: block; white-space: nowrap; padding: 0.7rem 0.75rem;
+  font-size: var(--t-chico); color: var(--tinta-2); text-decoration: none; border-bottom: 2px solid transparent;
+}
+.lista a:hover { color: var(--tinta); }
+.lista a[aria-current="true"] { color: var(--tinta); border-bottom-color: var(--serie); font-weight: 600; }
+@media (max-width: 860px) { .indice { top: 4.25rem; } }
+@media print { .indice { display: none; } }

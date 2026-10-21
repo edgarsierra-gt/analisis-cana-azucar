@@ -1,0 +1,114 @@
+/* Cinco nodos y cuatro flechas en una rejilla de 9 columnas; arriba, corchetes que agrupan las fases. */
+.diagrama {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr) 2rem minmax(0, 1fr) 2rem minmax(0, 1.2fr) 2rem minmax(0, 1.25fr) 2rem minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  row-gap: var(--e-3);
+  font-size: var(--t-chico);
+}
+
+/* Corchete de fase: línea fina con dos patas y un rótulo */
+.fase {
+  grid-row: 1;
+  position: relative;
+  padding-top: var(--e-2);
+  border-top: 1px solid var(--tinta-3);
+  font-family: var(--fuente-dato);
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+  line-height: 1.35;
+}
+.fase::before, .fase::after {
+  content: "";
+  position: absolute;
+  top: -1px;
+  width: 1px;
+  height: 0.5rem;
+  background: var(--tinta-3);
+}
+.fase::before { left: 0; }
+.fase::after { right: 0; }
+.faseAnalisis { grid-column: 1 / 4; }
+.faseServicio { grid-column: 5 / 8; }
+.faseUso { grid-column: 9 / 10; }
+
+.nodo {
+  grid-row: 2;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e-2);
+  padding: var(--e-4);
+  background: var(--hoja);
+  border: 1px solid var(--linea);
+  border-radius: var(--radio);
+  color: var(--tinta-2);
+  line-height: 1.45;
+}
+.n1 { grid-column: 1; }
+.n2 { grid-column: 3; }
+.n3 { grid-column: 5; }
+.n4 { grid-column: 7; }
+.n5 { grid-column: 9; }
+
+.titulo { font-family: var(--fuente-titulo); font-size: 1.2rem; font-weight: 500; line-height: 1.15; color: var(--tinta); }
+.ruta { font-family: var(--fuente-dato); font-size: 0.75rem; color: var(--tinta-3); margin-top: calc(-1 * var(--e-1)); }
+.pie { margin-top: auto; padding-top: var(--e-2); border-top: 1px solid var(--linea-suave); font-size: var(--t-etiqueta); color: var(--tinta-3); }
+
+.puntos { padding-left: 1em; }
+.puntos li + li { margin-top: var(--e-1); }
+
+.archivos { list-style: none; padding: 0; display: grid; gap: var(--e-2); }
+.archivos li + li { margin-top: 0; }
+.archivos li { display: grid; gap: 0.1rem; padding-left: var(--e-2); border-left: 3px solid var(--serie); }
+.serie { font-weight: 650; font-size: var(--t-etiqueta); color: var(--tinta); }
+.nombres { font-family: var(--fuente-dato); font-size: 0.75rem; color: var(--tinta-2); overflow-wrap: anywhere; }
+
+/* El nodo que importa: la API, en tinta */
+.api { background: var(--tinta); border-color: var(--tinta); color: var(--linea); }
+.api .titulo { color: var(--papel); }
+.api .ruta { color: var(--linea); }
+.api code { background: var(--tinta-2); color: var(--papel); }
+
+/* Flecha: línea fina con punta triangular */
+.flecha {
+  grid-row: 2;
+  align-self: center;
+  position: relative;
+  height: 1px;
+  margin: 0 0.3rem 0 0.2rem;
+  background: var(--tinta-3);
+}
+.flecha::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: -4px;
+  border-left: 7px solid var(--tinta-3);
+  border-top: 4.5px solid transparent;
+  border-bottom: 4.5px solid transparent;
+}
+.f1 { grid-column: 2; }
+.f2 { grid-column: 4; }
+.f3 { grid-column: 6; }
+.f4 { grid-column: 8; }
+
+/* Teléfono y tableta: de arriba abajo, en el orden del documento */
+@media (max-width: 960px) {
+  .diagrama { display: flex; flex-direction: column; align-items: stretch; gap: var(--e-2); }
+  .fase { margin-top: var(--e-3); }
+  .fase:first-child { margin-top: 0; }
+  .flecha { align-self: center; width: 1px; height: 1.5rem; margin: 0 0 0.25rem; }
+  .flecha::after {
+    right: auto;
+    top: auto;
+    left: -4px;
+    bottom: -1px;
+    border-left: 4.5px solid transparent;
+    border-right: 4.5px solid transparent;
+    border-top: 7px solid var(--tinta-3);
+    border-bottom: 0;
+  }
+}

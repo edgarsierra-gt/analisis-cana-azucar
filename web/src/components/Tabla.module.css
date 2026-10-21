@@ -1,0 +1,18 @@
+.envoltura { overflow-x: auto; }
+.tabla { width: 100%; border-collapse: collapse; font-size: var(--t-chico); }
+.titulo { caption-side: top; text-align: left; font-weight: 650; padding-bottom: var(--e-3); color: var(--tinta); }
+.tabla thead th {
+  font-family: var(--fuente-dato); font-size: 0.75rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase;
+  color: var(--tinta-3); text-align: left; padding: var(--e-2) var(--e-3); border-bottom: 1px solid var(--tinta); vertical-align: bottom;
+}
+.tabla tbody th, .tabla tbody td { padding: 0.55rem var(--e-3); border-bottom: 1px solid var(--linea-suave); vertical-align: top; text-align: left; }
+.tabla tbody th { font-weight: 600; color: var(--tinta); }
+.tabla td { color: var(--tinta-2); }
+.tabla th:first-child, .tabla td:first-child { padding-left: 0; }
+.num { text-align: right !important; font-family: var(--fuente-dato); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.destacada th, .destacada td { background: var(--serie-fondo); color: var(--tinta); }
+.destacada th:first-child { box-shadow: inset 3px 0 0 var(--serie); padding-left: var(--e-3); }
+.compacta { font-size: 0.875rem; }
+.compacta tbody th, .compacta tbody td { padding-top: 0.35rem; padding-bottom: 0.35rem; }
+.nota { margin-top: var(--e-3); font-size: var(--t-chico); color: var(--tinta-3); }
+.tabla thead th.num { white-space: normal; }

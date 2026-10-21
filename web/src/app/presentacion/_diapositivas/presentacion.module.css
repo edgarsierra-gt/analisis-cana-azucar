@@ -1,0 +1,135 @@
+/* Piezas propias de la presentación ejecutiva. Todo en cqw para que escale con la diapositiva,
+   y solo con los tokens de globals.css. La tipografía base (d-titulo, d-cifra, d-caja...) es la de Diapositivas. */
+
+/* ── Maquetas del cuerpo ── */
+.dos { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.36fr); grid-template-rows: minmax(0, 1fr); gap: 4.2cqw; }
+.dosIguales { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 4.2cqw; }
+.encargo { display: grid; grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr); grid-template-rows: minmax(0, 1fr); gap: 4cqw; }
+.filaYResto { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 2cqw; }
+.tres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.4cqw; align-items: start; }
+
+/* ── Cifras ── */
+.cifras { display: flex; flex-direction: column; justify-content: flex-start; min-height: 0; }
+.cifras > .cifra { padding: 0.9cqw 0; }
+.cifras > .cifra:first-child { padding-top: 0.2cqw; }
+.cifras > .cifra + .cifra { border-top: 0.08cqw solid var(--linea); }
+.cifras.compactas :global(.d-cifra) { font-size: 3.3cqw; }
+.cifras.compactas :global(.d-cifra-texto) { font-size: 1.28cqw; margin-top: 0.4cqw; }
+
+.filaCifras { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 0.08cqw solid var(--linea); border-bottom: 0.08cqw solid var(--linea); }
+.filaCifras > .cifra { padding: 1.2cqw 2cqw 1.2cqw 0; }
+.filaCifras > .cifra + .cifra { border-left: 0.08cqw solid var(--linea); padding-left: 2cqw; }
+.filaCifras.medianas :global(.d-cifra) { font-size: 4.2cqw; }
+.filaCifras.medianas :global(.d-cifra-texto) { font-size: 1.36cqw; margin-top: 0.6cqw; }
+
+.cifra { min-width: 0; }
+/* El párrafo de la cifra toma su altura de la cifra, no del cuerpo de texto de la página */
+.valor { font-size: 1cqw; line-height: 1; }
+.cifraDetalle { font-family: var(--fuente-dato); font-size: 1cqw; line-height: 1.45; color: var(--tinta-3); margin-top: 0.35cqw; }
+
+/* ── Gráficas ── */
+.columnaGrafica { display: flex; flex-direction: column; min-height: 0; }
+.leyenda { font-family: var(--fuente-dato); font-size: 1.05cqw; letter-spacing: 0.04em; text-transform: uppercase; color: var(--tinta-2); font-weight: 600; }
+.celdaGrafica { position: relative; flex: 1; min-height: 0; margin-top: 0.8cqw; }
+.lienzoGrafica { position: absolute; inset: 0; }
+.leyendaPie { font-size: 1.1cqw; line-height: 1.4; color: var(--tinta-3); margin-top: 0.6cqw; }
+.muestra { display: inline-block; width: 1.6cqw; height: 0.9cqw; vertical-align: baseline; margin-right: 0.4cqw; background: var(--serie); }
+.muestraClara { opacity: 0.35; }
+
+/* ── Listas ── */
+.subtitulo { font-family: var(--fuente-dato); font-size: 1.1cqw; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-3); font-weight: 600; margin-bottom: 0.9cqw; }
+.lista { list-style: none; padding: 0; margin: 0; counter-reset: paso; }
+.lista > li { display: grid; grid-template-columns: 2.6cqw minmax(0, 1fr); gap: 0.4cqw; padding: 0.85cqw 0; border-top: 0.08cqw solid var(--linea); font-size: 1.45cqw; line-height: 1.4; color: var(--tinta); }
+.lista > li + li { margin-top: 0; }
+.lista > li::before { counter-increment: paso; content: counter(paso); font-family: var(--fuente-titulo); font-size: 1.75cqw; line-height: 1.1; color: var(--serie); }
+.lista strong { font-weight: 650; }
+.lista .apagado { display: block; color: var(--tinta-2); font-size: 1.22cqw; margin-top: 0.15cqw; }
+.listaSinNumero > li { grid-template-columns: minmax(0, 1fr); }
+.listaSinNumero > li::before { content: none; }
+
+/* Preguntas por serie en la diapositiva del encargo */
+.pregunta { display: grid; grid-template-columns: 0.5cqw minmax(0, 1fr); gap: 1.4cqw; padding: 0.95cqw 0; border-top: 0.08cqw solid var(--linea); }
+.pregunta::before { content: ""; background: var(--serie); }
+.preguntaSerie { font-family: var(--fuente-dato); font-size: 1.05cqw; letter-spacing: 0.06em; text-transform: uppercase; color: var(--serie); font-weight: 600; }
+.preguntaTexto { font-size: 1.48cqw; line-height: 1.4; color: var(--tinta); margin-top: 0.25cqw; }
+
+/* Capas de alarmas y bloques cortos */
+.bloque { border-top: 0.45cqw solid var(--serie); background: var(--hoja); border-left: 0.08cqw solid var(--linea); border-right: 0.08cqw solid var(--linea); border-bottom: 0.08cqw solid var(--linea); padding: 1.3cqw 1.6cqw 1.5cqw; }
+.bloqueTitulo { font-family: var(--fuente-texto); font-size: 1.5cqw; font-weight: 650; color: var(--tinta); line-height: 1.25; }
+.bloqueTexto { font-size: 1.32cqw; line-height: 1.42; color: var(--tinta-2); margin-top: 0.6cqw; }
+.bloqueAccion { font-size: 1.32cqw; line-height: 1.42; color: var(--tinta); margin-top: 0.7cqw; font-weight: 600; }
+
+/* ── Evaluación gerencial ── */
+.evaluacion { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-rows: auto; gap: 1.2cqw; align-content: start; }
+.ancha { grid-column: span 3; }
+.angosta { grid-column: span 2; }
+.evaluacion .caja.decision { background: var(--serie-fondo); }
+/* Más compacta que la d-caja base para que quepan las cinco respuestas (selectores dobles: ganan a la regla base) */
+div.evaluacion.evaluacion { margin-top: 1.6cqw; }
+.evaluacion .caja.caja { padding: 1.2cqw 1.5cqw 1.35cqw; }
+.evaluacion .caja.caja h3 { font-size: 1.05cqw; }
+.evaluacion .caja.caja p { font-size: 1.32cqw; line-height: 1.4; margin-top: 0.55cqw; }
+.decision p { color: var(--tinta); font-weight: 500; }
+.caja p + p { margin-top: 0.5cqw; }
+
+/* Certeza escalada a la diapositiva (con texto siempre: el color nunca es la única señal) */
+.certeza { margin-top: 0.7cqw; }
+.certeza + .certeza { margin-top: 0.9cqw; }
+.nivel { display: inline-flex; align-items: center; gap: 0.6cqw; font-family: var(--fuente-dato); font-size: 1.1cqw; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 600; }
+.marcas { display: inline-flex; gap: 0.2cqw; }
+.marcas i { width: 0.55cqw; height: 1.1cqw; border: 0.1cqw solid currentColor; }
+.alta .nivel { color: var(--certeza-alta); }
+.alta .marcas i { background: currentColor; }
+.media .nivel { color: var(--certeza-media); }
+.media .marcas i:nth-child(-n + 2) { background: currentColor; }
+.baja .nivel { color: var(--certeza-baja); }
+.baja .marcas i:first-child { background: currentColor; }
+.motivo { font-size: 1.25cqw; line-height: 1.38; color: var(--tinta-2); margin-top: 0.25cqw; }
+
+/* ── Decisiones por gerencia ── */
+.decisiones { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2cqw; align-items: start; }
+.decisiones .caja.caja { padding: 1.4cqw 1.7cqw 1.5cqw; }
+.rotulo { font-family: var(--fuente-dato); font-size: 1cqw; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-3); font-weight: 600; margin-top: 1.2cqw; }
+.decisiones .caja p.rotulo { font-size: 1cqw; margin-top: 1.2cqw; }
+.puntos { list-style: none; padding: 0; margin: 0.5cqw 0 0; }
+.puntos li { font-size: 1.38cqw; line-height: 1.38; color: var(--tinta); padding-left: 1.4cqw; position: relative; }
+.puntos li + li { margin-top: 0.3cqw; }
+.puntos li::before { content: ""; position: absolute; left: 0; top: 0.62em; width: 0.6cqw; height: 0.6cqw; background: var(--serie); }
+.puntosSec li { color: var(--tinta-2); }
+.puntosSec li::before { background: var(--tinta-3); }
+
+/* ── Pie de cada diapositiva: fuente y enlace al detalle ── */
+.pie { margin-top: auto; padding-top: 1.4cqw; display: flex; align-items: baseline; justify-content: space-between; gap: 3cqw; }
+.pie a.detalle { color: var(--enlace); text-decoration: underline; text-underline-offset: 0.2em; white-space: nowrap; }
+.pie a.detalle:hover { text-decoration-thickness: 2px; }
+
+/* ── Portada y cierre ── */
+.arriba { margin-bottom: auto; }
+.meta { display: flex; flex-wrap: wrap; gap: 1.2cqw 4cqw; margin-top: 3.4cqw; padding-top: 1.6cqw; border-top: 0.08cqw solid var(--linea); }
+.meta dt { font-family: var(--fuente-dato); font-size: 1cqw; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-3); }
+.meta dd { margin: 0.3cqw 0 0; font-size: 1.5cqw; color: var(--tinta); }
+.enlaces { margin-top: 3cqw; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3cqw; padding-top: 1.6cqw; border-top: 0.08cqw solid var(--linea); }
+.enlaces dt { font-family: var(--fuente-dato); font-size: 1cqw; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tinta-3); }
+.enlaces dd { margin: 0.4cqw 0 0; font-size: 1.5cqw; line-height: 1.4; }
+.enlaces dd a { color: var(--enlace); }
+.enlaces .apagado { display: block; font-size: 1.15cqw; color: var(--tinta-3); margin-top: 0.2cqw; }
+
+/* Texto sobre el color de la serie (separadores). La regla base de Diapositivas pinta d-etiqueta con el color de la
+   serie, que sobre el fondo de la serie no se ve; esta regla la sobreescribe con más especificidad. */
+p.sobreColor.sobreColor { color: color-mix(in srgb, var(--papel) 80%, transparent); margin-bottom: 1.2cqw; }
+
+/* Texto de apoyo en separadores */
+.contexto { font-size: 1.5cqw; line-height: 1.5; max-width: 62cqw; margin-top: 2.4cqw; padding-top: 1.4cqw; border-top: 0.08cqw solid var(--linea-suave); color: inherit; opacity: 0.86; }
+
+/* Notas del expositor */
+.notas p + p { margin-top: 0.6rem; }
+.notasPregunta { font-weight: 650; }
+
+/* Aviso para teléfonos en vertical (fuera de las diapositivas, sobre el fondo oscuro de la pantalla) */
+.girar { display: none; }
+@media (max-width: 40rem) and (orientation: portrait) {
+  .girar {
+    display: block; position: fixed; top: 1rem; left: 1rem; right: 1rem; z-index: 5;
+    font-family: var(--fuente-dato); font-size: var(--t-etiqueta); line-height: 1.4; text-align: center; color: var(--linea);
+  }
+}
