@@ -34,6 +34,7 @@ lo que hizo la IA, cómo lo verifiqué y qué sugerencias o errores suyos correg
 | III · Mercado | Último cierre como pronóstico central y banda según volatilidad (D61) | ningún modelo probado le gana; el valor está en el rango |
 | III · Mercado | Permutación de los años del precio como prueba principal de la oferta (D62) | solo hay 20 años de precio; los errores agrupados prometían de más |
 | IV · API | La API lee artefactos JSON de las tres series y sus pruebas reproducen las cifras de los notebooks (D63, D70, D76) | sin pickles ni datasets, y comprobable |
+| IV · API | Límite de uso por IP y un asistente que solo redacta con lo que devuelven las funciones de la API (D78, D80) | API pública sin llave, con costo acotado y sin cifras inventadas |
 
 **Hipótesis que descarté** (24 en total; las principales):
 
@@ -46,7 +47,7 @@ lo que hizo la IA, cómo lo verifiqué y qué sugerencias o errores suyos correg
 | Un ARIMA pronostica mejor que el ingenuo (H22) | solo contra el ingenuo equivocado; contra el último cierre es 28 % peor |
 | El área no responde al precio (H24) | sí, con 2-3 años de rezago, pero poco (~0.08) y con evidencia causal débil |
 
-**Uso de IA en números.** 77 decisiones y 24 hipótesis descartadas. Corregí 32 errores de fondo de la IA (método,
+**Uso de IA en números.** 83 decisiones y 24 hipótesis descartadas. Corregí 34 errores de fondo de la IA (método,
 cálculo o afirmaciones sin respaldo), agrupé por serie las correcciones menores de texto, redondeo y figuras, y descarté
 3 sugerencias suyas. Al cerrar cada serie de análisis pedí una revisión independiente de cifras a un agente separado y
 corregí todo lo que encontró. Cada serie se volvió a correr desde cero en Windows antes de su commit, y sus cifras de
@@ -744,12 +745,14 @@ financiera) solo sirven para verificar.
   - encadeno Etiopía PDR → Etiopía y Sudán (anterior) → Sudán (Sudán del Sur no reporta caña);
   - recalculo el rendimiento en t/ha.
 
-**D54. Datos poco confiables (pregunta 1).** Cinco alertas por país:
-- % no oficial;
-- % imputado;
-- años seguidos con el mismo rendimiento;
-- saltos de más de 50 %;
-- variación casi nula.
+**D54. Datos poco confiables (pregunta 1).** Cinco alertas por país; con dos o más, lo marco como poco confiable:
+- más de 50 % de la producción con datos no oficiales;
+- 5 o más años seguidos con el mismo rendimiento;
+- 3 o más saltos del rendimiento de más de 50 % de un año a otro;
+- variación casi nula del rendimiento (desvío robusto del cambio anual menor a 1.5 %);
+- rendimiento 2014-2023 menor a 30 t/ha.
+
+El % imputado se reporta en la tabla, pero no cuenta como alerta.
 
 Lo que encuentran:
 - Liberia repite el mismo rendimiento 33 años y Ghana 11; Guinea y Papúa Nueva Guinea no tienen ni un dato oficial de
@@ -893,7 +896,7 @@ primera etapa tiene F = 0.2.
      mayoritariamente no oficiales; los pares son El Salvador, Eswatini, Brasil, Nicaragua y Egipto.
   2. La primera exploración del pronóstico comparaba el AR(1) contra el promedio del mes y parecía ganarle. El baseline
      correcto es el último cierre, contra el que pierde (D61, H22).
-  3. El texto de las bandas afirmaba que la banda fija cubría menos en turbulencia. En el período evaluado solo hay 6
+  3. El texto de las bandas afirmaba que la banda fija cubría menos en turbulencia. En el período evaluado solo hay 8
      meses turbulentos de 149, así que esa comparación no se puede hacer; la retiré.
   4. En la oferta se afirmó primero que los placebos "dan cero". Con el precio cortado en 2023 (sin el 2024 parcial),
      el precio del año siguiente se asocia negativamente con el área (−0.02). La revisión independiente marcó además
@@ -1038,16 +1041,85 @@ notebook 12 (≤ 0.02 ¢/lb); y las cifras de los ejemplos de `docs/api.md`. Par
 `src/fabrica_anomalias` corra también en Docker, la imagen suma scikit-learn: pasa de 448 a 723 MB. Dentro de Docker
 pasan las 67 pruebas (62 de la API y 5 del esquema SQL).
 
+**D77. Despliegue en Cloud Run.** Desplegué la misma imagen de Docker como servicio aparte (`analisis-cana-api`, us-central1),
+en mi proyecto de GCP del sitio personal, sin tocar el servicio que ya existía ahí. Pública, con 0 instancias mínimas (no cuesta
+si nadie la usa) y 2 máximas (tope de gasto), 1 GB de memoria. CORS solo para edgarsierra.com, localhost y las vistas previas de
+Vercel de este proyecto (`CORS_ORIGIN_REGEX`); otro sitio no puede consultarla desde el navegador. URL: https://analisis-cana-api-36437889250.us-central1.run.app.
+*Verificación:* `/salud`, `/docs` y `/mercado/pronostico` responden igual que en Docker, y una petición con otro origen no
+recibe permiso de CORS.
+
+**D78. Límite de uso por IP** (`api/limites.py`, versión 1.2.0). La API está en internet sin usuarios ni llaves, así
+que cualquiera podría usarla sin medida. Cada IP tiene 40 consultas por minuto y 300 por día, y el servicio un tope de
+5,000 diarias; `/salud` y la documentación no gastan la cuota. Al pasarse responde 429 con un mensaje en español y
+`Retry-After`; el día se reinicia a la medianoche de Guatemala. Lo dejé en memoria de cada instancia: con 2 instancias
+como máximo, el tope real es a lo sumo el doble, suficiente para evitar abusos y acotar el costo. Descarté Cloud Armor
+(necesita un balanceador de carga con costo fijo) y una base compartida como Redis (otro servicio que mantener para una
+demo). El límite va por dentro de CORS para que el navegador pueda leer el mensaje del 429.
+*Verificación:* `tests/test_limites.py` (cuota por día y por minuto, tope global, reinicio a medianoche, 429 en español
+con cabeceras de CORS, otra IP no se ve afectada).
+
+**D79. Errores de validación en español.** pydantic responde en inglés y sin nombrar el campo en el texto. Traduje cada
+tipo de error a una frase que dice el campo y el motivo: "precio: debe ser mayor o igual a 0.05",
+"minutos[3].PTCA_8322A: debe ser menor o igual a 20" (`api/errores.py`). Quien usa la API desde el sitio ve qué corregir.
+También traduje los mensajes de forma que FastAPI da en inglés: JSON mal escrito, cuerpo que no está en UTF-8, ruta que
+no existe (404) y método no permitido (405).
+*Verificación:* 13 casos en `tests/test_limites.py`, incluido un minuto con la presión en kPa.
+
+**D80. Asistente con Gemini en Vertex AI y herramientas que son la misma API** (`api/asistente.py`). El sitio necesitaba
+un chatbot que responda sobre las tres series sin inventar cifras. Lo diseñé con llamadas a funciones: el modelo recibe
+instrucciones fijas y 9 herramientas (ranking, ciclo, pronóstico de azúcar, catálogo, grupos, sensores, sensor virtual,
+precio y el resumen gerencial de cada serie), que son las mismas funciones de los endpoints. Las instrucciones le piden
+responder solo con lo que devuelven, citar el notebook de cada cifra, no nombrar a ningún ingenio, declinar lo que no
+sea de los análisis y tratar lo que devuelven las herramientas como datos, no como órdenes. Descarté buscar en
+documentos con vectores (RAG): los datos son pocos y estructurados, y una herramienta devuelve la cifra exacta que ya
+verifican las pruebas. En Cloud Run se autentica con la cuenta de servicio, sin llaves en el repo.
+La librería de Google suma 54 MB a la imagen (de 723 a 777 MB).
+*Verificación:* `tests/test_asistente.py` con un modelo falso (cada herramienta da lo mismo que su endpoint; el bucle se
+detiene en 6 pasos; 422, 429, 502 y 503), las 120 pruebas aprobadas dentro de Docker y seis preguntas reales: cuatro de las series, una fuera de tema y un intento
+de que revelara sus instrucciones y el nombre del ingenio. Las cifras de las respuestas coinciden con la API; declinó
+las dos últimas.
+
+**D81. Cuota y costo del asistente.** Cada pregunta gasta un modelo de lenguaje, así que tiene una cuota aparte y más
+corta: 30 preguntas por IP al día, 5 por minuto y 300 en total. Además: 500 caracteres por pregunta, 8 mensajes de
+historial, 6 pasos de herramientas y 2,048 tokens de respuesta. La conversación vive en el navegador; el servidor no
+guarda ni registra las preguntas. `GET /asistente/estado` dice cuántas le quedan a quien consulta sin gastar ninguna.
+Si el modelo falla (502), la pregunta se devuelve a la cuota del día: la falla es del servicio, no de quien pregunta.
+*Verificación:* `tests/test_asistente.py` (la tercera pregunta con cuota de 2 recibe 429; consultar el estado no gasta;
+una pregunta de 501 caracteres o un historial con rol "sistema" se rechazan sin llamar al modelo).
+
+**D82. Modelo principal y de respaldo.** Probé `gemini-3.8-flash`, pero horas después Vertex respondía 429 (sin
+capacidad) después de 27 s, y la librería reintentaba 5 veces con espera creciente: una pregunta quedaba minutos sin
+respuesta. Elegí `gemini-3.5-flash` (1 a 4 s por llamada) con `gemini-3.5-flash-lite` de respaldo: un solo intento por
+llamada con 45 s de tiempo máximo y, si el principal está saturado, se usa el de respaldo por 5 minutos. Razonamiento
+interno bajo, para responder rápido.
+*Verificación:* las seis preguntas reales respondieron en 2 a 7 s; la prueba del respaldo simula el 429 de Vertex.
+
+**D83. Sitio web en Next.js con diseño propio** (`web/`). La entrega se lee en `edgarsierra.com/analisis-cana-azucar`:
+inicio, una página por serie, la API (con consultas en vivo), herramientas, presentación y el asistente con su diagrama.
+Hice un sistema de diseño desde cero (`web/DESIGN.md`) en lugar de reutilizar el de mi sitio personal. Las cifras no
+se copian a mano: un script copia los JSON y tablas de `outputs/` antes de cada build, y los gráficos (Observable Plot)
+se dibujan con esos datos. Es un proyecto aparte en Vercel; mi sitio principal solo redirige esa ruta.
+*Verificación:* `npm run build` sin errores y revisión visual de cada página en escritorio y celular.
+
 ### Uso de IA
 
-- **Qué hizo:** escribió el código de la API, las pruebas, el Docker y la documentación según mi diseño de endpoints
-  y respuestas.
+- **Qué hizo:** escribió el código de la API, las pruebas, el Docker, la documentación, el asistente y el sitio web
+  según mi diseño de endpoints, respuestas, límites y páginas.
 - **Cómo lo verifiqué:** con las pruebas automáticas contra las cifras de control de los notebooks, y comparando cada
   ejemplo de `docs/api.md` con una llamada real.
 - **Errores de fondo de la IA que corregí:**
   1. La primera versión de la prueba de las 509 predicciones mandaba la ventaja del lote como `NaN` en los 8 lotes que
      no la tienen, y fallaba. Ahora se manda como "sin dato", igual que la calculadora del HTML.
+  2. El asistente entregaba la certeza del ranking (calculada con US$0.20/lb) también cuando se pedía otro precio. En
+     una prueba real a US$0.15/lb, Gemini dio un intervalo de ganancia de US$226 a 319 junto a una ganancia de US$190,
+     que queda fuera. Ahora las herramientas no entregan la certeza fuera de los supuestos base y dicen por qué.
+  3. La primera versión del asistente dejaba los reintentos por defecto de la librería de Google: con el modelo
+     saturado, una pregunta podía esperar minutos. Ahora hay un intento con tiempo máximo y un modelo de respaldo (D82).
 - **Correcciones menores:** las decisiones de la auditoría salían con 10 decimales (ahora 2); Docker Compose tomaba
   el nombre del proyecto de la carpeta local, con contenedores de nombre no neutro (ahora `name: analisis-cana`); una
   prueba redondeaba +16.5 % a 16 con `round()` de Python, que redondea al par (ahora redondeo convencional, 17, como en
-  el README); y la prueba de verificación no corría en Docker porque la imagen no traía scikit-learn (D76).
+  el notebook 12); y la prueba de verificación no corría en Docker porque la imagen no traía scikit-learn (D76). En la etapa
+  del asistente y el sitio: la marca de "respuesta recortada" del asistente usaba la clave `aviso`, que ya traen el
+  pronóstico y el precio (lo detectaron las pruebas); `docs/api.md` decía que las bandas −6 %/+7 % del precio estaban
+  en el README (están en el notebook 12); los mensajes del límite mezclaban "tú" y "usted"; y un borrador del sitio
+  decía que la API tenía 15 consultas (eran 12).

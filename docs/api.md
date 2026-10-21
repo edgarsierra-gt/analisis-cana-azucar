@@ -3,7 +3,7 @@
 ## Qué es
 
 Un servicio web que responde con una consulta las preguntas de la Serie I (campo) y parte de las Series II
-(caldera) y III (mercado). Otro sistema (una hoja de cálculo, una aplicación web, un chatbot o un flujo automático) le
+(caldera) y III (mercado). Otro sistema (una hoja de cálculo, una aplicación web, el asistente del sitio o un flujo automático) le
 manda datos en JSON y recibe la respuesta en JSON.
 
 - **Qué pregunta responde cada consulta:**
@@ -23,7 +23,7 @@ flowchart LR
     J -->|se cargan al arrancar| A["API FastAPI<br/>api/main.py"]
     S["src/campo_*.py<br/>(mismo código que los notebooks)"] --> A
     A --> W["App web"]
-    A --> C["Chatbot"]
+    A --> C["Asistente<br/>(Gemini en Vertex AI)"]
     A --> O["Otros sistemas<br/>(hoja de cálculo, flujos)"]
 ```
 
@@ -38,7 +38,7 @@ flowchart LR
 | Respaldar el medidor de vapor | Si el medidor falla o se sospecha de él, estimar el vapor con los demás sensores. |
 | Separar sensor de proceso | Mandar los últimos minutos y saber si un instrumento se separó de sus pares o si es un evento del hogar. |
 | Presupuestar ventas | Ver el rango de precio a 1 y 3 meses y el rango de ingreso de las toneladas sin fijar. |
-| Alimentar otras herramientas | La app de predicción y el chatbot del sitio web consultan esta misma API; no repiten cálculos. |
+| Alimentar otras herramientas | Las herramientas y el asistente del sitio web consultan esta misma API; no repiten cálculos. |
 
 **Límite principal:** los datos son públicos y de otros lugares: ensayos de Louisiana (2010-2021), una caldera a carbón
 y el mercado mundial. Sirven para el método; los valores de otra operación saldrán de sus propios datos.
@@ -47,12 +47,23 @@ y el mercado mundial. Sirven para el método; los valores de otra operación sal
 
 | Qué | Comando |
 |---|---|
+| Usarla en línea (Cloud Run, sin instalar nada) | [https://analisis-cana-api-36437889250.us-central1.run.app/docs](https://analisis-cana-api-36437889250.us-central1.run.app/docs) |
 | API con Docker (un solo comando) | `docker compose up --build` → `http://localhost:8000/docs` |
 | Todas las pruebas con Docker (incluye PostgreSQL 16) | `docker compose --profile pruebas run --rm pruebas` |
 | API sin Docker | `pip install -r requirements.txt` y `uvicorn api.main:app --reload` |
 | Pruebas sin Docker | `pytest` (la prueba de PostgreSQL se omite sin `CAMPO_PG_DSN`) |
 
-No necesita los datasets ni variables secretas. `CORS_ORIGINS` (opcional) limita qué sitios web pueden consultarla.
+No necesita los datasets ni variables secretas. Variables opcionales:
+
+| Variable | Para qué | Por defecto |
+|---|---|---|
+| `CORS_ORIGINS`, `CORS_ORIGIN_REGEX` | qué sitios web pueden consultarla (lista separada por coma y un patrón, por ejemplo para las vistas previas de Vercel) | cualquiera |
+| `LIMITE_IP_DIA`, `LIMITE_IP_MINUTO`, `LIMITE_GLOBAL_DIA` | límite de uso por IP y total por día | 300, 40 y 5,000 |
+| `ASISTENTE_LIMITE_IP_DIA`, `ASISTENTE_LIMITE_IP_MINUTO`, `ASISTENTE_LIMITE_GLOBAL_DIA` | límite del asistente | 30, 5 y 300 |
+| `LIMITES_ACTIVOS` | `0` apaga los límites (las pruebas automáticas lo usan) | `1` |
+| `GOOGLE_CLOUD_PROJECT`, `ASISTENTE_REGION`, `ASISTENTE_MODELO`, `ASISTENTE_MODELO_RESPALDO` | proyecto de Google Cloud, región y modelos del asistente; sin proyecto, el asistente responde 503 y lo demás funciona igual | —, `global`, `gemini-3.5-flash`, `gemini-3.5-flash-lite` |
+
+En Cloud Run el asistente se autentica con la cuenta de servicio del entorno: no hay llaves en el repo ni en la imagen.
 
 ## Consultas
 
@@ -72,6 +83,8 @@ Todas las cifras de los ejemplos salen de llamar a la API con los artefactos del
 | `POST /caldera/vapor-virtual` | II · 3 | al menos 10 minutos de promedios de 1 min | vapor estimado, banda de 90 % y comparación con el medido |
 | `POST /caldera/verificar` | II · 4 | 1 a 120 minutos de promedios de 1 min | z de los 12 chequeos, alarmas y diagnóstico |
 | `GET /mercado/pronostico?h=1` | III · 3 | horizonte (1 o 3) y, opcional, toneladas | centro y bandas de 80 % y 95 % en ¢/lb, % y US$/t |
+| `GET /asistente/estado` | — | — | si el asistente está activo, modelo y preguntas que le quedan hoy a quien consulta |
+| `POST /asistente` | todas | pregunta en español (hasta 500 caracteres) y, opcional, los últimos 8 mensajes | respuesta en Markdown, qué consultas usó y preguntas restantes |
 
 ### Pregunta 1 · `GET /campo/variedades`
 
@@ -287,15 +300,86 @@ Ejemplo: 6 minutos con el medidor de vapor 3 t/h arriba de lo real.
   el notebook 12 con datos nuevos.
 - Precio No. 11 sin primas, flete ni tipo de cambio; 1 ¢/lb = US$22.05 por tonelada.
 
-## Validación de entradas y errores
+## Asistente (preguntas en español)
+
+`POST /asistente` responde preguntas sobre los tres análisis. Usa Gemini (`gemini-3.5-flash`) en Vertex AI, pero el
+modelo **no calcula ni inventa cifras**: pide a la API las consultas que necesita y redacta con lo que devuelven. Si el
+modelo está saturado (Vertex responde 429), pasa a `gemini-3.5-flash-lite` por 5 minutos.
+
+```mermaid
+flowchart LR
+    U["Visitante<br/>(sitio web)"] -->|"pregunta + últimos mensajes"| A["POST /asistente<br/>cuota: 30 por IP al día"]
+    A -->|"instrucciones fijas + 9 herramientas"| G["Gemini<br/>Vertex AI"]
+    G -->|"pide una herramienta"| H["Herramientas = funciones de la API<br/>ranking · ciclo · pronóstico · grupos<br/>sensores · vapor · precio · resúmenes"]
+    H -->|"resultado con su fuente"| G
+    J["JSON de los notebooks"] --> H
+    G -->|"respuesta en Markdown<br/>(hasta 6 pasos)"| A
+    A --> U
+```
+
+```json
+POST /asistente
+{"pregunta": "¿Qué precio del azúcar se espera el próximo mes?", "historial": []}
+
+{
+  "respuesta": "Se espera alrededor de 18.30 ¢/lb, el último cierre ... (notebook 12)",
+  "herramientas": [{"nombre": "pronostico_precio", "etiqueta": "Pronóstico del precio", "argumentos": {"h": 1}}],
+  "restantes_hoy": 29, "modelo": "gemini-3.5-flash", "pasos": 2
+}
+```
+
+| Herramienta | Qué consulta |
+|---|---|
+| Ranking de variedades | lo mismo que `GET /campo/variedades`, con otro precio o costos si se piden |
+| Ciclo de renovación | lo mismo que `POST /campo/ciclo` (sin la curva por corte) |
+
+La certeza del ranking (P_top3 e intervalo de 90 %) se calculó con los supuestos base. Con otro precio o costos, las
+herramientas no la entregan y avisan por qué: en una prueba el modelo la mezclaba con el margen del precio nuevo.
+| Pronóstico de azúcar por finca | lo mismo que `POST /campo/pronostico` |
+| Variedades y fincas disponibles | el catálogo de `GET /campo/variedades` |
+| Grupos de variedades | grupo y certeza de cada variedad (notebook 04) |
+| Sensores de la caldera | lo mismo que `GET /caldera/sensores` |
+| Sensor virtual del vapor | error de cada modelo, banda y fórmula de dos variables (notebook 08) |
+| Pronóstico del precio | lo mismo que `GET /mercado/pronostico` |
+| Hallazgos y recomendaciones de una serie | el resumen gerencial de cada serie en el README |
+
+Reglas y límites:
+
+- **Solo datos de las herramientas.** Las instrucciones le piden citar la fuente (el notebook) de cada cifra, decir
+  cuando un dato no está, no nombrar a ningún ingenio y tratar lo que devuelven las herramientas como datos, no como
+  órdenes. Fuera de los tres análisis, declina con amabilidad.
+- **Costo acotado:** 30 preguntas por IP al día, 5 por minuto y 300 en total por día (por instancia); hasta 500
+  caracteres por pregunta, 8 mensajes de historial, 6 pasos de herramientas, 2,048 tokens de respuesta y 45 s por llamada al modelo.
+- **No guarda nada:** la conversación vive en el navegador; el servidor no registra las preguntas.
+- **Errores:** 422 si la pregunta es demasiado larga, 429 si se acabó la cuota, 503 si no está configurado (por ejemplo
+  en Docker local sin Google Cloud) y 502 si el modelo no respondió (esa pregunta no se descuenta de la cuota).
+
+## Validación de entradas, límite de uso y errores
 
 Cada campo tiene un rango físico o económico plausible (por ejemplo, precio entre US$0.05 y 1.00/lb, corte de 0 a 4,
-TCH entre 0 y 400, presión del domo entre 0 y 20 MPa: una presión en kPa se rechaza). Una entrada fuera de rango, una variedad o finca desconocida, o un CSV sin las columnas necesarias
-devuelven **422** con un mensaje en español que dice qué corregir.
+TCH entre 0 y 400, presión del domo entre 0 y 20 MPa: una presión en kPa se rechaza). Una entrada fuera de rango, una
+variedad o finca desconocida, o un CSV sin las columnas necesarias devuelven **422** con un mensaje en español que
+nombra el campo que hay que corregir:
+
+```json
+{"detail": "precio: debe ser mayor o igual a 0.05",
+ "errores": ["precio: debe ser mayor o igual a 0.05"]}
+```
+
+Los errores de forma también están en español: un JSON mal escrito (422), un cuerpo que no está en UTF-8 (400), una
+ruta que no existe (404) y un método no permitido (405).
+
+La API es pública y no pide llave, así que tiene un **límite de uso por IP**: 40 consultas por minuto y 300 por día, más
+un tope de 5,000 consultas diarias para todo el servicio. `/salud` y la documentación no gastan la cuota diaria. Si se
+pasa, responde **429** con un mensaje en español y la cabecera `Retry-After` (segundos para volver a intentar); cada
+respuesta trae `X-Consultas-Restantes-Hoy`. El día se reinicia a la medianoche, hora de Guatemala. El conteo vive en la
+memoria de cada instancia: con Cloud Run limitado a 2 instancias, el tope real es como mucho el doble, lo que basta para
+evitar abusos y acotar el costo.
 
 ## Cómo se verificó
 
-`tests/test_api.py` y `tests/test_api_caldera_mercado.py` llaman a la API y comprueban las cifras de los notebooks:
+`tests/test_api.py` y `tests/test_api_caldera_mercado.py` llaman a la API y comprueban las cifras de los notebooks;
+`tests/test_limites.py` y `tests/test_asistente.py` cubren el límite de uso y el asistente:
 
 | Pregunta | Qué se comprueba |
 |---|---|
@@ -306,11 +390,13 @@ devuelven **422** con un mensaje en español que dice qué corregir.
 | II · 2 | el 100 % de las 1,441 ventanas de 5 min del notebook 07 |
 | II · 3 | 171 minutos con 10 minutos de historia: el vapor estimado es igual al Ridge final del notebook 08 (≤ 0.006 t/h, por redondeo) |
 | II · 4 | el z de los 12 chequeos es igual al de `src/fabrica_anomalias` (el código del notebook 09) en 180 minutos; operación normal sin alarmas; una presión desplazada alarma solo con 5 minutos seguidos; tres presiones a la vez son un evento del hogar; una deriva de 3 t/h del medidor la señala el chequeo de vapor |
-| III · 3 | las bandas de 80 % y 95 % a 1 y 3 meses iguales a las del notebook 12 (≤ 0.02 ¢/lb); −6 % a +7 % y −14 % a +17 % como en el README |
-| todas | entradas inválidas devuelven 422 |
+| III · 3 | las bandas de 80 % y 95 % a 1 y 3 meses iguales a las del notebook 12 (≤ 0.02 ¢/lb); −6 % a +7 % y −14 % a +17 % como en el texto del notebook 12 |
+| todas | entradas inválidas devuelven 422 con el campo y el motivo en español |
+| límite de uso | `tests/test_limites.py`: cuota por IP al día y por minuto, tope global, reinicio a medianoche, 429 en español con CORS |
+| asistente | `tests/test_asistente.py`, con un modelo falso (no llama a Vertex AI): cada herramienta da lo mismo que su endpoint, el bucle se detiene en 6 pasos, cuota con 429, 422, 502 y 503 |
 
 Las muestras de la caldera las exportan los notebooks 07 y 08 (`outputs/tables/serie2_muestra_api_modos.csv` y
 `serie2_muestra_api_vapor.csv`), así que las pruebas no necesitan los datasets.
 
 `tests/test_esquema_postgres.py` comprueba además que la auditoría hecha en PostgreSQL es igual a la de pandas.
-La última corrida dentro de Docker (API + PostgreSQL 16) quedó en `outputs/tests/pytest_docker.txt`: 67 pruebas aprobadas.
+La última corrida dentro de Docker (API + PostgreSQL 16) quedó en `outputs/tests/pytest_docker.txt`: 120 pruebas aprobadas.

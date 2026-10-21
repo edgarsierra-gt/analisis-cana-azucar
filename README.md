@@ -5,8 +5,11 @@
 | I · Campo | variedades de caña y renovación de lotes | notebooks 01-05 listos |
 | II · Fábrica | caldera de cogeneración | notebooks 06-09 listos |
 | III · Mercado | producción mundial y precio del azúcar | notebooks 10-13 listos |
-| IV · Producción | API de las Series I, II y III con Docker Compose y pruebas | lista |
-| V · Presentación | presentación ejecutiva | pendiente |
+| IV · Producción | API de las Series I, II y III con Docker Compose, pruebas, límite de uso y asistente (Vertex AI) | lista, en Cloud Run |
+| V · Presentación | presentación ejecutiva | en el sitio web (`/presentacion`) |
+
+**En línea:** sitio [edgarsierra.com/analisis-cana-azucar](https://edgarsierra.com/analisis-cana-azucar) (Next.js en
+Vercel, código en `web/`) y API [analisis-cana-api…run.app/docs](https://analisis-cana-api-36437889250.us-central1.run.app/docs).
 
 Estado Serie I · Campo:
 - `notebooks/01_campo_eda.ipynb` — auditoría y EDA (listo)
@@ -154,6 +157,7 @@ Detalle de cada consulta, ejemplos y para qué sirve: [`docs/api.md`](docs/api.m
 
 | Qué | Comando (desde la raíz, con Docker Desktop abierto) |
 |---|---|
+| Usarla en línea (Cloud Run) | [https://analisis-cana-api-36437889250.us-central1.run.app/docs](https://analisis-cana-api-36437889250.us-central1.run.app/docs) |
 | Levantar la API | `docker compose up --build` → documentación interactiva en `http://localhost:8000/docs` |
 | Correr todas las pruebas, incluida PostgreSQL 16 | `docker compose --profile pruebas run --rm pruebas` |
 | Sin Docker | `pip install -r requirements.txt`, luego `uvicorn api.main:app --reload` y `pytest` |
@@ -169,6 +173,18 @@ Detalle de cada consulta, ejemplos y para qué sirve: [`docs/api.md`](docs/api.m
 | `POST /caldera/vapor-virtual` | II · 3 · sensor virtual del flujo de vapor |
 | `POST /caldera/verificar` | II · 4 · verificación de sensores: ¿falla el sensor o es el proceso? |
 | `GET /mercado/pronostico` | III · 3 · precio del azúcar a 1 y 3 meses con bandas |
+| `POST /asistente`, `GET /asistente/estado` | asistente: preguntas en español sobre las tres series |
+
+**Asistente.** `POST /asistente` responde preguntas en español con Gemini en Vertex AI. El modelo no calcula ni inventa
+cifras: llama a las mismas funciones de la API (ranking, ciclo, pronóstico, grupos, sensores, sensor virtual, precio y
+los resúmenes gerenciales de este README) y redacta solo con lo que devuelven, citando el notebook. En Cloud Run se
+autentica con la cuenta de servicio (sin llaves en el repo); sin Google Cloud responde 503 y el resto de la API sigue
+igual.
+
+**Límite de uso.** La API es pública y sin llave, así que cada IP tiene 40 consultas por minuto y 300 por día, con un
+tope de 5,000 diarias para todo el servicio. El asistente tiene una cuota aparte: 30 preguntas por IP al día, 5 por
+minuto y 300 en total. Al pasarse responde 429 con un mensaje en español. Los errores de validación (422) también
+están en español y nombran el campo que hay que corregir.
 
 Las pruebas llaman a la API y reproducen las cifras de los notebooks:
 - `tests/test_api.py` (Serie I): margen de referencia US$526.3/acre/año, las 23 variedades del notebook 02, las 509
@@ -176,8 +192,11 @@ Las pruebas llaman a la API y reproducen las cifras de los notebooks:
 - `tests/test_api_caldera_mercado.py` (Series II y III): el 100 % de las 1,441 ventanas de modo, el Ridge final del
   sensor virtual en 171 minutos, los 12 chequeos de verificación igual que `src/fabrica_anomalias`, el diagnóstico
   sensor contra proceso con fallas inyectadas y las bandas del pronóstico del notebook 12.
+- `tests/test_limites.py`: cuotas por IP y global, reinicio a medianoche, 429 y 422 en español.
+- `tests/test_asistente.py`: con un modelo falso (sin llamar a Vertex AI), cada herramienta del asistente da lo mismo
+  que su endpoint; el bucle se detiene en 6 pasos; cuota, 422, 502 y 503.
 
-Última corrida dentro de Docker, con PostgreSQL 16: 67 pruebas aprobadas (`outputs/tests/pytest_docker.txt`).
+Última corrida dentro de Docker, con PostgreSQL 16: 120 pruebas aprobadas (`outputs/tests/pytest_docker.txt`).
 
 ## Estructura
 
@@ -225,10 +244,15 @@ Serie IV · Producción
 - `Dockerfile`, `docker-compose.yml` — imagen de la API y servicios de pruebas (PostgreSQL 16 temporal)
 - `api/caldera.py`, `api/mercado.py` — cálculos de la caldera (Serie II) y del pronóstico del precio (Serie III)
   sobre sus JSON
+- `api/limites.py`, `api/errores.py` — límite de uso por IP (429) y errores de validación en español (422)
+- `api/asistente.py` — asistente con Gemini en Vertex AI: instrucciones, herramientas y bucle de llamadas a funciones
 - `tests/test_api.py` — pruebas de la API con las cifras de control de la Serie I
 - `tests/test_api_caldera_mercado.py` — pruebas de la API de la caldera y el mercado, con las muestras que exportan los
   notebooks 07 y 08 (`outputs/tables/serie2_muestra_api_*.csv`)
-- `outputs/tests/pytest_docker.txt` — salida de todas las pruebas dentro de Docker (API + PostgreSQL 16: 67 aprobadas)
+- `tests/test_limites.py`, `tests/test_asistente.py` — pruebas del límite de uso, de los errores y del asistente (con
+  un modelo falso, sin llamar a Vertex AI)
+- `web/` — sitio en Next.js que presenta las tres series, la API y el asistente (`edgarsierra.com/analisis-cana-azucar`)
+- `outputs/tests/pytest_docker.txt` — salida de todas las pruebas dentro de Docker (API + PostgreSQL 16: 120 aprobadas)
 - `docs/api.md` — documentación de la API: qué es, para qué sirve, cada consulta con ejemplo
 
 General
