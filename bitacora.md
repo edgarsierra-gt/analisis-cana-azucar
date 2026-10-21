@@ -47,7 +47,7 @@ lo que hizo la IA, cómo lo verifiqué y qué sugerencias o errores suyos correg
 | Un ARIMA pronostica mejor que el ingenuo (H22) | solo contra el ingenuo equivocado; contra el último cierre es 28 % peor |
 | El área no responde al precio (H24) | sí, con 2-3 años de rezago, pero poco (~0.08) y con evidencia causal débil |
 
-**Uso de IA en números.** 83 decisiones y 24 hipótesis descartadas. Corregí 34 errores de fondo de la IA (método,
+**Uso de IA en números.** 84 decisiones (D1-D83 y D13b) y 24 hipótesis descartadas. Corregí 34 errores de fondo de la IA (método,
 cálculo o afirmaciones sin respaldo), agrupé por serie las correcciones menores de texto, redondeo y figuras, y descarté
 3 sugerencias suyas. Al cerrar cada serie de análisis pedí una revisión independiente de cifras a un agente separado y
 corregí todo lo que encontró. Cada serie se volvió a correr desde cero en Windows antes de su commit, y sus cifras de

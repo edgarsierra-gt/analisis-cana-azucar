@@ -27,7 +27,7 @@ const NOTEBOOKS = 13;
 // fuente: docs/api.md, tabla "Consultas", y /openapi.json de la API (14 rutas, incluidas /salud y las 2 del asistente)
 const CONSULTAS_API = 14;
 // fuente: bitacora.md, "Resumen" > "Uso de IA en números"
-const BITACORA = { decisiones: 83, hipotesis: 24, erroresIa: 34 };
+const BITACORA = { decisiones: 84, hipotesis: 24, erroresIa: 34 };
 // fuente: outputs/tests/pytest_docker.txt ("120 passed")
 const PRUEBAS_DOCKER = 120;
 

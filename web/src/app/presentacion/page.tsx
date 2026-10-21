@@ -1077,7 +1077,7 @@ export default function Presentacion() {
               <dd>
                 <a href={archivoRepo("bitacora.md")}>bitacora.md</a>
                 {/* fuente: bitacora.md, "Uso de IA en números" */}
-                <span className={s.apagado}>83 decisiones y 24 hipótesis descartadas</span>
+                <span className={s.apagado}>84 decisiones y 24 hipótesis descartadas</span>
               </dd>
             </div>
           </dl>
