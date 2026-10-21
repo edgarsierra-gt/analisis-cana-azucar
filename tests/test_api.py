@@ -10,7 +10,7 @@ import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
-from api.main import app
+from api.main import VERSION, app
 from campo_renovacion import (auditar, curva_metrica, reconstruir_ciclos, resumir_ciclos, simular_portafolio)
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,7 +26,7 @@ def post(ruta, **cuerpo):
 
 # ----------------------------------------------------------------------------- general
 def test_salud():
-    assert cliente.get("/salud").json() == {"estado": "ok", "version": "1.1.0", "variedades_ciclo": 23,
+    assert cliente.get("/salud").json() == {"estado": "ok", "version": VERSION, "variedades_ciclo": 23,
                                             "variedades_pronostico": 40, "grupos": 5}
 
 

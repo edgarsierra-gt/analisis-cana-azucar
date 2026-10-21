@@ -10,3 +10,4 @@ pytest==9.1.1
 httpx==0.28.1
 psycopg[binary]==3.3.6
 scikit-learn==1.9.1   # la prueba de verificación compara contra src/fabrica_anomalias (código del notebook 09)
+google-genai==2.32.0   # asistente (Vertex AI); en Cloud Run se autentica con la cuenta de servicio

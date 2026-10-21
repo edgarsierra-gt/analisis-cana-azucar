@@ -11,3 +11,5 @@ outputs/tests
 *.pdf
 *.zip
 CLAUDE.md
+web
+.claude

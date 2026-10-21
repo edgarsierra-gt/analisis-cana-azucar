@@ -11,7 +11,7 @@ import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
 
-from api.main import app
+from api.main import VERSION, app
 from fabrica_anomalias import puntajes_verificacion, residuos_verificacion
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,7 +37,7 @@ def minutos(desde, hasta, columnas):
 
 # ----------------------------------------------------------------------------- general
 def test_salud_y_openapi():
-    assert cliente.get("/salud").json()["version"] == "1.1.0"
+    assert cliente.get("/salud").json()["version"] == VERSION
     rutas = cliente.get("/openapi.json").json()["paths"]
     for r in ["/caldera/sensores", "/caldera/modo", "/caldera/vapor-virtual", "/caldera/verificar", "/mercado/pronostico"]:
         assert r in rutas
@@ -150,10 +150,10 @@ def test_pronostico_reproduce_la_banda_del_notebook_12(h, mes):
 
 
 def test_pronostico_cifras_del_readme():
-    """README de la Serie III: banda 80 % de −6 % a +7 % a 1 mes y de −14 % a +17 % a 3 meses; 1 ¢/lb = US$22/t."""
+    """Notebook 12 (conclusión) y bitácora: banda 80 % de −6 % a +7 % a 1 mes y de −14 % a +17 % a 3 meses; 1 ¢/lb = US$22/t."""
     b1 = cliente.get("/mercado/pronostico?h=1").json()["bandas_pct"]["80"]
     b3 = cliente.get("/mercado/pronostico?h=3").json()["bandas_pct"]["80"]
-    entero = lambda x: math.floor(x + 0.5)                 # redondeo convencional (16.5 → 17), como en el README
+    entero = lambda x: math.floor(x + 0.5)                 # redondeo convencional (16.5 → 17), como en el texto
     assert [entero(x) for x in b1] == [-6, 7] and [entero(x) for x in b3] == [-14, 17]
     r = cliente.get("/mercado/pronostico?h=1&toneladas=1000").json()
     assert r["centro_usd_t"] == pytest.approx(r["centro_centavos_lb"] * 22.05, abs=0.5)

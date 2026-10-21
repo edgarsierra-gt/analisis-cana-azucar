@@ -1,6 +1,8 @@
 """Serie IV · esquemas de entrada (pydantic). Cada campo trae rango físico o económico plausible y un ejemplo."""
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, Field, create_model
 
 
@@ -121,3 +123,16 @@ class VerificarEntrada(BaseModel):
                                               description="Promedios de 1 min consecutivos; con 5 o más se aplica la persistencia")
     retorno_confirmado: bool = Field(True, description="Usar el centro del aire de retorno después de la redistribución "
                                                        "confirmada del 30/03 (la operación vigente)")
+
+
+class MensajeHistorial(BaseModel):
+    rol: Literal["usuario", "asistente"] = Field(..., description="Quién escribió el mensaje")
+    texto: str = Field(..., min_length=1, max_length=2000)
+
+
+class AsistenteEntrada(BaseModel):
+    model_config = ConfigDict(json_schema_extra={"example": {
+        "pregunta": "¿Qué variedad conviene ampliar y cada cuántos cortes se renueva?", "historial": []}})
+    pregunta: str = Field(..., min_length=1, max_length=500, description="Pregunta sobre los análisis, en español")
+    historial: list[MensajeHistorial] = Field([], max_length=8,
+                                              description="Últimos mensajes de la conversación (el servidor no guarda nada)")

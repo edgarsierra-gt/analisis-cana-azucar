@@ -15,6 +15,8 @@ COPY outputs/tables outputs/tables
 COPY sql sql
 COPY tests tests
 COPY pytest.ini .
+# El asistente lee los resúmenes gerenciales del README
+COPY README.md .
 
 RUN useradd --create-home app && chown -R app /app
 USER app

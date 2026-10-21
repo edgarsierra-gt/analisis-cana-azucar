@@ -7,20 +7,25 @@ Con Docker:        docker compose up --build
 from __future__ import annotations
 
 import io
+import logging
 import os
 
 import pandas as pd
 from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
+from fastapi.exception_handlers import http_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from pydantic import TypeAdapter, ValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from api import caldera, mercado, servicios
-from api.esquemas import (AuditoriaEntrada, CicloEntrada, Cosecha, PronosticoEntrada, SegmentoEntrada,
+from api import asistente, caldera, errores, mercado, servicios
+from api.esquemas import (AsistenteEntrada, AuditoriaEntrada, CicloEntrada, Cosecha, PronosticoEntrada, SegmentoEntrada,
                           VaporEntrada, VentanaModo, VerificarEntrada)
+from api.limites import Limitador, ip_cliente
 from campo_economia import Supuestos
 
-VERSION = "1.1.0"
+VERSION = "1.2.0"
 DESCRIPCION = """
 Modelos de la prueba expuestos como servicio: **Serie I · Campo** (ensayos de variedades de caña de Louisiana,
 2010-2021), **Serie II · Caldera** (5 días de una caldera de cogeneración) y **Serie III · Mercado** (azúcar No. 11).
@@ -36,6 +41,12 @@ Modelos de la prueba expuestos como servicio: **Serie I · Campo** (ensayos de v
 | II · 3 | `POST /caldera/vapor-virtual` | flujo de vapor estimado con los demás sensores (sensor virtual) |
 | II · 4 | `POST /caldera/verificar` | chequeos de redundancia: ¿falla un sensor o es el proceso? |
 | III · 3 | `GET /mercado/pronostico` | precio esperado a 1 y 3 meses con bandas de 80 % y 95 % |
+| Asistente | `POST /asistente`, `GET /asistente/estado` | preguntas en español sobre los tres análisis (Gemini en Vertex AI, responde solo con estos endpoints) |
+
+**Límite de uso:** es una API pública de demostración, así que cada IP tiene un límite de consultas por minuto y por
+día (respuesta 429 con un mensaje en español si se pasa). El asistente tiene su propia cuota, más corta: 30 preguntas
+por IP al día. Los errores de validación (422) dicen en español qué campo
+corregir.
 
 La API no re-entrena: lee los JSON que dejan los notebooks y reproduce sus cifras (lo comprueban las pruebas de `tests/`).
 Los datos son públicos y de otros lugares (Louisiana, una caldera a carbón, el mercado mundial): sirven para el
@@ -46,9 +57,57 @@ app = FastAPI(title="API · Análisis de caña de azúcar", version=VERSION, des
               openapi_tags=[{"name": "General"}, {"name": "Campo · Variedades y renovación"},
                             {"name": "Campo · Pronóstico"}, {"name": "Campo · Segmentos"},
                             {"name": "Campo · Auditoría de renovaciones"}, {"name": "Caldera"},
-                            {"name": "Mercado"}])
+                            {"name": "Mercado"}, {"name": "Asistente"}])
+# Límite de uso por IP (api/limites.py). Va antes que CORS en el código para quedar por dentro de él: así una respuesta
+# 429 también lleva las cabeceras de CORS y el navegador puede mostrar el mensaje.
+app.state.limitador = Limitador.desde_entorno()
+SIN_CUOTA_DIARIA = {"/", "/docs", "/redoc", "/openapi.json", "/docs/oauth2-redirect", "/salud", "/asistente/estado"}
+# El asistente gasta un modelo de lenguaje en cada pregunta: cuota aparte de 30 por IP al día, 5 por minuto y 300 en total.
+app.state.limitador_asistente = Limitador.desde_entorno(prefijo="ASISTENTE_LIMITE", por_ip_dia=30, por_ip_minuto=5,
+                                                        global_dia=300, unidad="preguntas", servicio="El asistente")
+log = logging.getLogger("api")
+
+
+@app.middleware("http")
+async def limitar(request: Request, siguiente):
+    if request.method == "OPTIONS":                      # las verificaciones previas de CORS no cuentan
+        return await siguiente(request)
+    ip = ip_cliente({k.lower(): v for k, v in request.headers.items()}, request.client.host if request.client else None)
+    v = request.app.state.limitador.registrar(ip, contar_dia=request.url.path not in SIN_CUOTA_DIARIA)
+    if not v.permitido:
+        return JSONResponse(status_code=429, content={"detail": v.mensaje},
+                            headers={"Retry-After": str(v.reintentar_en_s)})
+    respuesta = await siguiente(request)
+    respuesta.headers["X-Consultas-Restantes-Hoy"] = str(v.restantes_dia)
+    return respuesta
+
+
+# CORS: lista exacta de sitios (CORS_ORIGINS, separados por coma) y, opcional, un patrón para los dominios de vista
+# previa de Vercel (CORS_ORIGIN_REGEX). En local, sin variables, acepta cualquier origen.
 app.add_middleware(CORSMiddleware, allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
+                   allow_origin_regex=os.environ.get("CORS_ORIGIN_REGEX") or None,
                    allow_methods=["GET", "POST"], allow_headers=["*"])
+
+
+@app.exception_handler(RequestValidationError)
+def _error_validacion(_: Request, exc: RequestValidationError) -> JSONResponse:
+    frases = errores.traducir(list(exc.errors()))
+    return JSONResponse(status_code=422, content={"detail": "; ".join(frases), "errores": frases})
+
+
+# Mensajes que FastAPI y Starlette dan en inglés antes de llegar a una ruta
+MENSAJES_HTTP = {
+    "There was an error parsing the body": "No se pudo leer el cuerpo de la petición: debe ser JSON válido en UTF-8.",
+    "Not Found": "No existe esa ruta. Las consultas disponibles están en /docs.",
+    "Method Not Allowed": "Esa ruta no acepta este método (GET o POST). Ver /docs.",
+}
+
+
+@app.exception_handler(StarletteHTTPException)
+async def _error_http(request: Request, exc: StarletteHTTPException) -> JSONResponse:
+    if isinstance(exc.detail, str) and exc.detail in MENSAJES_HTTP:
+        exc = StarletteHTTPException(exc.status_code, MENSAJES_HTTP[exc.detail], exc.headers)
+    return await http_exception_handler(request, exc)
 
 
 @app.exception_handler(servicios.ErrorEntrada)
@@ -184,3 +243,40 @@ def mercado_pronostico(h: int = Query(1, ge=1, le=3, description="Horizonte en m
     if h == 2:
         raise HTTPException(422, "El horizonte debe ser 1 o 3 meses.")
     return mercado.pronostico(h, toneladas)
+
+
+# ----------------------------------------------------------------------------- asistente
+def _ip(request: Request) -> str:
+    return ip_cliente({k.lower(): v for k, v in request.headers.items()}, request.client.host if request.client else None)
+
+
+@app.get("/asistente/estado", tags=["Asistente"], summary="Disponibilidad y preguntas restantes hoy")
+def asistente_estado(request: Request) -> dict:
+    """Dice si el asistente está configurado y cuántas preguntas le quedan hoy a quien consulta. No gasta la cuota."""
+    lim = request.app.state.limitador_asistente
+    return {"disponible": asistente.disponible(), "modelo": asistente.MODELO, "limite_dia": lim.por_ip_dia,
+            "restantes_hoy": lim.restantes(_ip(request)), "max_caracteres": asistente.MAX_CARACTERES,
+            "max_pasos": asistente.MAX_PASOS}
+
+
+@app.post("/asistente", tags=["Asistente"], summary="Pregunta en lenguaje natural sobre los análisis")
+def asistente_preguntar(e: AsistenteEntrada, request: Request) -> dict:
+    """Responde en español con Gemini (Vertex AI). El modelo no calcula ni inventa cifras: consulta las mismas funciones
+    de esta API (ranking, ciclo, pronóstico, sensores, sensor virtual, precio, resúmenes) y redacta con lo que devuelven,
+    citando el notebook de origen. Mande los últimos mensajes en `historial` para seguir una conversación; el servidor
+    no guarda nada. Cuota: 30 preguntas por IP al día y 5 por minuto."""
+    if not asistente.disponible():
+        raise HTTPException(503, "El asistente no está disponible en este entorno.")
+    lim, ip = request.app.state.limitador_asistente, _ip(request)
+    v = lim.registrar(ip)
+    if not v.permitido:
+        return JSONResponse(status_code=429, content={"detail": v.mensaje}, headers={"Retry-After": str(v.reintentar_en_s)})
+    try:
+        r = asistente.responder(e.pregunta, [m.model_dump() for m in e.historial])
+    except asistente.AsistenteNoDisponible as exc:
+        raise HTTPException(503, "El asistente no está disponible en este entorno.") from exc
+    except asistente.FalloModelo as exc:
+        log.warning("asistente: el modelo falló: %s", exc)        # sin la pregunta: no se guarda lo que escriben
+        lim.devolver(ip)                                          # una falla del servicio no gasta la cuota del día
+        raise HTTPException(502, "El modelo no respondió. Intente de nuevo en unos segundos.") from exc
+    return {**r, "restantes_hoy": v.restantes_dia}

@@ -1,0 +1,18 @@
+# Lo que sube `gcloud run deploy --source .` a Cloud Build: solo lo que usa el Dockerfile.
+.gcloudignore
+.git
+.gitignore
+.claude
+data/
+notebooks/
+docs/
+web/
+outputs/figures/
+outputs/tests/
+**/__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/
+.env
+*.pdf
+*.zip
+CLAUDE.md
